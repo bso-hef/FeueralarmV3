@@ -1,0 +1,64 @@
+//registrieren
+POST https://alarm-bso.herokuapp.com/api/users/signup HTTP/1.1
+Content-Type: application/json
+
+{
+    "email": "penis@penis.de",
+    "password": "penis123"
+}
+
+###
+//anmelden
+POST https://alarm-bso.herokuapp.com/api/users/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "email": "penis@penis.de",
+    "password": "penis123"
+}
+
+###
+//daten holen
+//Params: starttime -> zb 830
+//        endtime -> zb 1030
+//        day -> jahr * 10.000 + monat * 100 + tag => 2020 * 10.000 + 9 * 100 + 10
+GET https://alarm-bso.herokuapp.com/api/posts/load HTTP/1.1
+Content-Type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNpbGluYXRvcjgzOTlAZ29vZ2xlbWFpbC5jb20iLCJ1c2VySWQiOiI1ZjU4N2E1NTQ4MGViYjAwMDQyMTMwODAiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2MDAyNTEzMzUsImV4cCI6MTYwMDI1NDkzNX0.-exLfi_FNIS-CEjVhF7AFYJogPc5TO40jp63yw9TEw8
+
+{
+    "starttime": "830",
+    "endtime": "1030"
+}
+
+###
+
+//Hole alle daten
+GET https://alarm-bso.herokuapp.com/api/posts HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNpbGluYXRvcjgzOTlAZ29vZ2xlbWFpbC5jb20iLCJ1c2VySWQiOiI1ZjU4N2E1NTQ4MGViYjAwMDQyMTMwODAiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE1OTk2MzQ3MjEsImV4cCI6MTU5OTYzODMyMX0.qtGEqetKIqoKDMRP5oA_XoeAD9REKOC9PSdsd6kaEFU
+
+###
+//einzelnes holen
+GET https://alarm-bso.herokuapp.com/api/posts/5f587eb4480ebb000421315f HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNpbGluYXRvcjgzOTlAZ29vZ2xlbWFpbC5jb20iLCJ1c2VySWQiOiI1ZjU4N2E1NTQ4MGViYjAwMDQyMTMwODAiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE1OTk2MzQ3MjEsImV4cCI6MTU5OTYzODMyMX0.qtGEqetKIqoKDMRP5oA_XoeAD9REKOC9PSdsd6kaEFU
+
+###
+//Update
+PUT https://alarm-bso.herokuapp.com/api/posts/5f587eb4480ebb000421315f HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNpbGluYXRvcjgzOTlAZ29vZ2xlbWFpbC5jb20iLCJ1c2VySWQiOiI1ZjU4N2E1NTQ4MGViYjAwMDQyMTMwODAiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE1OTk2MzQ3MjEsImV4cCI6MTU5OTYzODMyMX0.qtGEqetKIqoKDMRP5oA_XoeAD9REKOC9PSdsd6kaEFU
+
+{
+    "comment" : "penis",
+    "status": "complete"
+}
+
+###
+//Löschen
+DELETE https://alarm-bso.herokuapp.com/api/posts/5f587eb4480ebb000421315f HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNpbGluYXRvcjgzOTlAZ29vZ2xlbWFpbC5jb20iLCJ1c2VySWQiOiI1ZjU4N2E1NTQ4MGViYjAwMDQyMTMwODAiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE1OTk2MzQ3MjEsImV4cCI6MTU5OTYzODMyMX0.qtGEqetKIqoKDMRP5oA_XoeAD9REKOC9PSdsd6kaEFU
+
+

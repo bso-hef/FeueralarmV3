@@ -1,0 +1,6 @@
+Zugangsdaten VServer BSO-Alert-PC
+SSH
+Port: 22
+IP: 51.116.227.236
+Benutzername: Proj12Inf
+Passwort: Voellig_Egal12

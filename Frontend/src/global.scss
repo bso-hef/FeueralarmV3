@@ -1,0 +1,104 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+
+/* Core CSS required for Ionic components to work properly */
+@import "~@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "~@ionic/angular/css/normalize.css";
+@import "~@ionic/angular/css/structure.css";
+@import "~@ionic/angular/css/typography.css";
+@import '~@ionic/angular/css/display.css';
+
+/* Optional CSS utils that can be commented out */
+@import "~@ionic/angular/css/padding.css";
+@import "~@ionic/angular/css/float-elements.css";
+@import "~@ionic/angular/css/text-alignment.css";
+@import "~@ionic/angular/css/text-transformation.css";
+@import "~@ionic/angular/css/flex-utils.css";
+
+ion-alert {
+    // Hintergrund
+    .alert-wrapper.sc-ion-alert-md {
+        border-radius: 7px;
+        --background: linear-gradient(
+            135deg,
+            #242222,
+            #312e2e,
+            #242222
+        );
+    }
+    
+    // Radio Farbe außen
+    [aria-checked="true"].sc-ion-alert-md .alert-radio-icon.sc-ion-alert-md {
+        border-color: #ffffffdc ;
+    }
+    
+    // Radio Farbe außen 
+    [aria-checked="true"].sc-ion-alert-md .alert-radio-inner.sc-ion-alert-md {
+        background-color: #ffffffdc !important;
+      }
+
+    // Radio Farbe innen
+    .alert-radio-inner.sc-ion-alert-md {
+        background-color: #ffffffdc;
+    }
+    
+    // Label Text
+    .alert-radio-label.sc-ion-alert-md {
+        white-space: pre-line;
+        color: var(--ion-text-color, #ffffffdc);
+    }
+
+  
+    // Ausgewählter Label Text
+    [aria-checked="true"].sc-ion-alert-md .alert-radio-label.sc-ion-alert-md {
+        color: var(--ion-color-step-850, #ffffffdc);
+    }
+    
+    // Höhe der Reihen
+    .alert-tappable.sc-ion-alert-md {
+        height: 45px !important;
+      }
+
+    // Farbe von Ok und Abbrechen
+    .alert-button-inner.sc-ion-alert-md {
+        //font-size: 25px;
+        text-transform: none;
+        color: #ffffffdc;
+    }
+    .alert-button-group.sc-ion-alert-md {
+        text-transform: none;
+    }
+
+    // Header Text
+    .alert-title.sc-ion-alert-md {
+        color: var(--ion-text-color, #ffffffdc);
+    }
+
+    .alert-input.sc-ion-alert-md {
+        color: var(--ion-text-color, #ffffffdc);
+    }
+
+    .alert-input.sc-ion-alert-md:focus {
+        color: var(--ion-text-color, #ffffffdc);
+    }
+}
+
+.custom-toast{
+    --color:#eee; --background:#222; align-content: center; justify-content: center; text-align: center; --width: 80%; --min-width: 200px; --max-width: 550px;
+}
+
+.custom-modal{
+    --max-height: 95%;
+    white-space: pre-wrap;
+}

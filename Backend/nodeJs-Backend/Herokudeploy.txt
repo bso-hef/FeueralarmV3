@@ -1,0 +1,21 @@
+freemail account
+alarm-bso@web.de
+develop123!
+
+heroku account
+alarm-bso@web.de
+develop123!
+
+(Atlas) MongoDB account
+alarm-bso@web.de
+develop123!
+
+apiUrl
+https://alarm-bso.herokuapp.com/api
+
+heroku login
+heroku git:remote -a alarm-bso
+heroku git:clone -a alarm-bso
+git add .
+git commit -am ""
+git push heroku master

@@ -1,0 +1,71 @@
+
+#main-content{
+    display: flex; justify-content: space-between; height: 100vh;
+}
+
+
+h1{font-weight: 600;}
+
+#login{
+    display: flex; justify-content: center; align-items: center; width: 100%; height: 100vh; color: #1A1F36;
+    #login-box{
+        padding: 30px; background: #312e2e; border: solid 1px #e2e2e2; border-radius: 5px; min-width: 400px; max-width: 400px; margin: 0px 15px;
+        #bso-logo{height: 170px; display: block; margin: auto; margin-bottom: 40px;}
+        //h3{font-weight: 600; font-size: 23px; text-align: center; margin-top: 0px; margin-bottom: 15px; color: #fff}
+        .input{
+            margin-bottom: 15px; background: #fff; overflow: hidden; border: solid 1px #e2e2e2; height: 40px; display: flex; align-items: center; border-radius: 3px;
+            img{width: 14px; margin: 0 11px;}
+            input{border: none; background: #fff; width: calc(100% - 35px); padding: 0; height: 40px; font-size: 16px;}
+            input:focus{outline: none;}
+            input[type="password"]{letter-spacing: 1px;}
+            input[type="password"]::placeholder{letter-spacing: 0;}
+        }
+        label{font-size: 14px; color: #c4c4c4; display: flex; user-select: none; margin-left: 5px;  }
+        // input[type="checkbox"]{display: none;}
+        // input[type="checkbox"] + label::before{
+        //     width: 14px; height: 14px; display: flex; content: ""; float: left; align-self: center;
+        //     background: url("../../assets/png/checkbox-unchecked-dm-14.png"); 
+        // }
+        // input[type="checkbox"]:checked+label::before {
+        //     background: url("../../assets/png/checkbox-checked-dm-14.png");
+        // }
+        label::before{
+            margin-right: 5px;  
+        }
+        .bttn{font-size: 15px; font-weight: 300; display: flex; align-items: center; justify-content: center; padding: 12px 0; margin-top: 35px; 
+            border-radius: 5px; cursor: pointer; max-height: 42px; max-width: 338px; color: #111; background-size: 300%;
+            background-image: linear-gradient(45deg, #A00, #ff6565, #ff8686, #ffe1e1, #ffe1e1, #ff8686, #ff6565, #A00);
+            img{filter: brightness(10); height: 15px; margin-right: 10px}
+        }
+        .bttn:hover{
+            animation: slidebg 5s infinite;
+        }
+        
+        .by{
+            margin-top: 15px; color: #c4c4c4; font-size: 10px
+        }         
+        
+    }
+}
+
+@keyframes slidebg {
+    0% { background-position: 0 0; }
+    50% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+    // to {
+    //   background-position:338px;
+    // }
+}
+
+@media only screen and (max-width: 450px){
+    #login-box{
+        #bso-logo{ 
+            height: 120px !important;
+        }
+        .bttn{
+            margin-top: 20px !important;
+        }
+        min-width: 250px !important;
+        max-height: 450px;
+    }
+}

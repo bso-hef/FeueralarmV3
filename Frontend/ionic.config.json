@@ -1,0 +1,7 @@
+{
+  "name": "Feueralarm",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}

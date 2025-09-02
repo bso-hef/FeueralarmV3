@@ -1,0 +1,6 @@
+Infos
+Daten vom Datum Uhrzeit
+Angemeldet als admim/feuerwehr
+
+Login läuft ab in x Sekunden
+App Version

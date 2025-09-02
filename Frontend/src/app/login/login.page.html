@@ -1,0 +1,28 @@
+<div id="main-content" style="background: #222428;">
+
+  <section id="login">
+      <div id="login-box">
+          <img id="bso-logo" src="../../assets/svg/bso-logo-white.svg" alt="BSO-Logo">
+        <!--<h3>Feueralarm</h3>-->
+          <div class="input">
+              <img src="../../assets/svg/user.svg" />
+              <input type="text" placeholder="Username" [(ngModel)]="credentials.email" />
+          </div>
+          <div class="input">
+              <img src="../../assets/svg/lock.svg"  />
+              <input type="password" placeholder="Passwort" [(ngModel)]="credentials.password" (keyup.enter)="login()" /> 
+          </div>
+          <div style="display: flex; align-items: center;">
+            <input type="checkbox" id="stillogin" [(ngModel)]="stayLogin" />
+            <label for="stillogin" >Angemeldet bleiben</label>  
+            </div>
+          <div class="bttn" (click)="login()">
+              <img src="../../assets/svg/sign-in.svg" />
+              Anmelden
+          </div>
+          <div class="by">
+              Ein Projekt von Manuel Pilz, Silas Manns, Lorenz Matthäus, Jakob Körber, Justin Delle und Samuel Schütrumpf
+          </div>
+      </div>
+  </section>
+</div>

@@ -1,0 +1,56 @@
+<ion-content [fullscreen]="true" color="dark">
+  <div id="content">
+    <ion-icon name="arrow-back" style="font-size: 22px; margin-bottom: 15px; cursor: pointer;" (click)="back()"></ion-icon>
+    <h1>Einstellungen</h1>
+    <section id="items">
+        <div class="item">
+          <ion-label class="sortby-label">
+            Sortieren nach:
+          </ion-label>
+          <ion-select class="sortby-select" [value]="sortby" mode="md"
+                      okText="Ok" cancelText="Abbrechen" (ionChange)="onSortbyChange($event)">
+            <ion-select-option value="teacher">
+              Lehrer
+            </ion-select-option>
+            <ion-select-option value="class">
+              Klassen
+            </ion-select-option>
+          </ion-select>
+        </div>
+        <div class="item">
+          <ion-label class="sortby-label">
+            Archivierten Feueralarm auswählen:
+          </ion-label>
+          <ion-select class="sortby-select" mode="md" okText="Ok" cancelText="Abbrechen" [value]="chosenArchive" (ionChange)="onChosenArchiveChange($event)">
+            <ion-select-option [value]="a._id" *ngFor="let a of archives">{{formatDate(a.created)}}</ion-select-option>
+          </ion-select>
+        </div>
+        <div class="item">
+          <ion-label>
+            Benachrichtigungen aktivieren:
+          </ion-label>
+          <ion-checkbox color="light" slot="begin" (ionChange)="onToastChange($event)" [(ngModel)]="toastBool"></ion-checkbox>
+        </div>
+        <div class="item">
+          <ion-label>
+            Status standardmäßig auf:
+          </ion-label>
+          <ion-select class="status-select" [value]="status" mode="md"
+                      okText="Ok" cancelText="Abbrechen" (ionChange)="onStatusChange($event)">
+            <ion-select-option value="4">
+              Alle
+            </ion-select-option>
+            <ion-select-option value="1">
+              Offen
+            </ion-select-option>
+            <ion-select-option value="2">
+              Anwesend
+            </ion-select-option>
+            <ion-select-option value="3">
+              Unvollständig
+            </ion-select-option>
+          </ion-select>
+        </div>
+    </section>
+  </div>
+</ion-content>

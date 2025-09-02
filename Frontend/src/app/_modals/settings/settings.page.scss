@@ -1,0 +1,23 @@
+#content{
+    padding: 30px;
+    h1{color: #fff; margin: 0; margin-bottom: 20px; font-size: 35px; font-weight: 600;}
+    ion-label{
+        white-space: initial;
+    }
+    ion-select{
+        --padding-bottom: 0; --padding-top: 0;
+    }
+}
+
+#items{
+    .item{
+        padding: 9px 5px; display: flex; justify-content: space-between; border-top: solid 1px #333333; min-height: 60px; align-items: center; color: #fff;
+        h2, div{margin: 0; color: #fff; font-size: 16px;}
+        ion-label{
+            max-width: 80%;
+        }
+    }
+    .item:last-of-type{
+        border-bottom: solid 1px #333333;
+    }
+}
