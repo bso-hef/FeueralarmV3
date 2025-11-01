@@ -1,0 +1,92 @@
+<ion-content [fullscreen]="true">
+  <div class="login-container">
+    <div class="login-box">
+      <!-- Logo -->
+      <div class="logo-section">
+        <div class="logo-circle">
+          <ion-icon name="flame" class="logo-icon"></ion-icon>
+        </div>
+        <h1>Feueralarm</h1>
+        <p class="subtitle">Berufliche Schulen Obersberg</p>
+      </div>
+
+      <!-- Login Form -->
+      <form class="login-form" (ngSubmit)="login()">
+        <!-- Email Input -->
+        <div class="input-group">
+          <ion-icon name="person-outline" class="input-icon"></ion-icon>
+          <input
+            type="email"
+            placeholder="Benutzername"
+            [(ngModel)]="credentials.email"
+            name="email"
+            class="modern-input"
+            required
+            autocomplete="email"
+          />
+        </div>
+
+        <!-- Password Input -->
+        <div class="input-group">
+          <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Passwort"
+            [(ngModel)]="credentials.password"
+            name="password"
+            class="modern-input"
+            required
+            autocomplete="current-password"
+            (keyup.enter)="login()"
+          />
+          <ion-icon
+            [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
+            class="toggle-password"
+            (click)="showPassword = !showPassword"
+          ></ion-icon>
+        </div>
+
+        <!-- Stay Logged In -->
+        <div class="checkbox-group">
+          <ion-checkbox
+            [(ngModel)]="stayLoggedIn"
+            name="stayLoggedIn"
+          ></ion-checkbox>
+          <label>Angemeldet bleiben</label>
+        </div>
+
+        <!-- Login Button -->
+        <button type="submit" class="login-button" [disabled]="isLoading">
+          <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
+          <span *ngIf="!isLoading">
+            <ion-icon name="log-in-outline"></ion-icon>
+            Anmelden
+          </span>
+        </button>
+
+        <!-- TEST LOGIN BUTTON (nur für Entwicklung) -->
+        <button
+          type="button"
+          class="test-login-button"
+          (click)="testLogin()"
+          [disabled]="isLoading"
+        >
+          🧪 Test-Login (Entwicklung)
+        </button>
+      </form>
+
+      <!-- Theme Toggle -->
+      <div class="theme-toggle">
+        <ion-button fill="clear" (click)="toggleTheme()">
+          <ion-icon [name]="themeIcon" slot="start"></ion-icon>
+          Theme wechseln
+        </ion-button>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>Version 2.0 | MIT Lizenz</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

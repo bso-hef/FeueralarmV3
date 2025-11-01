@@ -1,0 +1,158 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Information</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="info-container">
+    <!-- App Info -->
+    <div class="info-section">
+      <div class="app-header">
+        <div class="app-icon">
+          <ion-icon name="flame"></ion-icon>
+        </div>
+        <div class="app-details">
+          <h2>Feueralarm App</h2>
+          <p>Berufliche Schulen Obersberg</p>
+          <p class="version">Version 2.0.0</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="info-section" *ngIf="stats">
+      <h3>
+        <ion-icon name="stats-chart"></ion-icon>
+        Statistiken
+      </h3>
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-value">{{ stats.total }}</div>
+          <div class="stat-label">Gesamt</div>
+        </div>
+        <div class="stat-card open">
+          <div class="stat-value">{{ stats.open }}</div>
+          <div class="stat-label">Offen</div>
+        </div>
+        <div class="stat-card present">
+          <div class="stat-value">{{ stats.present }}</div>
+          <div class="stat-label">Anwesend</div>
+        </div>
+        <div class="stat-card incomplete">
+          <div class="stat-value">{{ stats.incomplete }}</div>
+          <div class="stat-label">Unvollständig</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Info -->
+    <div class="info-section" *ngIf="alertDate">
+      <h3>
+        <ion-icon name="alarm"></ion-icon>
+        Alarm-Informationen
+      </h3>
+      <ion-list>
+        <ion-item>
+          <ion-label>
+            <h4>Datum & Zeit</h4>
+            <p>{{ alertDate | date:'dd.MM.yyyy, HH:mm' }} Uhr</p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>
+            <h4>Status</h4>
+            <p>{{ isLiveData ? 'Live Daten' : 'Archiv Daten' }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- User Info -->
+    <div class="info-section">
+      <h3>
+        <ion-icon name="person"></ion-icon>
+        Benutzer
+      </h3>
+      <ion-list>
+        <ion-item>
+          <ion-label>
+            <h4>Angemeldet als</h4>
+            <p>{{ userEmail || 'Unbekannt' }}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label>
+            <h4>Rolle</h4>
+            <p>{{ userRole || 'Benutzer' }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- About -->
+    <div class="info-section">
+      <h3>
+        <ion-icon name="information-circle"></ion-icon>
+        Über die App
+      </h3>
+      <p class="about-text">
+        Diese App dient der Verwaltung und Koordination bei Feueralarmübungen an
+        den Beruflichen Schulen Obersberg in Bad Hersfeld.
+      </p>
+      <p class="about-text">
+        Die App ermöglicht die Erfassung der Anwesenheit von Lehrkräften und
+        Klassen während einer Evakuierung.
+      </p>
+    </div>
+
+    <!-- Legal -->
+    <div class="info-section">
+      <h3>
+        <ion-icon name="shield-checkmark"></ion-icon>
+        Rechtliches
+      </h3>
+      <ion-list>
+        <ion-item button detail="false">
+          <ion-label>
+            <h4>Lizenz</h4>
+            <p>MIT License</p>
+          </ion-label>
+        </ion-item>
+        <ion-item button detail="false">
+          <ion-label>
+            <h4>Datenschutz</h4>
+            <p>Alle Daten werden lokal verarbeitet</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Logout Button -->
+    <div class="info-section">
+      <ion-button
+        expand="block"
+        color="danger"
+        (click)="logout()"
+        class="logout-button"
+      >
+        <ion-icon name="log-out" slot="start"></ion-icon>
+        Abmelden
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <div class="footer-text">
+      <p>© 2025 Berufliche Schulen Obersberg</p>
+      <p>Entwickelt mit ❤️ für BSO</p>
+    </div>
+  </ion-toolbar>
+</ion-footer>

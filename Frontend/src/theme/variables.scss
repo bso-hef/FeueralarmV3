@@ -1,233 +1,376 @@
-// Ionic Variables and Theming. For more info, please see:
-// http://ionicframework.com/docs/theming/
+// Modern Design System Variables
+// ========================================
 
-/** Ionic CSS Variables **/
+// Design Tokens
 :root {
-  /** primary **/
-  --ion-color-primary: #3880ff;
-  --ion-color-primary-rgb: 56, 128, 255;
-  --ion-color-primary-contrast: #ffffff;
-  --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #3171e0;
-  --ion-color-primary-tint: #4c8dff;
+  // Brand Colors
+  --brand-primary: #aa0000;
+  --brand-primary-light: #d42d2d;
+  --brand-primary-dark: #7a0000;
+  --brand-secondary: #3880ff;
+  --brand-accent: #ffb800;
 
-  /** secondary **/
-  --ion-color-secondary: #3dc2ff;
-  --ion-color-secondary-rgb: 61, 194, 255;
-  --ion-color-secondary-contrast: #ffffff;
-  --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #36abe0;
-  --ion-color-secondary-tint: #50c8ff;
+  // Status Colors
+  --status-success: #10dc60;
+  --status-warning: #ffce00;
+  --status-danger: #f04141;
+  --status-info: #3dc2ff;
 
-  /** tertiary **/
-  --ion-color-tertiary: #5260ff;
-  --ion-color-tertiary-rgb: 82, 96, 255;
-  --ion-color-tertiary-contrast: #ffffff;
-  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #4854e0;
-  --ion-color-tertiary-tint: #6370ff;
+  // Spacing System (8px base)
+  --space-1: 0.25rem; // 4px
+  --space-2: 0.5rem; // 8px
+  --space-3: 0.75rem; // 12px
+  --space-4: 1rem; // 16px
+  --space-5: 1.5rem; // 24px
+  --space-6: 2rem; // 32px
+  --space-8: 3rem; // 48px
+  --space-10: 4rem; // 64px
 
-  /** success **/
-  --ion-color-success: #2dd36f;
-  --ion-color-success-rgb: 45, 211, 111;
-  --ion-color-success-contrast: #ffffff;
-  --ion-color-success-contrast-rgb: 255, 255, 255;
-  --ion-color-success-shade: #28ba62;
-  --ion-color-success-tint: #42d77d;
+  // Border Radius
+  --radius-sm: 0.375rem; // 6px
+  --radius-md: 0.5rem; // 8px
+  --radius-lg: 0.75rem; // 12px
+  --radius-xl: 1rem; // 16px
+  --radius-2xl: 1.5rem; // 24px
+  --radius-full: 9999px;
 
-  /** warning **/
-  --ion-color-warning: #ffc409;
-  --ion-color-warning-rgb: 255, 196, 9;
-  --ion-color-warning-contrast: #000000;
-  --ion-color-warning-contrast-rgb: 0, 0, 0;
-  --ion-color-warning-shade: #e0ac08;
-  --ion-color-warning-tint: #ffca22;
+  // Typography
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
+    monospace;
 
-  /** danger **/
-  --ion-color-danger: #eb445a;
-  --ion-color-danger-rgb: 235, 68, 90;
-  --ion-color-danger-contrast: #ffffff;
-  --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #cf3c4f;
-  --ion-color-danger-tint: #ed576b;
+  --text-xs: 0.75rem; // 12px
+  --text-sm: 0.875rem; // 14px
+  --text-base: 1rem; // 16px
+  --text-lg: 1.125rem; // 18px
+  --text-xl: 1.25rem; // 20px
+  --text-2xl: 1.5rem; // 24px
+  --text-3xl: 1.875rem; // 30px
+  --text-4xl: 2.25rem; // 36px
 
-  /** dark **/
-  --ion-color-dark: #1d1d1d;
-  --ion-color-dark-rgb: 34, 36, 40;
-  --ion-color-dark-contrast: #ffffff;
-  --ion-color-dark-contrast-rgb: 255, 255, 255;
-  --ion-color-dark-shade: #1e2023;
-  --ion-color-dark-tint: #383a3e;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
 
-  /** medium **/
-  --ion-color-medium: #92949c;
-  --ion-color-medium-rgb: 146, 148, 156;
-  --ion-color-medium-contrast: #ffffff;
-  --ion-color-medium-contrast-rgb: 255, 255, 255;
-  --ion-color-medium-shade: #808289;
-  --ion-color-medium-tint: #9d9fa6;
+  // Transitions
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  /** light **/
-  --ion-color-light: #f4f5f8;
-  --ion-color-light-rgb: 244, 245, 248;
-  --ion-color-light-contrast: #000000;
-  --ion-color-light-contrast-rgb: 0, 0, 0;
-  --ion-color-light-shade: #d7d8da;
-  --ion-color-light-tint: #f5f6f9;
-
+  // Z-Index Scale
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
 }
 
-// @media (prefers-color-scheme: dark) {
-//   /*
-//    * Dark Colors
-//    * -------------------------------------------
-//    */
+// ========================================
+// LIGHT THEME
+// ========================================
+body.light-theme {
+  // Backgrounds
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --bg-elevated: #ffffff;
+  --bg-hover: #f1f3f5;
+  --bg-active: #e9ecef;
+  --bg-disabled: #dee2e6;
 
-//   body {
-//     --ion-color-primary: #428cff;
-//     --ion-color-primary-rgb: 66,140,255;
-//     --ion-color-primary-contrast: #ffffff;
-//     --ion-color-primary-contrast-rgb: 255,255,255;
-//     --ion-color-primary-shade: #3a7be0;
-//     --ion-color-primary-tint: #5598ff;
+  // Text Colors
+  --text-primary: #1a1a1a;
+  --text-secondary: #495057;
+  --text-tertiary: #6c757d;
+  --text-disabled: #adb5bd;
+  --text-inverse: #ffffff;
+  --text-link: var(--brand-primary);
 
-//     --ion-color-secondary: #50c8ff;
-//     --ion-color-secondary-rgb: 80,200,255;
-//     --ion-color-secondary-contrast: #ffffff;
-//     --ion-color-secondary-contrast-rgb: 255,255,255;
-//     --ion-color-secondary-shade: #46b0e0;
-//     --ion-color-secondary-tint: #62ceff;
+  // Borders
+  --border-primary: #dee2e6;
+  --border-secondary: #e9ecef;
+  --border-focus: var(--brand-primary);
 
-//     --ion-color-tertiary: #6a64ff;
-//     --ion-color-tertiary-rgb: 106,100,255;
-//     --ion-color-tertiary-contrast: #ffffff;
-//     --ion-color-tertiary-contrast-rgb: 255,255,255;
-//     --ion-color-tertiary-shade: #5d58e0;
-//     --ion-color-tertiary-tint: #7974ff;
+  // Shadows
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.15);
 
-//     --ion-color-success: #2fdf75;
-//     --ion-color-success-rgb: 47,223,117;
-//     --ion-color-success-contrast: #000000;
-//     --ion-color-success-contrast-rgb: 0,0,0;
-//     --ion-color-success-shade: #29c467;
-//     --ion-color-success-tint: #44e283;
+  // Status Backgrounds
+  --status-open-bg: #fff8e1;
+  --status-open-text: #f57f17;
+  --status-open-border: #ffecb3;
 
-//     --ion-color-warning: #ffd534;
-//     --ion-color-warning-rgb: 255,213,52;
-//     --ion-color-warning-contrast: #000000;
-//     --ion-color-warning-contrast-rgb: 0,0,0;
-//     --ion-color-warning-shade: #e0bb2e;
-//     --ion-color-warning-tint: #ffd948;
+  --status-present-bg: #e8f5e9;
+  --status-present-text: #2e7d32;
+  --status-present-border: #c8e6c9;
 
-//     --ion-color-danger: #ff4961;
-//     --ion-color-danger-rgb: 255,73,97;
-//     --ion-color-danger-contrast: #ffffff;
-//     --ion-color-danger-contrast-rgb: 255,255,255;
-//     --ion-color-danger-shade: #e04055;
-//     --ion-color-danger-tint: #ff5b71;
+  --status-incomplete-bg: #ffebee;
+  --status-incomplete-text: #c62828;
+  --status-incomplete-border: #ffcdd2;
 
-//     --ion-color-dark: #1d1d1d;
-//     --ion-color-dark-rgb: 244,245,248;
-//     --ion-color-dark-contrast: #000000;
-//     --ion-color-dark-contrast-rgb: 0,0,0;
-//     --ion-color-dark-shade: #d7d8da;
-//     --ion-color-dark-tint: #f5f6f9;
+  // Ionic Overrides
+  --ion-background-color: #f8f9fa;
+  --ion-text-color: #1a1a1a;
+  --ion-toolbar-background: #ffffff;
+  --ion-toolbar-border-color: #e9ecef;
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+}
 
-//     --ion-color-medium: #989aa2;
-//     --ion-color-medium-rgb: 152,154,162;
-//     --ion-color-medium-contrast: #000000;
-//     --ion-color-medium-contrast-rgb: 0,0,0;
-//     --ion-color-medium-shade: #86888f;
-//     --ion-color-medium-tint: #a2a4ab;
+// ========================================
+// DARK THEME
+// ========================================
+body.dark-theme {
+  // Backgrounds
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #252525;
+  --bg-tertiary: #2d2d2d;
+  --bg-elevated: #282828;
+  --bg-hover: #353535;
+  --bg-active: #3d3d3d;
+  --bg-disabled: #404040;
 
-//     --ion-color-light: #222428;
-//     --ion-color-light-rgb: 34,36,40;
-//     --ion-color-light-contrast: #ffffff;
-//     --ion-color-light-contrast-rgb: 255,255,255;
-//     --ion-color-light-shade: #1e2023;
-//     --ion-color-light-tint: #383a3e;
-//   }
+  // Text Colors
+  --text-primary: #e9ecef;
+  --text-secondary: #adb5bd;
+  --text-tertiary: #868e96;
+  --text-disabled: #495057;
+  --text-inverse: #1a1a1a;
+  --text-link: var(--brand-primary-light);
 
-//   /*
-//    * iOS Dark Theme
-//    * -------------------------------------------
-//    */
+  // Borders
+  --border-primary: #404040;
+  --border-secondary: #353535;
+  --border-focus: var(--brand-primary-light);
 
-//   .ios body {
-//     --ion-background-color: #000000;
-//     --ion-background-color-rgb: 0,0,0;
+  // Shadows
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.7);
 
-//     --ion-text-color: #ffffff;
-//     --ion-text-color-rgb: 255,255,255;
+  // Status Backgrounds
+  --status-open-bg: rgba(245, 127, 23, 0.15);
+  --status-open-text: #ffb74d;
+  --status-open-border: rgba(245, 127, 23, 0.3);
 
-//     --ion-color-step-50: #0d0d0d;
-//     --ion-color-step-100: #1a1a1a;
-//     --ion-color-step-150: #262626;
-//     --ion-color-step-200: #333333;
-//     --ion-color-step-250: #404040;
-//     --ion-color-step-300: #4d4d4d;
-//     --ion-color-step-350: #595959;
-//     --ion-color-step-400: #666666;
-//     --ion-color-step-450: #737373;
-//     --ion-color-step-500: #808080;
-//     --ion-color-step-550: #8c8c8c;
-//     --ion-color-step-600: #999999;
-//     --ion-color-step-650: #a6a6a6;
-//     --ion-color-step-700: #b3b3b3;
-//     --ion-color-step-750: #bfbfbf;
-//     --ion-color-step-800: #cccccc;
-//     --ion-color-step-850: #d9d9d9;
-//     --ion-color-step-900: #e6e6e6;
-//     --ion-color-step-950: #f2f2f2;
+  --status-present-bg: rgba(46, 125, 50, 0.15);
+  --status-present-text: #81c784;
+  --status-present-border: rgba(46, 125, 50, 0.3);
 
-//     --ion-toolbar-background: #0d0d0d;
+  --status-incomplete-bg: rgba(198, 40, 40, 0.15);
+  --status-incomplete-text: #ef5350;
+  --status-incomplete-border: rgba(198, 40, 40, 0.3);
 
-//     --ion-item-background: #000000;
+  // Ionic Overrides
+  --ion-background-color: #1a1a1a;
+  --ion-text-color: #e9ecef;
+  --ion-toolbar-background: #1e1e1e;
+  --ion-toolbar-border-color: #353535;
+  --ion-item-background: #1e1e1e;
+  --ion-card-background: #252525;
+}
 
-//     --ion-card-background: #1c1c1d;
-//   }
+// ========================================
+// COMPONENT STYLES
+// ========================================
 
+// Modern Card
+.modern-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-secondary);
+  transition: all var(--transition-base);
 
-//   /*
-//    * Material Design Dark Theme
-//    * -------------------------------------------
-//    */
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+}
 
-//   .md body {
-//     --ion-background-color: #121212;
-//     --ion-background-color-rgb: 18,18,18;
+// Modern Button
+.modern-button {
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-medium);
+  font-size: var(--text-base);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 
-//     --ion-text-color: #ffffff;
-//     --ion-text-color-rgb: 255,255,255;
+  &.btn-primary {
+    background: linear-gradient(
+      135deg,
+      var(--brand-primary),
+      var(--brand-primary-light)
+    );
+    color: white;
 
-//     --ion-border-color: #222222;
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
 
-//     --ion-color-step-50: #1e1e1e;
-//     --ion-color-step-100: #2a2a2a;
-//     --ion-color-step-150: #363636;
-//     --ion-color-step-200: #414141;
-//     --ion-color-step-250: #4d4d4d;
-//     --ion-color-step-300: #595959;
-//     --ion-color-step-350: #656565;
-//     --ion-color-step-400: #717171;
-//     --ion-color-step-450: #7d7d7d;
-//     --ion-color-step-500: #898989;
-//     --ion-color-step-550: #949494;
-//     --ion-color-step-600: #a0a0a0;
-//     --ion-color-step-650: #acacac;
-//     --ion-color-step-700: #b8b8b8;
-//     --ion-color-step-750: #c4c4c4;
-//     --ion-color-step-800: #d0d0d0;
-//     --ion-color-step-850: #dbdbdb;
-//     --ion-color-step-900: #e7e7e7;
-//     --ion-color-step-950: #f3f3f3;
+    &:active {
+      transform: translateY(0);
+    }
+  }
 
-//     --ion-item-background: #1e1e1e;
+  &.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-primary);
 
-//     --ion-toolbar-background: #1f1f1f;
+    &:hover {
+      background: var(--bg-hover);
+    }
+  }
+}
 
-//     --ion-tab-bar-background: #1f1f1f;
+// Modern Input
+.modern-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-primary);
+  border: 2px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  transition: all var(--transition-fast);
 
-//     --ion-card-background: #1e1e1e;
-//   }
-// }
+  &:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(170, 0, 0, 0.1);
+  }
+
+  &::placeholder {
+    color: var(--text-tertiary);
+  }
+}
+
+// Status Badge
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+
+  &.status-open {
+    background: var(--status-open-bg);
+    color: var(--status-open-text);
+    border: 1px solid var(--status-open-border);
+  }
+
+  &.status-present {
+    background: var(--status-present-bg);
+    color: var(--status-present-text);
+    border: 1px solid var(--status-present-border);
+  }
+
+  &.status-incomplete {
+    background: var(--status-incomplete-bg);
+    color: var(--status-incomplete-text);
+    border: 1px solid var(--status-incomplete-border);
+  }
+}
+
+// Modern Segment
+.modern-segment {
+  background: var(--bg-secondary);
+  padding: var(--space-1);
+  border-radius: var(--radius-lg);
+  display: inline-flex;
+  gap: var(--space-1);
+
+  .segment-button {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-weight: var(--font-medium);
+
+    &.active {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    &:hover:not(.active) {
+      background: var(--bg-hover);
+    }
+  }
+}
+
+// ========================================
+// UTILITY CLASSES
+// ========================================
+
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  body.dark-theme & {
+    background: rgba(30, 30, 30, 0.7);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-secondary) 0%,
+    var(--bg-tertiary) 50%,
+    var(--bg-secondary) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Scrollbar Styling
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: var(--radius-full);
+
+  &:hover {
+    background: var(--text-tertiary);
+  }
+}

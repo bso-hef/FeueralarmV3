@@ -1,107 +1,170 @@
-<!-- <ion-header [translucent]="true">
+<ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+    <ion-title>Feueralarm</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSettings()">
+        <ion-icon name="settings-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openInformation()">
+        <ion-icon name="information-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
-</ion-header> -->
+</ion-header>
 
-<ion-content [fullscreen]="true" color="dark">
-  <section id="header-content">
-    <div id="header-section" [class.center]="role === 'user'">
-      <div class="fire-alarm-section" *ngIf="role === 'admin'">
-        <div class="hour-picker">
-          <ion-label class="hour-picker-label">
-            Stunde wählen:
-          </ion-label>
-          <ion-select class="hour-picker-select" [value]="times.currentSchoolHour" mode="md"
-                      okText="Ok" cancelText="Abbrechen" (ionChange)="onSelectValueChange($event)">
-            <ion-select-option *ngFor="let hours of times.schoolHours" [value]="hours[0]">{{hours[1]}}</ion-select-option>
-          </ion-select>
-        </div>
-        <div class="fire-alarm" (click)="fireAlert()">
-          <img src="../../assets/svg/bell-solid.svg" />
-          Feueralarm auslösen 
-        </div>
+<ion-content [fullscreen]="true">
+  <!-- Admin: Feueralarm Button -->
+  <div class="alarm-section" *ngIf="isAdmin">
+    <div class="alarm-controls">
+      <!-- Stunden Auswahl -->
+      <div class="hour-picker">
+        <ion-select
+          [(ngModel)]="selectedHour"
+          interface="popover"
+          placeholder="Stunde wählen"
+        >
+          <ion-select-option
+            *ngFor="let hour of schoolHours"
+            [value]="hour.time"
+          >
+            {{ hour.label }}
+          </ion-select-option>
+        </ion-select>
       </div>
-      <div class="searchstate">
-        <div class="state">
-          <ion-segment [value]="selectedState" mode="md" (ionChange)="segmentChanged($event)" scrollable="true">
-            <ion-segment-button value="4">
-              <ion-label>Alle</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="1">
-              <ion-label>Offen</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="2">
-              <ion-label>Anwesend</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="3">
-              <ion-label>Unvollständig</ion-label>
-            </ion-segment-button>
-          </ion-segment>
-        </div>
-        <div id="right-menu-items">
-          <div class="searchbar">
-            <ion-searchbar (ionInput)="setSearchValue($event)" (ionClear)="clearSearch()" placeholder="Suchen"></ion-searchbar>
-          </div>
-          <ion-icon name="information-circle" (click)="openInformation()"></ion-icon>
-          <ion-icon name="settings-outline" (click)="openSettings()"></ion-icon>
-        </div>
-      </div>
+
+      <!-- Alarm Button -->
+      <button class="alarm-button" (click)="triggerAlarm()">
+        <ion-icon name="notifications"></ion-icon>
+        Feueralarm auslösen
+      </button>
     </div>
-  </section>
-  <section id="teacher-section">
-    <div class="teacher-item" *ngFor="let teacher of filter">
-      <div class="info-flex flex">
-        <div class="informations">
-          <div class="teachers" style="display: flex; flex-wrap: wrap;">
-            <div *ngIf="sortby === 'teacher'; then showTeacher else showClass"></div>
-            <ng-template #showTeacher class="showTeacher">
-              <div class="teacher-header">
-                <h2 *ngFor="let teacherName of teacher.names" class="teacher">{{teacherName}}</h2>
-              </div>
-              <h3>Klasse: {{teacher.class}} ({{teacher.classNumber}})</h3>
-            </ng-template>
-            <ng-template #showClass class="showClass">
-              <h2>{{teacher.class}}</h2>
-              <h3>Kürzel: {{teacher.classNumber}}</h3>
-              <div class="teacher-paragraph" style="display: flex; flex-wrap: wrap;">
-                <h4 class="teacher-teacher">Lehrer/innen:</h4>
-                <h4 *ngFor="let teacherName of teacher.names" class="teacher">{{teacherName}}</h4>
-              </div>
-            </ng-template>
-          </div>
-          <h3 class="room">Raum: <span class="rooms" *ngFor="let roomNumber of teacher.room">{{roomNumber}}</span> </h3>
-          <h3>Status: 
-            <span *ngIf="teacher.state === 1" style="color: #f8d93d;">Offen</span>
-            <span *ngIf="teacher.state === 2" style="color: #22B152;">Anwesend</span>
-            <span *ngIf="teacher.state === 3" style="color: #f32843;">Unvollständig</span>
+  </div>
+
+  <!-- Filter & Search -->
+  <div class="filter-section">
+    <!-- Status Filter -->
+    <div class="status-filter">
+      <ion-segment [(ngModel)]="selectedStatus" (ionChange)="onStatusChange()">
+        <ion-segment-button value="4">
+          <ion-label>Alle ({{ stats.total }})</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="1">
+          <ion-label>Offen ({{ stats.open }})</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="2">
+          <ion-label>✓ ({{ stats.present }})</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="3">
+          <ion-label>✗ ({{ stats.incomplete }})</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <ion-searchbar
+        [(ngModel)]="searchTerm"
+        (ionInput)="onSearch()"
+        (ionClear)="onSearch()"
+        placeholder="Suchen..."
+        animated
+      ></ion-searchbar>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Lade Daten...</p>
+  </div>
+
+  <!-- Teacher List -->
+  <div class="teacher-list" *ngIf="!isLoading">
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredTeachers.length === 0">
+      <ion-icon name="search-outline"></ion-icon>
+      <h3>Keine Einträge gefunden</h3>
+      <p *ngIf="searchTerm">Versuche einen anderen Suchbegriff</p>
+    </div>
+
+    <!-- Teacher Cards -->
+    <div
+      class="teacher-card"
+      *ngFor="let teacher of filteredTeachers"
+      [class.fade-in]="true"
+    >
+      <!-- Header -->
+      <div class="card-header">
+        <div class="teacher-info">
+          <!-- Teacher Names or Class -->
+          <h3 *ngIf="sortBy === 'teacher'">
+            <span *ngFor="let name of teacher.names; let last = last">
+              {{ name }}<span *ngIf="!last">, </span>
+            </span>
           </h3>
-          <h3 *ngIf="teacher.comment" style="margin-top: 2%;">Kommentar:</h3>
+          <h3 *ngIf="sortBy === 'class'">{{ teacher.class }}</h3>
+
+          <!-- Sub Info -->
+          <p class="sub-info" *ngIf="sortBy === 'teacher'">
+            Klasse: {{ teacher.class }} ({{ teacher.classNumber }})
+          </p>
+          <p class="sub-info" *ngIf="sortBy === 'class'">
+            Kürzel: {{ teacher.classNumber }} | Lehrer:
+            <span *ngFor="let name of teacher.names; let last = last">
+              {{ name }}<span *ngIf="!last">, </span>
+            </span>
+          </p>
+
+          <!-- Room & Status -->
+          <div class="meta-info">
+            <span class="room-badge">
+              <ion-icon name="location-outline"></ion-icon>
+              <span *ngFor="let room of teacher.room; let last = last">
+                {{ room }}<span *ngIf="!last">, </span>
+              </span>
+            </span>
+            <span class="status-badge" [ngClass]="'status-' + teacher.state">
+              {{ getStatusLabel(teacher.state) }}
+            </span>
+          </div>
         </div>
-        <div class="setcomment">
-          <img src="../../assets/svg/comment-alt-solid.svg" (click)="setComment(teacher)"/>
-        </div>
+
+        <!-- Comment Button -->
+        <button class="icon-button" (click)="addComment(teacher)">
+          <ion-icon name="chatbox-outline"></ion-icon>
+        </button>
       </div>
-      <div class="comment">
-        <div class="commentset" *ngIf="teacher.comment" style="margin: 0; font-size: 14px;">
-          {{teacher.comment}}
+
+      <!-- Comment Display -->
+      <div class="comment-section" *ngIf="teacher.comment">
+        <div class="comment-content">
+          <ion-icon name="chatbox"></ion-icon>
+          <p>{{ teacher.comment }}</p>
         </div>
-        <div class="commentdelete">
-          <img *ngIf="teacher.comment" src="../../assets/svg/trash-alt-solid.svg" (click)="deleteComment(teacher)"/>
-        </div>
+        <button class="icon-button delete" (click)="deleteComment(teacher)">
+          <ion-icon name="trash-outline"></ion-icon>
+        </button>
       </div>
-      <div class="buttons flex">
-        <div class="bttn lost" (click)="setLost(teacher)">
-          <img src="../../assets/svg/times-solid.svg" />
-          <div>Unvollständig</div>
-        </div>
-        <div class="bttn present" (click)="setPresent(teacher)">
-          <img src="../../assets/svg/check-solid.svg"/>
-          <div>Anwesend</div>
-        </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button
+          class="action-btn incomplete"
+          (click)="setIncomplete(teacher)"
+          [class.active]="teacher.state === 3"
+        >
+          <ion-icon name="close-circle"></ion-icon>
+          Unvollständig
+        </button>
+        <button
+          class="action-btn present"
+          (click)="setPresent(teacher)"
+          [class.active]="teacher.state === 2"
+        >
+          <ion-icon name="checkmark-circle"></ion-icon>
+          Anwesend
+        </button>
       </div>
     </div>
-  </section>
+  </div>
 </ion-content>

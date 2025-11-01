@@ -1,7 +1,7 @@
 {
-  "name": "Feueralarm",
+  "name": "Frontend",
   "integrations": {
-    "cordova": {}
+    "capacitor": {}
   },
-  "type": "angular"
+  "type": "angular-standalone"
 }
