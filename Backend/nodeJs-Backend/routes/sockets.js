@@ -1,80 +1,77 @@
-const socketio = require("socket.io");
-const socketauth = require("socketio-jwt");
 const PostController = require("../controllers/posts");
+const jwt = require("jsonwebtoken");
+const { Mutex } = require("async-mutex");
 
-var busyWithUntis = false;
+// Mutex für Thread-Safety bei WebUntis-Anfragen
+const untisLock = new Mutex();
 
-module.exports.listen = function (server) {
-  const { Server } = require("socket.io");
-  const io = new Server(server);
+module.exports = (io) => {
+  // Moderne JWT-Authentifizierung Middleware
+  io.use(async (socket, next) => {
+    try {
+      const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.replace("Bearer ", "");
 
-  io.on(
-    "connection",
-    socketauth.authorize({
-      secret: process.env.JWT_KEY,
-      timeout: 5000,
-    })
-  ).on("authenticated", (socket) => {
-    console.log("user is authenticated and logged in");
-    socket.emit("emitSocketId", {
-      success: true,
-      msg: socket.id,
-      posts: [],
-    });
-
-    socket.on("disconnect", () => {
-      console.log("user disconnected");
-    });
-
-    socket.on("alert", async (data) => {
-      if (busyWithUntis) {
-        socket.emit("emitError", {
-          success: true,
-          msg: "Es wurde bereits ein Feueralarm ausgelöst. Ihre Anwendung wird sich jeden Augenblick aktualisieren.",
-          posts: [],
-        });
-        return;
+      if (!token) {
+        return next(new Error("Authentication error: No token provided"));
       }
 
-      let res = await PostController.alert(data);
-      if (res.success) {
-        try {
-          io.sockets.emit("emitPosts", res);
-          res = await PostController.fetchAlerts();
-          if (res.success) io.sockets.emit("emitAlerts", res);
-        } catch (err) {
-          console.log(err.message);
-          socket.emit("emitError", {
-            success: false,
-            msg: err.message,
-            posts: [],
+      // Token verifizieren
+      const decoded = jwt.verify(token, process.env.JWT_KEY);
+
+      // User-ID im Socket speichern
+      socket.userId = decoded.userId;
+      socket.email = decoded.email;
+
+      console.log(`✅ User authenticated: ${socket.email} (${socket.userId})`);
+      next();
+    } catch (error) {
+      console.error("❌ Authentication failed:", error.message);
+      next(new Error("Authentication error: Invalid token"));
+    }
+  });
+
+  io.on("connection", (socket) => {
+    console.log(`🔌 Client connected: ${socket.id} (User: ${socket.email})`);
+
+    // Alert Event mit Mutex für Thread-Safety
+    socket.on("alert", async (data) => {
+      console.log("🚨 Alert received from:", socket.email);
+
+      // Mutex acquire - verhindert Race Conditions
+      const release = await untisLock.acquire();
+
+      try {
+        let res = await PostController.alert(data);
+
+        if (res.message === "OK") {
+          console.log("✅ Alert processed successfully");
+          io.emit("alert", {
+            title: data.title,
+            content: data.content,
+            teachers: res.teachers,
+            time: data.time,
           });
+        } else {
+          console.error("❌ Alert processing failed:", res.message);
+          socket.emit("error", { message: res.message });
         }
-      } else socket.emit("emitError", res);
+      } catch (error) {
+        console.error("❌ Error processing alert:", error);
+        socket.emit("error", { message: "Internal server error" });
+      } finally {
+        // Mutex release - IMMER ausführen
+        release();
+      }
     });
 
-    socket.on("fetchAlerts", async (data) => {
-      let res = await PostController.fetchAlerts();
-
-      if (res.success) socket.emit("emitAlerts", res);
-      else socket.emit("emitError", res);
+    // Disconnect Event
+    socket.on("disconnect", (reason) => {
+      console.log(`🔌 Client disconnected: ${socket.id} (Reason: ${reason})`);
     });
 
-    socket.on("fetchPosts", async (data) => {
-      alertId = await PostController.getAlertId(data);
-      let res = await PostController.fetchPosts(alertId);
-
-      if (res.success) socket.emit("emitPosts", res);
-      else socket.emit("emitError", res);
-    });
-
-    socket.on("updatePost", async (data) => {
-      let res = await PostController.updatePost(data);
-
-      if (res.success) {
-        res.msg = socket.id;
-        io.sockets.emit("emitUpdate", res);
-      } else socket.emit("emitError", res);
+    // Error Event
+    socket.on("error", (error) => {
+      console.error(`❌ Socket error for ${socket.id}:`, error);
     });
   });
 };

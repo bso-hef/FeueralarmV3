@@ -1,18 +1,9 @@
 {
-  "env": {
-    "MONGO_ATLAS_PW": "qGuYh56hDKIUH6uJ",
-    "MONGO_ATLAS_CONNECTION_STRING": "mongodb+srv://dbAdmin:qGuYh56hDKIUH6uJ@cluster0.wxiww.mongodb.net/FireAlertDB?retryWrites=true&w=majority",
-    "MONGO_CONNECTION_STRING": "mongodb://localhost:27017/ShittyDatabase?readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=false",
-    "JWT_KEY": "ki4qztbzrn7azewozdzQoznbzee895ztzbnslnspötzznws",
-    "UNTIS_API_KEY": "https://nessa.webuntis.com/WebUntis/jsonrpc.do?school=BS-Bad+Hersfeld",
-    "UNTIS_AUTH_HEADER": "{\"headers\":{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}}",
-    "UNTIS_AUTH_BODY": "{\"id\":\"authenticate\",\"method\":\"authenticate\",\"params\":{\"user\":\"Proj12Inf\",\"password\":\"Voellig_Egal12\",\"client\":\"W2MCAVAWK62BJJSX\"},\"jsonrpc\":\"2.0\"}",
-    "UNTIS_REQUEST_HEADER": "{\"headers\":{\"JSESSIONID\":\"abc\",\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}}",
-    "UNTIS_TEACHERS_BODY": "{\"id\":\"get_teachers\",\"method\":\"getTeachers\",\"params\":{},\"jsonrpc\":\"2.0\"}",
-    "UNTIS_CLASSES_BODY": "{\"id\":\"get_classes\",\"method\":\"getKlassen\",\"params\":{},\"jsonrpc\":\"2.0\"}",
-    "UNTIS_TIMEGRIDUNITS_BODY": "{\"id\":\"get_timegridUnits\",\"method\":\"getTimegridUnits\",\"params\":{},\"jsonrpc\":\"2.0\"}",
-    "UNTIS_ROOMS_BODY": "{\"id\":\"get_rooms\",\"method\":\"getRooms\",\"params\":{},\"jsonrpc\":\"2.0\"}",
-    "UNTIS_TIMETABLE_BODY": "{\"id\":\"req-002\",\"method\":\"getTimetable\",\"params\":{\"id\":557,\"type\":\"1\",\"startDate\":20200908,\"endDate\":20200909},\"jsonrpc\":\"2.0\"}",
-    "UNTIS_ROOM_TIMETABLE_BODY": "{\"id\":\"req-002\",\"method\":\"getTimetable\",\"params\":{\"id\":557,\"type\":\"4\",\"startDate\":20200908,\"endDate\":20200909},\"jsonrpc\":\"2.0\"}"
+  "watch": ["*.js", "routes/**/*.js", "controllers/**/*.js", "models/**/*.js", "untis/**/*.js"],
+  "ignore": ["node_modules/**", "*.test.js"],
+  "ext": "js,json",
+  "verbose": true,
+  "execMap": {
+    "js": "node"
   }
 }

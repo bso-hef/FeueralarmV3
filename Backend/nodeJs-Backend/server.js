@@ -1,9 +1,10 @@
+require("dotenv").config();
+
 const http = require("http");
 const debug = require("debug")("node-angular");
 const app = require("./app");
-
-const normalizePort = val => {
-  var port = parseInt(val, 10);
+const normalizePort = (val) => {
+  const port = process.env.PORT || 3000;
 
   if (isNaN(port)) {
     return val;
@@ -16,7 +17,7 @@ const normalizePort = val => {
   return false;
 };
 
-const onError = error => {
+const onError = (error) => {
   if (error.syscall !== "listen") {
     throw error;
   }
@@ -48,6 +49,16 @@ const server = http.createServer(app);
 server.on("error", onError);
 server.on("listening", onListening);
 
-var io = require("./routes/sockets").listen(server);
+// Socket.io initialisieren
+const io = require("socket.io")(server, {
+  cors: {
+    origin: process.env.CORS_ORIGIN || "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+// Socket-Handler laden
+require("./routes/sockets")(io);
 
 server.listen(port);
+console.log(`🚀 Server running on port ${port}`);
