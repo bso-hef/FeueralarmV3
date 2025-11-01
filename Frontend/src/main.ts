@@ -13,10 +13,11 @@ import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
+import { environment } from './environments/environment';
 
 // Socket.io Configuration
 const socketConfig: SocketIoConfig = {
-  url: 'https://alarm-bso.herokuapp.com',
+  url: environment.socketUrl,
   options: {
     transports: ['websocket', 'polling'],
     autoConnect: false,
@@ -31,4 +32,4 @@ bootstrapApplication(AppComponent, {
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(SocketIoModule.forRoot(socketConfig)),
   ],
-});
+}).catch((err) => console.error(err));

@@ -25,8 +25,7 @@ import {
 import { RestService } from '../../services/rest.service';
 import { FeedbackService } from '../../services/feedback.service';
 import { ThemeService } from '../../services/theme.service';
-import { SocketService } from '../../services/socket.service';
-
+import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -52,15 +51,14 @@ export class LoginPage implements OnInit {
   stayLoggedIn = false;
   isLoading = false;
   themeIcon = 'moon';
+  showTestLogin = environment.enableTestLogin;
 
   constructor(
     private restService: RestService,
     private feedbackService: FeedbackService,
     private themeService: ThemeService,
-    private socketService: SocketService,
     private router: Router
   ) {
-    // Register icons
     addIcons({
       flame,
       personOutline,
@@ -79,7 +77,6 @@ export class LoginPage implements OnInit {
   }
 
   async login() {
-    // Validation
     if (!this.credentials.email || !this.credentials.password) {
       await this.feedbackService.showErrorToast('Bitte alle Felder ausfüllen');
       return;
@@ -88,27 +85,18 @@ export class LoginPage implements OnInit {
     this.isLoading = true;
 
     try {
-      // Login attempt
       const result = await this.restService.login(this.credentials);
 
       if (result.success) {
-        // Save credentials if stay logged in
         if (this.stayLoggedIn) {
           localStorage.setItem('stayloggedin', 'true');
           localStorage.setItem('user', this.credentials.email);
           localStorage.setItem('password', this.credentials.password);
         }
 
-        // Connect to socket
-        await this.socketService.connect();
-
-        // Success feedback
         await this.feedbackService.showSuccessToast('Erfolgreich angemeldet!');
-
-        // Navigate to home
         this.router.navigate(['/home']);
       } else {
-        // Show error
         await this.feedbackService.showErrorToast(
           result.error || 'Anmeldung fehlgeschlagen'
         );
@@ -118,6 +106,25 @@ export class LoginPage implements OnInit {
       await this.feedbackService.showErrorToast(
         'Verbindungsfehler. Bitte versuche es erneut.'
       );
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async testLogin() {
+    console.log('🧪 Aktiviere Test-Login');
+    this.isLoading = true;
+
+    try {
+      const result = await this.restService.testLogin();
+
+      if (result.success) {
+        await this.feedbackService.showSuccessToast('Test-Login erfolgreich!');
+        this.router.navigate(['/home']);
+      }
+    } catch (error) {
+      console.error('Test-Login error:', error);
+      await this.feedbackService.showErrorToast('Test-Login fehlgeschlagen');
     } finally {
       this.isLoading = false;
     }

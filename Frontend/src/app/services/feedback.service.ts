@@ -4,6 +4,14 @@ import {
   AlertController,
   ToastController,
 } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import {
+  close,
+  checkmarkCircle,
+  closeCircle,
+  warningOutline,
+  informationCircle,
+} from 'ionicons/icons';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +23,16 @@ export class FeedbackService {
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private toastCtrl: ToastController
-  ) {}
+  ) {
+    // Register icons for toasts and alerts
+    addIcons({
+      close,
+      checkmarkCircle,
+      closeCircle,
+      warningOutline,
+      informationCircle,
+    });
+  }
 
   // ==========================================
   // LOADING
@@ -156,7 +173,7 @@ export class FeedbackService {
       cssClass: 'custom-toast',
       buttons: [
         {
-          icon: 'close',
+          text: '✕',
           role: 'cancel',
         },
       ],

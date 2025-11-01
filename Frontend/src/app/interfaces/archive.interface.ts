@@ -1,7 +1,9 @@
 export interface Archive {
-  archived: boolean;
   _id: string;
-  created: Date;
-  updated: Date;
-  classCount: number;
+  id?: string; // Alias für _id
+  created: string | Date;
+  date?: Date; // Parsed date
+  time?: string;
+  day?: string;
+  posts?: any[];
 }

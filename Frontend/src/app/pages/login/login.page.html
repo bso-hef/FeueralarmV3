@@ -63,6 +63,16 @@
             Anmelden
           </span>
         </button>
+
+        <!-- TEST LOGIN BUTTON (nur für Entwicklung) -->
+        <button
+          type="button"
+          class="test-login-button"
+          (click)="testLogin()"
+          [disabled]="isLoading"
+        >
+          🧪 Test-Login (Entwicklung)
+        </button>
       </form>
 
       <!-- Theme Toggle -->

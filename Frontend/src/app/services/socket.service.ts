@@ -4,11 +4,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { RestService } from './rest.service';
 import { Archive } from '../interfaces/archive.interface';
 
-@Injectable({
-  providedIn: 'root',
-})
+import { environment } from '../../environments/environment';
+
 export class SocketService {
-  private readonly SERVER_URL = 'https://alarm-bso.herokuapp.com';
+  private readonly SERVER_URL = environment.socketUrl;
 
   private postsSubject = new BehaviorSubject<any>(null);
   private updateSubject = new BehaviorSubject<any>(null);

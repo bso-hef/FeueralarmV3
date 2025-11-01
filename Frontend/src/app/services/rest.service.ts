@@ -29,11 +29,13 @@ interface Teacher {
   comment?: string;
 }
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root',
 })
 export class RestService {
-  private readonly API_URL = 'https://alarm-bso.herokuapp.com/api';
+  private readonly API_URL = environment.apiUrl;
   private readonly jwtHelper = new JwtHelperService();
 
   private authSubject = new BehaviorSubject<AuthCredentials>({
@@ -171,7 +173,13 @@ export class RestService {
     const token = this.getToken();
     return token !== '' && !this.jwtHelper.isTokenExpired(token);
   }
+  getAuthValue(): { email: string; password: string; token?: string } {
+    return this.authSubject.value;
+  }
 
+  getEmail(): string {
+    return this.authSubject.value.email;
+  }
   // ==========================================
   // HTTP HELPERS
   // ==========================================
@@ -256,5 +264,32 @@ export class RestService {
         headers: this.getHeaders(),
       })
       .pipe(catchError(this.handleError.bind(this)));
+  }
+  // ==========================================
+  // TEST LOGIN (NUR FÜR ENTWICKLUNG)
+  // ==========================================
+
+  async testLogin(): Promise<{ success: boolean; error?: string }> {
+    console.log('🧪 Test Login aktiviert');
+
+    // Fake Token
+    const fakeToken =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+
+    // Setze Auth
+    this.authSubject.next({
+      email: 'test@bso.de',
+      password: 'test123',
+      token: fakeToken,
+    });
+
+    this.roleSubject.next('admin');
+
+    // Speichere im localStorage
+    localStorage.setItem('auth_token', fakeToken);
+    localStorage.setItem('user_email', 'test@bso.de');
+    localStorage.setItem('user_role', 'admin');
+
+    return { success: true };
   }
 }
