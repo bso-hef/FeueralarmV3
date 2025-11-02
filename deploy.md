@@ -11,5 +11,6 @@ Das Skript "./deploy.sh" führt beim Start automatisch diese Schritte auf der EC
 Ergebnis: Die EC2 hat die aktuellste Version des Codes, bereinigt alte Dateien, baut die App und startet sie frisch.
 
 ```sh
+chmod +x deploy.sh
 ./deploy.sh
 ```
