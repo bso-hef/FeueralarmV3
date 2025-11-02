@@ -1,4 +1,4 @@
-package beans;
+package untis.beans;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

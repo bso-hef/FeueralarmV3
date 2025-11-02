@@ -1,18 +1,18 @@
-package utils;
+package untis.utils;
 
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import beans.ClassBean;
-import beans.TeacherBean;
-import beans.TimeUnitBean;
+import untis.beans.ClassBean;
+import untis.beans.TeacherBean;
+import untis.beans.TimeUnitBean;
+import utils.RequestWrapper;
 
 import java.util.ArrayList;
 import java.util.List;

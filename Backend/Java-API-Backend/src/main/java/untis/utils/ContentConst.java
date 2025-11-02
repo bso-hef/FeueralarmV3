@@ -1,4 +1,4 @@
-package utils;
+package untis.utils;
 
 import config.ConfigLoader;
 

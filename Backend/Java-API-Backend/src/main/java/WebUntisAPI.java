@@ -1,5 +1,3 @@
-package untis;
-
 import untis.beans.ClassBean;
 import untis.beans.TeacherBean;
 import untis.beans.TimeUnitBean;
