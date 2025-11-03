@@ -70,8 +70,13 @@ export class RestService {
     credentials: AuthCredentials
   ): Promise<{ success: boolean; error?: string }> {
     try {
+      // backend expects a `username` field; map email -> username for the request
+      const payload = {
+        username: credentials.email,
+        password: credentials.password,
+      };
       const response = await this.http
-        .post<LoginResponse>(`${this.API_URL}/users/login`, credentials)
+        .post<LoginResponse>(`${this.API_URL}/users/login`, payload)
         .toPromise();
 
       if (response && response.token) {
@@ -116,11 +121,13 @@ export class RestService {
     // Refresh token every 5 minutes
     this.loggedInTimer = setInterval(async () => {
       try {
+        // refresh token using username mapped from stored email
+        const refreshPayload = {
+          username: credentials.email,
+          password: credentials.password,
+        };
         const response = await this.http
-          .post<LoginResponse>(`${this.API_URL}/users/login`, {
-            email: credentials.email,
-            password: credentials.password,
-          })
+          .post<LoginResponse>(`${this.API_URL}/users/login`, refreshPayload)
           .toPromise();
 
         if (response && response.token) {

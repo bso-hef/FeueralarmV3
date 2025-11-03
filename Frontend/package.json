@@ -21,6 +21,7 @@
     "@angular/platform-browser": "18.2.14",
     "@angular/platform-browser-dynamic": "18.2.14",
     "@angular/router": "18.2.14",
+    "@auth0/angular-jwt": "^5.2.0",
     "@capacitor/android": "7.0.0",
     "@capacitor/app": "7.0.0",
     "@capacitor/core": "7.0.0",
@@ -28,10 +29,12 @@
     "@capacitor/keyboard": "7.0.0",
     "@capacitor/status-bar": "7.0.0",
     "@ionic/angular": "8.7.8",
+    "ionicons": "^8.0.13",
+    "moment": "^2.29.4",
+    "ngx-socket-io": "^4.6.0",
     "rxjs": "7.8.2",
     "tslib": "^2.3.0",
-    "zone.js": "~0.14.10",
-    "moment": "^2.29.4"
+    "zone.js": "~0.14.10"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^18.2.21",
@@ -40,7 +43,7 @@
     "@angular-eslint/eslint-plugin-template": "^20.0.0",
     "@angular-eslint/schematics": "^20.0.0",
     "@angular-eslint/template-parser": "^20.0.0",
-    "@angular/cli": "^18.2.21",
+    "@angular/cli": "18.2.21",
     "@angular/compiler-cli": "^18.2.14",
     "@angular/language-service": "^20.0.0",
     "@capacitor/cli": "7.4.4",

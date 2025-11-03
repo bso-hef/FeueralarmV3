@@ -43,19 +43,44 @@ exports.userLogin = (req, res, next) => {
   User.findOne({ username: req.body.username })
     .then((user) => {
       if (!user) {
-        return res.status(404).json({ message: "Invalid authentication credentials!", info: "erstes" });
+        res.status(404).json({ message: "Invalid authentication credentials!" });
+        return Promise.reject("User not found");
       }
       fetchedUser = user;
       return bcrypt.compare(req.body.password, fetchedUser.password);
     })
     .then((result) => {
       if (!result) {
-        return res.status(404).json({ message: "Invalid authentication credentials!", info: "zweites" });
+        res.status(404).json({ message: "Invalid authentication credentials!" });
+        return Promise.reject("Invalid password");
       }
-      const token = jwt.sign({ username: fetchedUser.username, userId: fetchedUser._id, role: fetchedUser.role }, process.env.JWT_KEY, { expiresIn: "1h" });
-      res.status(200).json({ token: token, expiresIn: 3600, userId: fetchedUser._id, username: fetchedUser.username });
+      const token = jwt.sign(
+        {
+          username: fetchedUser.username,
+          userId: fetchedUser._id,
+          role: fetchedUser.role,
+        },
+        process.env.JWT_KEY,
+        { expiresIn: "1h" }
+      );
+      res.status(200).json({
+        token: token,
+        expiresIn: 3600,
+        userId: fetchedUser._id,
+        username: fetchedUser.username,
+      });
     })
     .catch((err) => {
-      return res.status(404).json({ message: "Invalid authentication credentials!", info: "drittes", shiet: fetchedUser });
+      // Nur senden wenn noch keine Response gesendet wurde
+      if (!res.headersSent) {
+        // Log error stack for debugging
+        console.error("Authentication error:", err && err.stack ? err.stack : err);
+
+        const resp = { message: "An error occurred during authentication" };
+        if (process.env.NODE_ENV !== "production" && err && err.message) {
+          resp.error = err.message;
+        }
+        res.status(500).json(resp);
+      }
     });
 };
