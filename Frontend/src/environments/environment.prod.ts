@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://alarm-bso.herokuapp.com/api',
-  socketUrl: 'https://alarm-bso.herokuapp.com',
+  apiUrl: 'http://52.59.245.175/api',
+  socketUrl: 'http://52.59.245.175',
   appVersion: '2.0.0',
   appName: 'Feueralarm BSO',
   enableTestLogin: false,
