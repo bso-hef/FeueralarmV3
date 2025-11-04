@@ -12,17 +12,17 @@
 
       <!-- Login Form -->
       <form class="login-form" (ngSubmit)="login()">
-        <!-- Email Input -->
+        <!-- Username Input -->
         <div class="input-group">
           <ion-icon name="person-outline" class="input-icon"></ion-icon>
           <input
-            type="email"
+            type="username"
             placeholder="Benutzername"
-            [(ngModel)]="credentials.email"
-            name="email"
+            [(ngModel)]="credentials.username"
+            name="username"
             class="modern-input"
             required
-            autocomplete="email"
+            autocomplete="username"
           />
         </div>
 
