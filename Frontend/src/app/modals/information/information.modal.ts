@@ -61,7 +61,7 @@ export class InformationModal implements OnInit {
     incomplete: number;
   };
 
-  userEmail = '';
+  username = '';
   userRole = '';
   alertDate?: Date;
   isLiveData = true;
@@ -89,7 +89,7 @@ export class InformationModal implements OnInit {
 
   ngOnInit() {
     // Get user info
-    this.userEmail = this.restService.getAuthValue().email;
+    this.username = this.restService.getAuthValue().username;
     this.userRole = this.capitalizeRole(this.restService.getRoleValue());
 
     // Check if viewing live or archive
