@@ -21,7 +21,7 @@ export const loginGuard: CanActivateFn = (route, state) => {
 
   // Wenn bereits eingeloggt, redirect zu home
   if (restService.isAuthenticated()) {
-    router.navigate(['/home']);
+    router.navigate(['/login']);
     return false;
   }
 
