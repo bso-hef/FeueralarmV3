@@ -43,7 +43,6 @@ const onListening = () => {
 };
 
 const port = normalizePort(process.env.PORT || "3000");
-const host = process.env.HOST || "0.0.0.0";
 app.set("port", port);
 
 const server = http.createServer(app);
@@ -61,7 +60,5 @@ const io = require("socket.io")(server, {
 // Socket-Handler laden
 require("./routes/sockets")(io);
 
-// bind to HOST to allow external connections (default 0.0.0.0)
-server.listen(port, host, () => {
-  console.log(`🚀 Server running on http://${host}:${port}`);
-});
+server.listen(port);
+console.log(`🚀 Server running on port ${port}`);

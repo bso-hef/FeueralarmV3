@@ -3,27 +3,15 @@ const Post = require("../models/post");
 const axios = require("axios");
 const os = require("os");
 
-const requestURL = process.env.UNTIS_API_KEY || "";
-
-function safeParseEnv(name, defaultValue) {
-  const raw = process.env[name];
-  if (!raw) return defaultValue;
-  try {
-    return JSON.parse(raw);
-  } catch (err) {
-    console.error(`Failed to parse env ${name}:`, err.message || err);
-    return defaultValue;
-  }
-}
-
-const authBody = safeParseEnv("UNTIS_AUTH_BODY", {});
-const authHeader = safeParseEnv("UNTIS_AUTH_HEADER", {});
-var requestHeader = safeParseEnv("UNTIS_AUTH_HEADER", {});
-const teacherBody = safeParseEnv("UNTIS_TEACHERS_BODY", {});
-const classesBody = safeParseEnv("UNTIS_CLASSES_BODY", {});
-const roomsBody = safeParseEnv("UNTIS_ROOMS_BODY", {});
-const timeUnitsBody = safeParseEnv("UNTIS_TIMEGRIDUNITS_BODY", {});
-var timetableBody = safeParseEnv("UNTIS_TIMETABLE_BODY", {});
+const requestURL = process.env.UNTIS_API_KEY;
+const authBody = JSON.parse(process.env.UNTIS_AUTH_BODY);
+const authHeader = JSON.parse(process.env.UNTIS_AUTH_HEADER);
+var requestHeader = JSON.parse(process.env.UNTIS_AUTH_HEADER);
+const teacherBody = JSON.parse(process.env.UNTIS_TEACHERS_BODY);
+const classesBody = JSON.parse(process.env.UNTIS_CLASSES_BODY);
+const roomsBody = JSON.parse(process.env.UNTIS_ROOMS_BODY);
+const timeUnitsBody = JSON.parse(process.env.UNTIS_TIMEGRIDUNITS_BODY);
+var timetableBody = JSON.parse(process.env.UNTIS_TIMETABLE_BODY);
 
 const workerFile = "./untis/timeTableWorker.js";
 
