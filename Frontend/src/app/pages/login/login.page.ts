@@ -82,6 +82,7 @@ export class LoginPage implements OnInit {
       return;
     }
 
+    console.log('login start', this.credentials);
     this.isLoading = true;
 
     try {
@@ -108,6 +109,7 @@ export class LoginPage implements OnInit {
       );
     } finally {
       this.isLoading = false;
+      console.log('login end -> isLoading', this.isLoading);
     }
   }
 
