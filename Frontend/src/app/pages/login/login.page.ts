@@ -26,6 +26,7 @@ import { RestService } from '../../services/rest.service';
 import { FeedbackService } from '../../services/feedback.service';
 import { ThemeService } from '../../services/theme.service';
 import { environment } from '../../../environments/environment';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -77,46 +78,70 @@ export class LoginPage implements OnInit {
   }
 
   async login() {
+    // 🔒 Verhindere mehrfache Aufrufe
+    if (this.isLoading) {
+      console.warn('⚠️ Login bereits in Progress, ignoriere weiteren Aufruf');
+      return;
+    }
+
     if (!this.credentials.username || !this.credentials.password) {
       await this.feedbackService.showErrorToast('Bitte alle Felder ausfüllen');
       return;
     }
 
-    console.log('login start', this.credentials);
+    console.log('🔐 Login gestartet...', this.credentials.username);
     this.isLoading = true;
 
     try {
       const result = await this.restService.login(this.credentials);
+      console.log('✅ Login Resultat:', result);
 
       if (result.success) {
+        // Speichere Login-Daten wenn gewünscht
         if (this.stayLoggedIn) {
           localStorage.setItem('stayloggedin', 'true');
           localStorage.setItem('user', this.credentials.username);
           localStorage.setItem('password', this.credentials.password);
         }
 
+        // Toast anzeigen
         await this.feedbackService.showSuccessToast('Erfolgreich angemeldet!');
-        console.log('login result:', result);
-        const ok = this.router.navigate(['/home']);
-        console.log('navigate ok?', ok);
+
+        // ⚠️ WICHTIG: isLoading VORHER auf false setzen,
+        // damit UI nicht blockiert ist während Navigation
+        this.isLoading = false;
+
+        // Navigation mit replaceUrl um zurück-Button zu verhindern
+        console.log('🚀 Navigiere zu /home...');
+        const navigationSuccess = await this.router.navigate(['/home'], {
+          replaceUrl: true,
+        });
+        console.log('✅ Navigation erfolgreich:', navigationSuccess);
       } else {
+        // Login fehlgeschlagen
+        this.isLoading = false;
         await this.feedbackService.showErrorToast(
           result.error || 'Anmeldung fehlgeschlagen'
         );
       }
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
+      this.isLoading = false;
       await this.feedbackService.showErrorToast(
         'Verbindungsfehler. Bitte versuche es erneut.'
       );
-    } finally {
-      this.isLoading = false;
-      console.log('login end -> isLoading', this.isLoading);
     }
+    // KEIN finally Block mehr - isLoading wird bereits vorher gesetzt
   }
 
   async testLogin() {
     console.log('🧪 Aktiviere Test-Login');
+
+    // Verhindere mehrfache Aufrufe
+    if (this.isLoading) {
+      return;
+    }
+
     this.isLoading = true;
 
     try {
@@ -124,13 +149,16 @@ export class LoginPage implements OnInit {
 
       if (result.success) {
         await this.feedbackService.showSuccessToast('Test-Login erfolgreich!');
-        this.router.navigate(['/home']);
+        this.isLoading = false;
+        await this.router.navigate(['/home'], { replaceUrl: true });
+      } else {
+        this.isLoading = false;
+        await this.feedbackService.showErrorToast('Test-Login fehlgeschlagen');
       }
     } catch (error) {
       console.error('Test-Login error:', error);
-      await this.feedbackService.showErrorToast('Test-Login fehlgeschlagen');
-    } finally {
       this.isLoading = false;
+      await this.feedbackService.showErrorToast('Test-Login fehlgeschlagen');
     }
   }
 

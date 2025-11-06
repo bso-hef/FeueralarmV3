@@ -19,16 +19,6 @@ interface LoginResponse {
   token: string;
 }
 
-interface Teacher {
-  id: string;
-  names: string[];
-  class?: string;
-  classNumber?: string;
-  room?: string[];
-  state?: number;
-  comment?: string;
-}
-
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -61,8 +51,13 @@ export class RestService {
 
     if (token && email && !this.jwtHelper.isTokenExpired(token)) {
       const decoded = this.jwtHelper.decodeToken(token);
-      this.authSubject.next({ username:'', password: '', token });
+      this.authSubject.next({ username: email, password: '', token });
       this.roleSubject.next(decoded.role);
+      console.log(
+        '✅ Gespeicherte Auth wiederhergestellt:',
+        email,
+        decoded.role
+      );
     }
   }
 
@@ -70,17 +65,22 @@ export class RestService {
     credentials: AuthCredentials
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      // backend expects a `username` field; map email -> username for the request
+      console.log('📤 Sende Login Request:', credentials.username);
+
       const payload = {
         username: credentials.username,
         password: credentials.password,
       };
+
       const response = await this.http
         .post<LoginResponse>(`${this.API_URL}/users/login`, payload)
         .toPromise();
 
+      console.log('📥 Login Response erhalten:', response);
+
       if (response && response.token) {
         const decoded = this.jwtHelper.decodeToken(response.token);
+        console.log('🔓 Token dekodiert:', decoded);
 
         this.authSubject.next({
           ...credentials,
@@ -93,21 +93,32 @@ export class RestService {
         localStorage.setItem('auth-token', response.token);
         localStorage.setItem('auth-email', credentials.username);
 
+        console.log('💾 Auth Daten gespeichert');
+
         // Start auto-refresh
         this.startTokenRefresh(credentials);
 
         return { success: true };
       }
 
+      console.warn('⚠️ Keine gültige Response vom Server');
       return { success: false, error: 'Ungültige Antwort vom Server' };
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
+
+      let errorMessage = 'Verbindungsfehler';
+
+      if (error.status === 404 || error.status === 401) {
+        errorMessage = 'Benutzername oder Passwort falsch';
+      } else if (error.status === 0) {
+        errorMessage = 'Server nicht erreichbar';
+      } else if (error.error?.message) {
+        errorMessage = error.error.message;
+      }
+
       return {
         success: false,
-        error:
-          error.status === 404
-            ? 'Benutzername oder Passwort falsch'
-            : 'Verbindungsfehler',
+        error: errorMessage,
       };
     }
   }
@@ -121,7 +132,6 @@ export class RestService {
     // Refresh token every 5 minutes
     this.loggedInTimer = setInterval(async () => {
       try {
-        // refresh token using username mapped from stored email
         const refreshPayload = {
           username: credentials.username,
           password: credentials.password,
@@ -135,15 +145,18 @@ export class RestService {
           auth.token = response.token;
           this.authSubject.next(auth);
           localStorage.setItem('auth-token', response.token);
+          console.log('🔄 Token refreshed');
         }
       } catch (error) {
-        console.error('Token refresh failed:', error);
+        console.error('❌ Token refresh failed:', error);
         this.logout();
       }
     }, 300000); // 5 minutes
   }
 
   logout(): void {
+    console.log('👋 Logout...');
+
     if (this.loggedInTimer) {
       clearInterval(this.loggedInTimer);
     }
@@ -178,8 +191,16 @@ export class RestService {
 
   isAuthenticated(): boolean {
     const token = this.getToken();
-    return token !== '' && !this.jwtHelper.isTokenExpired(token);
+    const isAuth = token !== '' && !this.jwtHelper.isTokenExpired(token);
+    console.log(
+      '🔐 isAuthenticated:',
+      isAuth,
+      'Token:',
+      token ? 'vorhanden' : 'fehlt'
+    );
+    return isAuth;
   }
+
   getAuthValue(): { username: string; password: string; token?: string } {
     return this.authSubject.value;
   }
@@ -187,6 +208,7 @@ export class RestService {
   getEmail(): string {
     return this.authSubject.value.username;
   }
+
   // ==========================================
   // HTTP HELPERS
   // ==========================================
@@ -272,6 +294,7 @@ export class RestService {
       })
       .pipe(catchError(this.handleError.bind(this)));
   }
+
   // ==========================================
   // TEST LOGIN (NUR FÜR ENTWICKLUNG)
   // ==========================================
@@ -281,7 +304,7 @@ export class RestService {
 
     // Fake Token
     const fakeToken =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoyMTQ3NDgzNjQ3fQ.placeholder';
 
     // Setze Auth
     this.authSubject.next({
@@ -293,10 +316,10 @@ export class RestService {
     this.roleSubject.next('admin');
 
     // Speichere im localStorage
-    localStorage.setItem('auth_token', fakeToken);
-    localStorage.setItem('user_email', 'test@bso.de');
-    localStorage.setItem('user_role', 'admin');
+    localStorage.setItem('auth-token', fakeToken);
+    localStorage.setItem('auth-email', 'test@bso.de');
 
+    console.log('✅ Test-Login erfolgreich');
     return { success: true };
   }
 }
