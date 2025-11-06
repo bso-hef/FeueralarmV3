@@ -60,5 +60,8 @@ const io = require("socket.io")(server, {
 // Socket-Handler laden
 require("./routes/sockets")(io);
 
-server.listen(port);
-console.log(`🚀 Server running on port ${port}`);
+server.listen(port, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${port}`);
+  console.log(`📡 Listening on all network interfaces (0.0.0.0:${port})`);
+  console.log(`🌐 Access from network: http://18.193.97.54:${port}`);
+});
