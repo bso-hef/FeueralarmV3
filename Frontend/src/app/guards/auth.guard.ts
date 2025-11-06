@@ -40,3 +40,6 @@ export const loginGuard: CanActivateFn = (route, state) => {
   console.log('✅ Nicht eingeloggt, Login-Seite erlaubt');
   return true;
 };
+
+// The Comment only exists to do a commit with the message, that the login is finally working as intended.
+// That means the Repo is in its First working State regarding Authentication and Login.
