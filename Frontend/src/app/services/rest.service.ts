@@ -58,47 +58,10 @@ export class RestService {
   // ==========================================
 
   async isOnline(): Promise<boolean> {
-    // Erst Browser-Status prüfen
-    if (!navigator.onLine) {
-      console.log('🔴 Browser ist offline');
-      return false;
-    }
-
-    // Server-Erreichbarkeit testen (ohne speziellen Ping-Endpoint)
-    try {
-      // Versuche eine einfache HEAD-Anfrage an die API
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-      const response = await fetch(`${this.API_URL}/users/login`, {
-        method: 'HEAD',
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      clearTimeout(timeoutId);
-
-      // Auch 401/404 bedeutet: Server ist erreichbar!
-      console.log('🟢 Server erreichbar (Status:', response.status, ')');
-      return true;
-    } catch (error: any) {
-      // AbortError = Timeout
-      if (error.name === 'AbortError') {
-        console.log('🔴 Server Timeout');
-        return false;
-      }
-
-      // TypeError = Network Error (CORS, keine Verbindung)
-      if (error.name === 'TypeError') {
-        console.log('🔴 Network Error - Server nicht erreichbar');
-        return false;
-      }
-
-      console.log('🔴 Server nicht erreichbar:', error.name);
-      return false;
-    }
+    // Nur Browser-Status prüfen (kein Server-Request!)
+    const online = navigator.onLine;
+    console.log(online ? '🟢 Online' : '🔴 Offline');
+    return online;
   }
 
   getOfflineMode(): Observable<boolean> {
@@ -172,15 +135,14 @@ export class RestService {
   ): Promise<{ success: boolean; error?: string; isOffline?: boolean }> {
     console.log('🔐 Login gestartet:', credentials.username);
 
-    // Verwende navigator.onLine für schnelle Prüfung
-    const quickOnlineCheck = navigator.onLine;
-
-    if (quickOnlineCheck) {
-      // ONLINE LOGIN (schnell, ohne extra Server-Check)
-      return this.onlineLogin(credentials);
-    } else {
-      // OFFLINE LOGIN
-      return this.offlineLogin(credentials);
+    // Versuche immer zuerst Online-Login
+    // Falls fehlschlägt → automatisch Fallback zu Offline
+    try {
+      return await this.onlineLogin(credentials);
+    } catch (error) {
+      // Online-Login fehlgeschlagen → Versuche Offline-Login
+      console.log('⚠️ Online-Login fehlgeschlagen, versuche Offline-Login...');
+      return await this.offlineLogin(credentials);
     }
   }
 
