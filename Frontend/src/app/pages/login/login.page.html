@@ -10,6 +10,38 @@
         <p class="subtitle">Berufliche Schulen Obersberg</p>
       </div>
 
+      <!-- Online/Offline Status Badge -->
+      <div class="status-badge-container">
+        <ion-badge
+          [color]="isOnline ? 'success' : 'warning'"
+          class="status-badge"
+        >
+          <ion-icon
+            [name]="isOnline ? 'cloud-done-outline' : 'cloud-offline-outline'"
+          ></ion-icon>
+          {{ isOnline ? 'Online' : 'Offline' }}
+        </ion-badge>
+      </div>
+
+      <!-- Offline-Info -->
+      <div class="offline-info" *ngIf="!isOnline && canOfflineLogin">
+        <ion-icon name="information-circle"></ion-icon>
+        <div>
+          <p><strong>Offline-Modus verfügbar</strong></p>
+          <p *ngIf="lastOnlineLogin">
+            Letzter Online-Login: {{ formatLastLogin(lastOnlineLogin) }}
+          </p>
+        </div>
+      </div>
+
+      <div class="offline-warning" *ngIf="!isOnline && !canOfflineLogin">
+        <ion-icon name="warning"></ion-icon>
+        <div>
+          <p><strong>Keine Internetverbindung</strong></p>
+          <p>Bitte zuerst online anmelden, um Offline-Login zu aktivieren.</p>
+        </div>
+      </div>
+
       <!-- Login Form -->
       <form class="login-form" (ngSubmit)="login()">
         <!-- Username Input -->
@@ -56,16 +88,21 @@
         </div>
 
         <!-- Login Button -->
-        <button type="submit" class="login-button" [disabled]="isLoading">
+        <button
+          type="submit"
+          class="login-button"
+          [disabled]="isLoading || (!isOnline && !canOfflineLogin)"
+        >
           <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
           <span *ngIf="!isLoading">
             <ion-icon name="log-in-outline"></ion-icon>
-            Anmelden
+            {{ isOnline ? 'Anmelden' : 'Offline Anmelden' }}
           </span>
         </button>
 
         <!-- TEST LOGIN BUTTON (nur für Entwicklung) -->
         <button
+          *ngIf="showTestLogin"
           type="button"
           class="test-login-button"
           (click)="testLogin()"

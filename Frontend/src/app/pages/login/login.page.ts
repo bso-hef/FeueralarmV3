@@ -8,6 +8,7 @@ import {
   IonIcon,
   IonCheckbox,
   IonSpinner,
+  IonBadge,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -20,6 +21,8 @@ import {
   moon,
   sunny,
   contrast,
+  cloudOfflineOutline,
+  cloudDoneOutline,
 } from 'ionicons/icons';
 
 import { RestService } from '../../services/rest.service';
@@ -40,6 +43,7 @@ import { environment } from '../../../environments/environment';
     IonIcon,
     IonCheckbox,
     IonSpinner,
+    IonBadge,
   ],
 })
 export class LoginPage implements OnInit {
@@ -53,6 +57,11 @@ export class LoginPage implements OnInit {
   isLoading = false;
   themeIcon = 'moon';
   showTestLogin = environment.enableTestLogin;
+
+  // Offline-Status
+  isOnline = true;
+  canOfflineLogin = false;
+  lastOnlineLogin: Date | null = null;
 
   constructor(
     private restService: RestService,
@@ -70,17 +79,31 @@ export class LoginPage implements OnInit {
       moon,
       sunny,
       contrast,
+      cloudOfflineOutline,
+      cloudDoneOutline,
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.themeIcon = this.themeService.getThemeIcon();
+
+    // Prüfe Online-Status nur einmal beim Laden
+    this.checkOnlineStatus();
+
+    // Prüfe ob Offline-Login möglich ist
+    this.canOfflineLogin = this.restService.canOfflineLogin();
+    this.lastOnlineLogin = this.restService.getLastOnlineLogin();
+  }
+
+  private async checkOnlineStatus() {
+    this.isOnline = await this.restService.isOnline();
+    console.log(this.isOnline ? '🟢 Online' : '🔴 Offline');
   }
 
   async login() {
-    // 🔒 Verhindere mehrfache Aufrufe
+    // Verhindere mehrfache Aufrufe
     if (this.isLoading) {
-      console.warn('⚠️ Login bereits in Progress, ignoriere weiteren Aufruf');
+      console.warn('⚠️ Login bereits in Progress');
       return;
     }
 
@@ -94,40 +117,40 @@ export class LoginPage implements OnInit {
 
     try {
       const result = await this.restService.login(this.credentials);
-      console.log('✅ Login Resultat:', result);
 
       if (result && result.success) {
-        console.log('📝 Speichere Login-Daten...');
+        console.log('✅ Login erfolgreich', result);
 
         // Speichere Login-Daten wenn gewünscht
         if (this.stayLoggedIn) {
           localStorage.setItem('stayloggedin', 'true');
           localStorage.setItem('user', this.credentials.username);
-          localStorage.setItem('password', this.credentials.password);
         }
 
-        console.log('📢 Zeige Erfolgs-Toast...');
-        // Toast anzeigen (ohne await - soll parallel laufen)
-        this.feedbackService.showSuccessToast('Erfolgreich angemeldet!');
+        // Toast (OHNE await - parallel laufen lassen)
+        if (result.isOffline) {
+          this.feedbackService.showSuccessToast(
+            '📴 Offline-Login erfolgreich!'
+          );
+        } else {
+          this.feedbackService.showSuccessToast('🟢 Online-Login erfolgreich!');
+        }
 
-        console.log('🔓 Setze isLoading auf false...');
-        // ⚠️ WICHTIG: isLoading VORHER auf false setzen
+        // WICHTIG: isLoading SOFORT auf false setzen
         this.isLoading = false;
 
-        console.log('🚀 Starte Navigation zu /home...');
-        // Navigation mit replaceUrl und setTimeout als Fallback
-        setTimeout(async () => {
-          try {
-            const navigationSuccess = await this.router.navigate(['/home'], {
-              replaceUrl: true,
-            });
-            console.log('✅ Navigation erfolgreich:', navigationSuccess);
-          } catch (navError) {
-            console.error('❌ Navigation Error:', navError);
+        // Navigation direkt ohne setTimeout
+        console.log('🚀 Navigiere zu /home...');
+        this.router.navigate(['/home'], { replaceUrl: true }).then(
+          (success) => {
+            console.log('✅ Navigation erfolgreich:', success);
+          },
+          (error) => {
+            console.error('❌ Navigation fehlgeschlagen:', error);
             // Fallback: Hard reload
             window.location.href = '/home';
           }
-        }, 100);
+        );
       } else {
         // Login fehlgeschlagen
         console.log('❌ Login fehlgeschlagen:', result?.error);
@@ -148,10 +171,7 @@ export class LoginPage implements OnInit {
   async testLogin() {
     console.log('🧪 Aktiviere Test-Login');
 
-    // Verhindere mehrfache Aufrufe
-    if (this.isLoading) {
-      return;
-    }
+    if (this.isLoading) return;
 
     this.isLoading = true;
 
@@ -176,5 +196,17 @@ export class LoginPage implements OnInit {
   toggleTheme() {
     this.themeService.toggleTheme();
     this.themeIcon = this.themeService.getThemeIcon();
+  }
+
+  formatLastLogin(date: Date | null): string {
+    if (!date) return '';
+    const now = new Date();
+    const diffDays = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays === 0) return 'heute';
+    if (diffDays === 1) return 'gestern';
+    return `vor ${diffDays} Tagen`;
   }
 }

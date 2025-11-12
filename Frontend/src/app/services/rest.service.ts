@@ -5,7 +5,7 @@ import {
   HttpErrorResponse,
 } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, timeout } from 'rxjs/operators';
 import { NavController } from '@ionic/angular';
 import { JwtHelperService } from '@auth0/angular-jwt';
 
@@ -19,6 +19,15 @@ interface LoginResponse {
   token: string;
 }
 
+interface StoredAuthData {
+  token: string;
+  username: string;
+  password: string; // Für Offline-Login (HASHED)
+  role: string;
+  lastOnlineLogin: string; // ISO timestamp
+  offlineLoginEnabled: boolean;
+}
+
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -27,6 +36,8 @@ import { environment } from '../../environments/environment';
 export class RestService {
   private readonly API_URL = environment.apiUrl;
   private readonly jwtHelper = new JwtHelperService();
+  private readonly ONLINE_LOGIN_TIMEOUT = 10000; // 10 Sekunden
+  private readonly OFFLINE_TOKEN_VALIDITY_DAYS = 30;
 
   private authSubject = new BehaviorSubject<AuthCredentials>({
     username: '',
@@ -35,6 +46,7 @@ export class RestService {
   });
 
   private roleSubject = new BehaviorSubject<string>('');
+  private isOfflineModeSubject = new BehaviorSubject<boolean>(false);
   private loggedInTimer: any;
 
   constructor(private http: HttpClient, private navCtrl: NavController) {
@@ -42,30 +54,103 @@ export class RestService {
   }
 
   // ==========================================
+  // ONLINE/OFFLINE DETECTION
+  // ==========================================
+
+  async isOnline(): Promise<boolean> {
+    // Nur Browser-Status prüfen (kein Server-Request!)
+    const online = navigator.onLine;
+    console.log(online ? '🟢 Online' : '🔴 Offline');
+    return online;
+  }
+
+  getOfflineMode(): Observable<boolean> {
+    return this.isOfflineModeSubject.asObservable();
+  }
+
+  isOfflineMode(): boolean {
+    return this.isOfflineModeSubject.value;
+  }
+
+  // ==========================================
   // AUTHENTICATION
   // ==========================================
 
   private checkStoredAuth(): void {
-    const token = localStorage.getItem('auth-token');
-    const email = localStorage.getItem('auth-email');
-    const storedRole = localStorage.getItem('role');
+    const storedData = this.getStoredAuthData();
 
-    if (token && email && !this.jwtHelper.isTokenExpired(token)) {
-      const decoded = this.jwtHelper.decodeToken(token);
-      const role = storedRole || decoded.role; // Verwende gespeicherte Rolle oder dekodiere aus Token
-
-      this.authSubject.next({ username: email, password: '', token });
-      this.roleSubject.next(role);
-
-      console.log('✅ Gespeicherte Auth wiederhergestellt:', email, role);
+    if (!storedData) {
+      console.log('ℹ️ Keine gespeicherten Auth-Daten gefunden');
+      return;
     }
+
+    // Prüfe ob Offline-Login aktiviert ist
+    if (!storedData.offlineLoginEnabled) {
+      console.log(
+        '⚠️ Offline-Login nicht aktiviert - erster Login erforderlich'
+      );
+      return;
+    }
+
+    // Prüfe Token-Gültigkeit
+    if (this.jwtHelper.isTokenExpired(storedData.token)) {
+      // Token abgelaufen - prüfe ob innerhalb Offline-Zeitraum
+      const lastLogin = new Date(storedData.lastOnlineLogin);
+      const now = new Date();
+      const daysSinceLogin = Math.floor(
+        (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      if (daysSinceLogin > this.OFFLINE_TOKEN_VALIDITY_DAYS) {
+        console.log(
+          '⚠️ Offline-Login-Zeitraum abgelaufen - neuer Online-Login erforderlich'
+        );
+        this.clearStoredAuth();
+        return;
+      }
+
+      console.log(
+        `✅ Offline-Login möglich (${daysSinceLogin}/${this.OFFLINE_TOKEN_VALIDITY_DAYS} Tage)`
+      );
+      this.isOfflineModeSubject.next(true);
+    }
+
+    // Auth wiederherstellen
+    this.authSubject.next({
+      username: storedData.username,
+      password: '',
+      token: storedData.token,
+    });
+    this.roleSubject.next(storedData.role);
+
+    console.log(
+      '✅ Auth wiederhergestellt:',
+      storedData.username,
+      storedData.role
+    );
   }
 
   async login(
     credentials: AuthCredentials
-  ): Promise<{ success: boolean; error?: string }> {
+  ): Promise<{ success: boolean; error?: string; isOffline?: boolean }> {
+    console.log('🔐 Login gestartet:', credentials.username);
+
+    // Versuche immer zuerst Online-Login
+    // Falls fehlschlägt → automatisch Fallback zu Offline
     try {
-      console.log('📤 Sende Login Request:', credentials.username);
+      return await this.onlineLogin(credentials);
+    } catch (error) {
+      // Online-Login fehlgeschlagen → Versuche Offline-Login
+      console.log('⚠️ Online-Login fehlgeschlagen, versuche Offline-Login...');
+      return await this.offlineLogin(credentials);
+    }
+  }
+
+  private async onlineLogin(
+    credentials: AuthCredentials
+  ): Promise<{ success: boolean; error?: string; isOffline?: boolean }> {
+    try {
+      console.log('🌐 Online-Login...');
 
       const payload = {
         username: credentials.username,
@@ -74,74 +159,200 @@ export class RestService {
 
       const response = await this.http
         .post<LoginResponse>(`${this.API_URL}/users/login`, payload)
+        .pipe(timeout(this.ONLINE_LOGIN_TIMEOUT))
         .toPromise();
 
-      console.log('📥 Login Response erhalten:', response);
-
-      if (response && response.token) {
-        const decoded = this.jwtHelper.decodeToken(response.token);
-        console.log('🔓 Token dekodiert:', decoded);
-
-        this.authSubject.next({
-          ...credentials,
-          token: response.token,
-        });
-
-        this.roleSubject.next(decoded.role);
-
-        // Store auth data
-        localStorage.setItem('auth-token', response.token);
-        localStorage.setItem('auth-email', credentials.username);
-        localStorage.setItem('role', decoded.role); // ← Rolle im localStorage speichern
-
-        console.log(
-          '💾 Auth Daten gespeichert (inkl. Rolle:',
-          decoded.role + ')'
-        );
-
-        // Start auto-refresh
-        this.startTokenRefresh(credentials);
-
-        return { success: true };
+      if (!response || !response.token) {
+        return { success: false, error: 'Ungültige Antwort vom Server' };
       }
 
-      console.warn('⚠️ Keine gültige Response vom Server');
-      return { success: false, error: 'Ungültige Antwort vom Server' };
+      const decoded = this.jwtHelper.decodeToken(response.token);
+      console.log('🔓 Token dekodiert:', decoded);
+
+      // Auth setzen
+      this.authSubject.next({
+        ...credentials,
+        token: response.token,
+      });
+      this.roleSubject.next(decoded.role);
+
+      // Speichere Auth-Daten für Offline-Login
+      const authData: StoredAuthData = {
+        token: response.token,
+        username: credentials.username,
+        password: await this.hashPassword(credentials.password), // Hash für Offline-Vergleich
+        role: decoded.role,
+        lastOnlineLogin: new Date().toISOString(),
+        offlineLoginEnabled: true,
+      };
+
+      this.saveAuthData(authData);
+
+      console.log('💾 Auth-Daten gespeichert (Offline-Login aktiviert)');
+
+      // Start auto-refresh
+      this.startTokenRefresh(credentials);
+
+      this.isOfflineModeSubject.next(false);
+
+      return { success: true, isOffline: false };
     } catch (error: any) {
-      console.error('❌ Login error:', error);
+      console.error('❌ Online-Login Fehler:', error);
 
       let errorMessage = 'Verbindungsfehler';
 
-      if (error.status === 404 || error.status === 401) {
+      if (error.name === 'TimeoutError') {
+        errorMessage = 'Server-Timeout - bitte erneut versuchen';
+      } else if (error.status === 404 || error.status === 401) {
         errorMessage = 'Benutzername oder Passwort falsch';
       } else if (error.status === 0) {
         errorMessage = 'Server nicht erreichbar';
-      } else if (error.error?.message) {
-        errorMessage = error.error.message;
       }
 
-      return {
-        success: false,
-        error: errorMessage,
-      };
+      return { success: false, error: errorMessage };
     }
   }
 
+  private async offlineLogin(
+    credentials: AuthCredentials
+  ): Promise<{ success: boolean; error?: string; isOffline?: boolean }> {
+    console.log('📴 Offline-Login-Versuch...');
+
+    const storedData = this.getStoredAuthData();
+
+    // Prüfe ob Offline-Login möglich ist
+    if (!storedData || !storedData.offlineLoginEnabled) {
+      return {
+        success: false,
+        error: 'Offline-Login nicht verfügbar. Bitte zuerst online anmelden.',
+      };
+    }
+
+    // Prüfe Username
+    if (credentials.username !== storedData.username) {
+      return {
+        success: false,
+        error: 'Benutzername stimmt nicht überein',
+      };
+    }
+
+    // Prüfe Passwort
+    const passwordHash = await this.hashPassword(credentials.password);
+    if (passwordHash !== storedData.password) {
+      return {
+        success: false,
+        error: 'Passwort falsch',
+      };
+    }
+
+    // Prüfe Offline-Zeitraum
+    const lastLogin = new Date(storedData.lastOnlineLogin);
+    const now = new Date();
+    const daysSinceLogin = Math.floor(
+      (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysSinceLogin > this.OFFLINE_TOKEN_VALIDITY_DAYS) {
+      this.clearStoredAuth();
+      return {
+        success: false,
+        error: `Offline-Login abgelaufen (>${this.OFFLINE_TOKEN_VALIDITY_DAYS} Tage). Bitte online anmelden.`,
+      };
+    }
+
+    // Offline-Login erfolgreich
+    console.log(
+      `✅ Offline-Login erfolgreich (${daysSinceLogin}/${this.OFFLINE_TOKEN_VALIDITY_DAYS} Tage)`
+    );
+
+    this.authSubject.next({
+      username: storedData.username,
+      password: '',
+      token: storedData.token,
+    });
+    this.roleSubject.next(storedData.role);
+
+    this.isOfflineModeSubject.next(true);
+
+    return {
+      success: true,
+      isOffline: true,
+    };
+  }
+
+  // ==========================================
+  // PASSWORD HASHING (für Offline-Vergleich)
+  // ==========================================
+
+  private async hashPassword(password: string): Promise<string> {
+    // Einfacher Base64-Hash (funktioniert überall)
+    // Für Production: Server-side Hashing verwenden
+    const salted = 'bso-app-' + password + '-salt-2025';
+    return btoa(salted);
+  }
+
+  // ==========================================
+  // AUTH DATA STORAGE
+  // ==========================================
+
+  private saveAuthData(data: StoredAuthData): void {
+    try {
+      localStorage.setItem('auth-data', JSON.stringify(data));
+
+      // Legacy-Support (für alte Keys)
+      localStorage.setItem('auth-token', data.token);
+      localStorage.setItem('auth-email', data.username);
+      localStorage.setItem('role', data.role);
+    } catch (error) {
+      console.error('❌ Fehler beim Speichern der Auth-Daten:', error);
+    }
+  }
+
+  private getStoredAuthData(): StoredAuthData | null {
+    try {
+      const stored = localStorage.getItem('auth-data');
+      if (!stored) return null;
+      return JSON.parse(stored);
+    } catch (error) {
+      console.error('❌ Fehler beim Laden der Auth-Daten:', error);
+      return null;
+    }
+  }
+
+  private clearStoredAuth(): void {
+    localStorage.removeItem('auth-data');
+    localStorage.removeItem('auth-token');
+    localStorage.removeItem('auth-email');
+    localStorage.removeItem('role');
+    localStorage.removeItem('stayloggedin');
+    localStorage.removeItem('user');
+    localStorage.removeItem('password');
+  }
+
+  // ==========================================
+  // TOKEN REFRESH
+  // ==========================================
+
   private startTokenRefresh(credentials: AuthCredentials): void {
-    // Clear existing timer
     if (this.loggedInTimer) {
       clearInterval(this.loggedInTimer);
     }
 
-    // Refresh token every 5 minutes
+    // Refresh nur im Online-Modus
     this.loggedInTimer = setInterval(async () => {
+      const online = await this.isOnline();
+      if (!online) {
+        console.log('📴 Offline - Token-Refresh übersprungen');
+        return;
+      }
+
       try {
-        const refreshPayload = {
-          username: credentials.username,
-          password: credentials.password,
-        };
         const response = await this.http
-          .post<LoginResponse>(`${this.API_URL}/users/login`, refreshPayload)
+          .post<LoginResponse>(`${this.API_URL}/users/login`, {
+            username: credentials.username,
+            password: credentials.password,
+          })
+          .pipe(timeout(5000))
           .toPromise();
 
         if (response && response.token) {
@@ -150,16 +361,26 @@ export class RestService {
           auth.token = response.token;
           this.authSubject.next(auth);
           this.roleSubject.next(decoded.role);
-          localStorage.setItem('auth-token', response.token);
-          localStorage.setItem('role', decoded.role); // ← Rolle auch beim Refresh speichern
+
+          // Update gespeicherte Daten
+          const storedData = this.getStoredAuthData();
+          if (storedData) {
+            storedData.token = response.token;
+            storedData.lastOnlineLogin = new Date().toISOString();
+            this.saveAuthData(storedData);
+          }
+
           console.log('🔄 Token refreshed');
         }
       } catch (error) {
         console.error('❌ Token refresh failed:', error);
-        this.logout();
       }
-    }, 300000); // 5 minutes
+    }, 300000); // 5 Minuten
   }
+
+  // ==========================================
+  // LOGOUT
+  // ==========================================
 
   logout(): void {
     console.log('👋 Logout...');
@@ -170,13 +391,9 @@ export class RestService {
 
     this.authSubject.next({ username: '', password: '', token: '' });
     this.roleSubject.next('');
+    this.isOfflineModeSubject.next(false);
 
-    localStorage.removeItem('auth-token');
-    localStorage.removeItem('auth-email');
-    localStorage.removeItem('role'); // ← Rolle auch beim Logout entfernen
-    localStorage.removeItem('stayloggedin');
-    localStorage.removeItem('user');
-    localStorage.removeItem('password');
+    this.clearStoredAuth();
 
     this.navCtrl.navigateRoot('/login');
   }
@@ -199,13 +416,18 @@ export class RestService {
 
   isAuthenticated(): boolean {
     const token = this.getToken();
-    const isAuth = token !== '' && !this.jwtHelper.isTokenExpired(token);
-    console.log(
-      '🔐 isAuthenticated:',
-      isAuth,
-      'Token:',
-      token ? 'vorhanden' : 'fehlt'
-    );
+
+    if (!token) return false;
+
+    // Im Offline-Modus: Prüfe nur ob Token vorhanden
+    if (this.isOfflineMode()) {
+      console.log('📴 Offline-Modus: Auth OK');
+      return true;
+    }
+
+    // Im Online-Modus: Prüfe Token-Gültigkeit
+    const isAuth = !this.jwtHelper.isTokenExpired(token);
+    console.log('🔐 isAuthenticated:', isAuth);
     return isAuth;
   }
 
@@ -215,6 +437,18 @@ export class RestService {
 
   getEmail(): string {
     return this.authSubject.value.username;
+  }
+
+  canOfflineLogin(): boolean {
+    const storedData = this.getStoredAuthData();
+    return storedData?.offlineLoginEnabled || false;
+  }
+
+  getLastOnlineLogin(): Date | null {
+    const storedData = this.getStoredAuthData();
+    return storedData?.lastOnlineLogin
+      ? new Date(storedData.lastOnlineLogin)
+      : null;
   }
 
   // ==========================================
@@ -310,11 +544,9 @@ export class RestService {
   async testLogin(): Promise<{ success: boolean; error?: string }> {
     console.log('🧪 Test Login aktiviert');
 
-    // Fake Token
     const fakeToken =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoyMTQ3NDgzNjQ3fQ.placeholder';
 
-    // Setze Auth
     this.authSubject.next({
       username: 'test@bso.de',
       password: 'test123',
@@ -323,12 +555,18 @@ export class RestService {
 
     this.roleSubject.next('admin');
 
-    // Speichere im localStorage
-    localStorage.setItem('auth-token', fakeToken);
-    localStorage.setItem('auth-email', 'test@bso.de');
-    localStorage.setItem('role', 'admin'); // ← Rolle auch beim Test-Login speichern
+    const authData: StoredAuthData = {
+      token: fakeToken,
+      username: 'test@bso.de',
+      password: await this.hashPassword('test123'),
+      role: 'admin',
+      lastOnlineLogin: new Date().toISOString(),
+      offlineLoginEnabled: true,
+    };
 
-    console.log('✅ Test-Login erfolgreich');
+    this.saveAuthData(authData);
+
+    console.log('✅ Test-Login erfolgreich (Offline-Login aktiviert)');
     return { success: true };
   }
 }

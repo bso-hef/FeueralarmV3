@@ -14,3 +14,15 @@ Ergebnis: Die EC2 hat die aktuellste Version des Codes, bereinigt alte Dateien, 
 chmod +x deploy.sh
 ./deploy.sh
 ```
+
+Endpoint: 18.193.97.54
+
+Restart Frontend:                                                                                                                                           sudo chown -R $USER:$USER /var/www/Deployment/Repository/Frontend
+cd /var/www/Deployment/Repository/Frontend
+npx ng build --configuration=production
+sudo rsync -av --delete www/ /var/www/Deployment/Webserver/
+sudo nginx -t && sudo systemctl reload nginx
+npm run start
+
+Username: admin
+Passwort: Admin2024!Secure
