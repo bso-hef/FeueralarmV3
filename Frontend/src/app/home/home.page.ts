@@ -31,6 +31,7 @@ import {
   closeCircle,
   checkmarkCircle,
   searchOutline,
+  peopleOutline,
 } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
@@ -144,6 +145,7 @@ export class HomePage implements OnInit, OnDestroy {
       closeCircle,
       checkmarkCircle,
       searchOutline,
+      peopleOutline,
     });
   }
 
@@ -502,6 +504,10 @@ export class HomePage implements OnInit, OnDestroy {
   // ==========================================
   // NAVIGATION
   // ==========================================
+
+  openUserManagement(): void {
+    this.router.navigate(['/admin-users']);
+  }
 
   async openSettings(): Promise<void> {
     const modal = await this.modalCtrl.create({

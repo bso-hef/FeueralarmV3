@@ -1,0 +1,73 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Benutzer erstellen</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="modal-content">
+    <ion-list>
+      <!-- Username -->
+      <ion-item>
+        <ion-label position="stacked">Benutzername *</ion-label>
+        <ion-input
+          [(ngModel)]="userData.username"
+          type="text"
+          placeholder="z.B. max.mustermann@bso.de"
+          required
+        ></ion-input>
+      </ion-item>
+
+      <!-- Password -->
+      <ion-item>
+        <ion-label position="stacked">Passwort *</ion-label>
+        <ion-input
+          [(ngModel)]="userData.password"
+          type="password"
+          placeholder="Mindestens 6 Zeichen"
+          required
+        ></ion-input>
+      </ion-item>
+
+      <!-- Role -->
+      <ion-item>
+        <ion-label position="stacked">Rolle *</ion-label>
+        <ion-select [(ngModel)]="userData.role" interface="popover">
+          <ion-select-option value="user">Benutzer</ion-select-option>
+          <ion-select-option value="admin">Administrator</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-list>
+
+    <div class="info-box">
+      <ion-icon name="information-circle"></ion-icon>
+      <p>
+        <strong>Hinweis:</strong> Das Passwort kann nach dem Erstellen nicht
+        mehr angezeigt werden. Bitte sichere es an einem sicheren Ort.
+      </p>
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <div class="footer-buttons">
+      <ion-button expand="block" fill="clear" (click)="cancel()">
+        Abbrechen
+      </ion-button>
+      <ion-button
+        expand="block"
+        (click)="createUser()"
+        [disabled]="isSubmitting"
+      >
+        <ion-icon name="checkmark" slot="start"></ion-icon>
+        Erstellen
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>

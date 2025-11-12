@@ -48,16 +48,16 @@ export class RestService {
   private checkStoredAuth(): void {
     const token = localStorage.getItem('auth-token');
     const email = localStorage.getItem('auth-email');
+    const storedRole = localStorage.getItem('role');
 
     if (token && email && !this.jwtHelper.isTokenExpired(token)) {
       const decoded = this.jwtHelper.decodeToken(token);
+      const role = storedRole || decoded.role; // Verwende gespeicherte Rolle oder dekodiere aus Token
+
       this.authSubject.next({ username: email, password: '', token });
-      this.roleSubject.next(decoded.role);
-      console.log(
-        '✅ Gespeicherte Auth wiederhergestellt:',
-        email,
-        decoded.role
-      );
+      this.roleSubject.next(role);
+
+      console.log('✅ Gespeicherte Auth wiederhergestellt:', email, role);
     }
   }
 
@@ -92,8 +92,12 @@ export class RestService {
         // Store auth data
         localStorage.setItem('auth-token', response.token);
         localStorage.setItem('auth-email', credentials.username);
+        localStorage.setItem('role', decoded.role); // ← Rolle im localStorage speichern
 
-        console.log('💾 Auth Daten gespeichert');
+        console.log(
+          '💾 Auth Daten gespeichert (inkl. Rolle:',
+          decoded.role + ')'
+        );
 
         // Start auto-refresh
         this.startTokenRefresh(credentials);
@@ -141,10 +145,13 @@ export class RestService {
           .toPromise();
 
         if (response && response.token) {
+          const decoded = this.jwtHelper.decodeToken(response.token);
           const auth = this.authSubject.value;
           auth.token = response.token;
           this.authSubject.next(auth);
+          this.roleSubject.next(decoded.role);
           localStorage.setItem('auth-token', response.token);
+          localStorage.setItem('role', decoded.role); // ← Rolle auch beim Refresh speichern
           console.log('🔄 Token refreshed');
         }
       } catch (error) {
@@ -166,6 +173,7 @@ export class RestService {
 
     localStorage.removeItem('auth-token');
     localStorage.removeItem('auth-email');
+    localStorage.removeItem('role'); // ← Rolle auch beim Logout entfernen
     localStorage.removeItem('stayloggedin');
     localStorage.removeItem('user');
     localStorage.removeItem('password');
@@ -318,6 +326,7 @@ export class RestService {
     // Speichere im localStorage
     localStorage.setItem('auth-token', fakeToken);
     localStorage.setItem('auth-email', 'test@bso.de');
+    localStorage.setItem('role', 'admin'); // ← Rolle auch beim Test-Login speichern
 
     console.log('✅ Test-Login erfolgreich');
     return { success: true };

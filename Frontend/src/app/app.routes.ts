@@ -19,4 +19,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/login/login.page').then((m) => m.LoginPage),
   },
+  {
+    path: 'admin-users',
+    loadComponent: () =>
+      import('./pages/admin-users/admin-users.page').then(
+        (m) => m.AdminUsersPage
+      ),
+    canActivate: [authGuard],
+  },
 ];
