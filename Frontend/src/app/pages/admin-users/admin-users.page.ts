@@ -97,9 +97,24 @@ export class AdminUsersPage implements OnInit {
   }
 
   ngOnInit() {
-    // Fix: Type assertion für userId Property
+    // Get current user ID from auth token
     const authValue = this.restService.getAuthValue() as any;
-    this.currentUserId = authValue?.userId || '';
+    const token = authValue?.token || localStorage.getItem('auth-token');
+
+    if (token) {
+      try {
+        // Decode JWT Token to get userId
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decoded = JSON.parse(window.atob(base64));
+        this.currentUserId = decoded.userId || '';
+        console.log('🔑 Current User ID:', this.currentUserId);
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        this.currentUserId = '';
+      }
+    }
+
     this.loadUsers();
   }
 
@@ -197,6 +212,11 @@ export class AdminUsersPage implements OnInit {
   }
 
   async deleteUser(user: User) {
+    alert('DELETE BUTTON CLICKED FOR: ' + user.username);
+
+    console.log('🗑️ Delete User clicked:', user.username, 'ID:', user._id);
+    console.log('🔑 Current User ID:', this.currentUserId);
+
     // Verhindere selbst-löschen
     if (user._id === this.currentUserId) {
       await this.feedbackService.showWarningToast(
@@ -212,22 +232,27 @@ export class AdminUsersPage implements OnInit {
       'Abbrechen'
     );
 
+    console.log('✅ Confirmed:', confirmed);
+
     if (confirmed) {
       try {
         await this.feedbackService.showLoading('Lösche Benutzer...');
 
         this.userManagementService.deleteUser(user._id).subscribe({
-          next: async () => {
+          next: async (response) => {
+            console.log('✅ Delete Response:', response);
             await this.feedbackService.hideLoading();
             await this.feedbackService.showSuccessToast('Benutzer gelöscht!');
             await this.loadUsers();
           },
           error: async (error) => {
+            console.error('❌ Delete Error:', error);
             await this.feedbackService.hideLoading();
             await this.feedbackService.showError(error, 'Fehler beim Löschen');
           },
         });
       } catch (error) {
+        console.error('❌ Delete Catch Error:', error);
         await this.feedbackService.hideLoading();
         await this.feedbackService.showError(error, 'Fehler beim Löschen');
       }
@@ -252,6 +277,11 @@ export class AdminUsersPage implements OnInit {
 
   isCurrentUser(userId: string): boolean {
     return userId === this.currentUserId;
+  }
+
+  testMethod() {
+    alert('TEST BUTTON WORKS!');
+    console.log('🧪 TEST BUTTON CLICKED');
   }
 
   goBack() {

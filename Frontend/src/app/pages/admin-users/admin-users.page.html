@@ -26,6 +26,24 @@
     ></ion-searchbar>
   </div>
 
+  <!-- TEST BUTTON -->
+  <div style="padding: 20px; text-align: center">
+    <button
+      (click)="testMethod()"
+      style="
+        padding: 15px 30px;
+        background: red;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+      "
+    >
+      🧪 TEST BUTTON
+    </button>
+  </div>
+
   <!-- Loading State -->
   <div class="loading-state" *ngIf="isLoading">
     <ion-spinner name="crescent"></ion-spinner>
