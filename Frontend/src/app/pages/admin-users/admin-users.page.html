@@ -1,0 +1,108 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Benutzerverwaltung</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Search Bar -->
+  <div class="search-section">
+    <ion-searchbar
+      [(ngModel)]="searchTerm"
+      (ionInput)="onSearch()"
+      (ionClear)="onSearch()"
+      placeholder="Benutzer suchen..."
+      animated
+    ></ion-searchbar>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Lade Benutzer...</p>
+  </div>
+
+  <!-- User List -->
+  <div class="users-container" *ngIf="!isLoading">
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredUsers.length === 0">
+      <ion-icon name="search-outline"></ion-icon>
+      <h3>Keine Benutzer gefunden</h3>
+      <p *ngIf="searchTerm">Versuche einen anderen Suchbegriff</p>
+      <p *ngIf="!searchTerm">Noch keine Benutzer vorhanden</p>
+    </div>
+
+    <!-- User Cards -->
+    <ion-list *ngIf="filteredUsers.length > 0">
+      <ion-item
+        *ngFor="let user of filteredUsers"
+        lines="full"
+        class="user-item"
+      >
+        <ion-icon
+          [name]="getRoleIcon(user.role)"
+          slot="start"
+          [color]="getRoleColor(user.role)"
+        ></ion-icon>
+
+        <ion-label>
+          <h2>{{ user.username }}</h2>
+          <p>
+            <ion-badge [color]="getRoleColor(user.role)">
+              {{ getRoleLabel(user.role) }}
+            </ion-badge>
+            <ion-badge color="medium" *ngIf="isCurrentUser(user._id)">
+              Du
+            </ion-badge>
+          </p>
+        </ion-label>
+
+        <!-- Actions -->
+        <ion-button
+          slot="end"
+          fill="clear"
+          (click)="editUser(user)"
+          class="action-button"
+        >
+          <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+
+        <ion-button
+          slot="end"
+          fill="clear"
+          color="danger"
+          (click)="deleteUser(user)"
+          [disabled]="isCurrentUser(user._id)"
+          class="action-button"
+        >
+          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-item>
+    </ion-list>
+
+    <!-- User Count -->
+    <div class="user-count" *ngIf="filteredUsers.length > 0">
+      <p>
+        {{ filteredUsers.length }} von {{ users.length }} Benutzer{{
+        users.length !== 1 ? "n" : "" }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Floating Action Button -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="createUser()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

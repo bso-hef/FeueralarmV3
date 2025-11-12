@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Benutzer bearbeiten</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="modal-content">
+    <ion-list>
+      <!-- Username -->
+      <ion-item>
+        <ion-label position="stacked">Benutzername *</ion-label>
+        <ion-input
+          [(ngModel)]="updateData.username"
+          type="text"
+          placeholder="Benutzername"
+          required
+        ></ion-input>
+      </ion-item>
+
+      <!-- Role -->
+      <ion-item>
+        <ion-label position="stacked">Rolle *</ion-label>
+        <ion-select [(ngModel)]="updateData.role" interface="popover">
+          <ion-select-option value="user">Benutzer</ion-select-option>
+          <ion-select-option value="admin">Administrator</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!-- Change Password Toggle -->
+      <ion-item>
+        <ion-label>Passwort ändern</ion-label>
+        <ion-toggle
+          [(ngModel)]="changePassword"
+          (ionChange)="onPasswordToggleChange()"
+        ></ion-toggle>
+      </ion-item>
+
+      <!-- New Password (conditional) -->
+      <ion-item *ngIf="changePassword">
+        <ion-label position="stacked">Neues Passwort *</ion-label>
+        <ion-input
+          [(ngModel)]="updateData.password"
+          type="password"
+          placeholder="Mindestens 6 Zeichen"
+          required
+        ></ion-input>
+      </ion-item>
+    </ion-list>
+
+    <div class="info-box" *ngIf="changePassword">
+      <ion-icon name="warning"></ion-icon>
+      <p>
+        <strong>Achtung:</strong> Das neue Passwort wird sofort aktiv und kann
+        nicht mehr angezeigt werden. Bitte informiere den Benutzer über das neue
+        Passwort.
+      </p>
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <div class="footer-buttons">
+      <ion-button expand="block" fill="clear" (click)="cancel()">
+        Abbrechen
+      </ion-button>
+      <ion-button
+        expand="block"
+        (click)="updateUser()"
+        [disabled]="isSubmitting"
+      >
+        <ion-icon name="checkmark" slot="start"></ion-icon>
+        Speichern
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>
