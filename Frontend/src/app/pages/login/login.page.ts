@@ -87,17 +87,12 @@ export class LoginPage implements OnInit {
   async ngOnInit() {
     this.themeIcon = this.themeService.getThemeIcon();
 
-    // Prüfe Online-Status
+    // Prüfe Online-Status nur einmal beim Laden
     this.checkOnlineStatus();
 
     // Prüfe ob Offline-Login möglich ist
     this.canOfflineLogin = this.restService.canOfflineLogin();
     this.lastOnlineLogin = this.restService.getLastOnlineLogin();
-
-    // Online-Status regelmäßig prüfen
-    setInterval(() => {
-      this.checkOnlineStatus();
-    }, 5000);
   }
 
   private async checkOnlineStatus() {

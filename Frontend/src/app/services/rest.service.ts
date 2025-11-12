@@ -323,14 +323,10 @@ export class RestService {
   // ==========================================
 
   private async hashPassword(password: string): Promise<string> {
-    // Simple SHA-256 Hash
-    const msgBuffer = new TextEncoder().encode(password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-    return hashHex;
+    // Einfacher Base64-Hash (funktioniert überall)
+    // Für Production: Server-side Hashing verwenden
+    const salted = 'bso-app-' + password + '-salt-2025';
+    return btoa(salted);
   }
 
   // ==========================================
