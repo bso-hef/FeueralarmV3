@@ -219,44 +219,29 @@ export class AdminUsersPage implements OnInit {
 
     // Verhindere selbst-löschen
     if (user._id === this.currentUserId) {
+      alert('Das bist du selbst - nicht erlaubt!');
       await this.feedbackService.showWarningToast(
         'Du kannst dich nicht selbst löschen!'
       );
       return;
     }
 
-    const confirmed = await this.feedbackService.showConfirm(
-      'Benutzer löschen',
-      `Möchtest du den Benutzer "${user.username}" wirklich löschen?`,
-      'Löschen',
-      'Abbrechen'
-    );
+    // DIREKT LÖSCHEN OHNE CONFIRM (ZUM TESTEN)
+    console.log('⏳ Starte DELETE Request...');
 
-    console.log('✅ Confirmed:', confirmed);
-
-    if (confirmed) {
-      try {
-        await this.feedbackService.showLoading('Lösche Benutzer...');
-
-        this.userManagementService.deleteUser(user._id).subscribe({
-          next: async (response) => {
-            console.log('✅ Delete Response:', response);
-            await this.feedbackService.hideLoading();
-            await this.feedbackService.showSuccessToast('Benutzer gelöscht!');
-            await this.loadUsers();
-          },
-          error: async (error) => {
-            console.error('❌ Delete Error:', error);
-            await this.feedbackService.hideLoading();
-            await this.feedbackService.showError(error, 'Fehler beim Löschen');
-          },
-        });
-      } catch (error) {
-        console.error('❌ Delete Catch Error:', error);
-        await this.feedbackService.hideLoading();
+    this.userManagementService.deleteUser(user._id).subscribe({
+      next: async (response) => {
+        console.log('✅ Delete Response:', response);
+        alert('SUCCESS: User wurde gelöscht!');
+        await this.feedbackService.showSuccessToast('Benutzer gelöscht!');
+        await this.loadUsers();
+      },
+      error: async (error) => {
+        console.error('❌ Delete Error:', error);
+        alert('ERROR: ' + error.message);
         await this.feedbackService.showError(error, 'Fehler beim Löschen');
-      }
-    }
+      },
+    });
   }
 
   // ==========================================
