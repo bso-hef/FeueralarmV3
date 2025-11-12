@@ -64,19 +64,39 @@ export class RestService {
       return false;
     }
 
-    // Dann Server-Erreichbarkeit testen
+    // Server-Erreichbarkeit testen (ohne speziellen Ping-Endpoint)
     try {
-      const response = await this.http
-        .get(`${this.API_URL}/users/ping`, {
-          headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
-        })
-        .pipe(timeout(3000))
-        .toPromise();
+      // Versuche eine einfache HEAD-Anfrage an die API
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-      console.log('🟢 Server erreichbar');
+      const response = await fetch(`${this.API_URL}/users/login`, {
+        method: 'HEAD',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      // Auch 401/404 bedeutet: Server ist erreichbar!
+      console.log('🟢 Server erreichbar (Status:', response.status, ')');
       return true;
-    } catch (error) {
-      console.log('🔴 Server nicht erreichbar:', error);
+    } catch (error: any) {
+      // AbortError = Timeout
+      if (error.name === 'AbortError') {
+        console.log('🔴 Server Timeout');
+        return false;
+      }
+
+      // TypeError = Network Error (CORS, keine Verbindung)
+      if (error.name === 'TypeError') {
+        console.log('🔴 Network Error - Server nicht erreichbar');
+        return false;
+      }
+
+      console.log('🔴 Server nicht erreichbar:', error.name);
       return false;
     }
   }
