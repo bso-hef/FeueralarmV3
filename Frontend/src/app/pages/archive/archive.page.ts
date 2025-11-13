@@ -65,6 +65,7 @@ export class ArchivePage implements OnInit {
   filteredAlarms: AlarmData[] = [];
   filterStatus: 'all' | 'active' | 'archived' = 'all';
   isLoading = true;
+  loadedFromCache = false;
 
   // Stats
   get activeAlarmsCount(): number {
@@ -100,30 +101,47 @@ export class ArchivePage implements OnInit {
   }
 
   // ==========================================
-  // DATA LOADING
+  // DATA LOADING WITH LOCAL STORAGE
   // ==========================================
 
   async loadAlarms() {
     try {
       this.isLoading = true;
 
-      this.alarmService.getAllAlarms().subscribe({
-        next: (response: any) => {
-          console.log('✅ Alarme geladen:', response);
-          this.alarms = response.alerts;
-          this.applyFilter();
-          this.isLoading = false;
-        },
-        error: async (error: any) => {
-          console.error('❌ Fehler beim Laden der Alarme:', error);
-          this.isLoading = false;
-          await this.feedbackService.showError(
-            error,
-            'Fehler beim Laden der Alarme'
-          );
-        },
-      });
+      // 1️⃣ SCHRITT: Versuche erst aus dem Cache zu laden (schnell!)
+      const cachedAlarms = this.alarmService.getAlarmsFromLocalStorage();
+      const isCacheValid = this.alarmService.isCacheValid();
+
+      if (cachedAlarms && isCacheValid) {
+        console.log('⚡ Verwende gecachte Alarme (Cache ist noch gültig)');
+        this.alarms = cachedAlarms;
+        this.applyFilter();
+        this.isLoading = false;
+        this.loadedFromCache = true;
+
+        // Zeige kurzen Hinweis
+        await this.feedbackService.showInfoToast('Alarme aus Cache geladen');
+
+        // Optional: Trotzdem im Hintergrund aktualisieren
+        this.loadAlarmsFromServer(false);
+      } else if (cachedAlarms && !isCacheValid) {
+        console.log(
+          '⏱️ Cache ist abgelaufen, zeige alte Daten und aktualisiere'
+        );
+        this.alarms = cachedAlarms;
+        this.applyFilter();
+        this.isLoading = false;
+        this.loadedFromCache = true;
+
+        // Lade neue Daten vom Server
+        this.loadAlarmsFromServer(true);
+      } else {
+        console.log('🌐 Kein Cache vorhanden, lade vom Server');
+        // Kein Cache vorhanden, direkt vom Server laden
+        this.loadAlarmsFromServer(true);
+      }
     } catch (error) {
+      console.error('❌ Fehler beim Laden:', error);
       this.isLoading = false;
       await this.feedbackService.showError(
         error,
@@ -132,13 +150,59 @@ export class ArchivePage implements OnInit {
     }
   }
 
+  // 2️⃣ SCHRITT: Vom Server laden
+  private loadAlarmsFromServer(showLoading: boolean = true) {
+    if (showLoading && !this.loadedFromCache) {
+      this.isLoading = true;
+    }
+
+    this.alarmService.getAllAlarms().subscribe({
+      next: (response: any) => {
+        console.log('✅ Alarme vom Server geladen:', response);
+
+        this.alarms = response.alerts;
+        this.applyFilter();
+        this.isLoading = false;
+        this.loadedFromCache = false;
+
+        // Automatisch im LocalStorage gespeichert durch tap() in service
+        console.log('💾 Alarme wurden automatisch im Cache gespeichert');
+      },
+      error: async (error: any) => {
+        console.error('❌ Fehler beim Laden vom Server:', error);
+
+        // Wenn wir Cache haben, verwenden wir den weiter
+        if (this.loadedFromCache) {
+          await this.feedbackService.showWarningToast(
+            'Keine Verbindung zum Server, zeige gecachte Daten'
+          );
+        } else {
+          this.isLoading = false;
+          await this.feedbackService.showError(
+            error,
+            'Fehler beim Laden der Alarme'
+          );
+        }
+      },
+    });
+  }
+
   async doRefresh(event: any) {
+    console.log('🔄 Pull-to-Refresh ausgelöst');
+
+    // Cache löschen für erzwungenes Neuladen
+    this.alarmService.clearCache();
+
     await this.loadAlarms();
     event.target.complete();
   }
 
   async refreshAlarms() {
     await this.feedbackService.showLoading('Aktualisiere...');
+
+    // Cache löschen
+    this.alarmService.clearCache();
+
     await this.loadAlarms();
     await this.feedbackService.hideLoading();
     await this.feedbackService.showSuccessToast('Alarme aktualisiert!');

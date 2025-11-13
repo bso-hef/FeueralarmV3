@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { RestService } from './rest.service';
 
@@ -47,6 +48,9 @@ export interface AlarmDetailResponse {
 })
 export class AlarmService {
   private readonly API_URL = environment.apiUrl;
+  private readonly STORAGE_KEY = 'feueralarm_cached_alarms';
+  private readonly STORAGE_TIMESTAMP_KEY = 'feueralarm_cached_alarms_timestamp';
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 Minuten
 
   constructor(private http: HttpClient, private restService: RestService) {}
 
@@ -57,17 +61,102 @@ export class AlarmService {
     });
   }
 
+  // ==========================================
+  // LOCAL STORAGE METHODS
+  // ==========================================
+
+  /**
+   * Speichert Alarme im LocalStorage
+   */
+  saveAlarmsToLocalStorage(alarms: Alarm[]): void {
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(alarms));
+      localStorage.setItem(
+        this.STORAGE_TIMESTAMP_KEY,
+        new Date().getTime().toString()
+      );
+      console.log('💾 Alarme im LocalStorage gespeichert:', alarms.length);
+    } catch (error) {
+      console.error('❌ Fehler beim Speichern im LocalStorage:', error);
+    }
+  }
+
+  /**
+   * Lädt Alarme aus dem LocalStorage
+   */
+  getAlarmsFromLocalStorage(): Alarm[] | null {
+    try {
+      const cached = localStorage.getItem(this.STORAGE_KEY);
+      if (cached) {
+        const alarms = JSON.parse(cached);
+        console.log('📦 Alarme aus LocalStorage geladen:', alarms.length);
+        return alarms;
+      }
+      return null;
+    } catch (error) {
+      console.error('❌ Fehler beim Laden aus LocalStorage:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Prüft ob Cache noch gültig ist
+   */
+  isCacheValid(): boolean {
+    try {
+      const timestamp = localStorage.getItem(this.STORAGE_TIMESTAMP_KEY);
+      if (!timestamp) return false;
+
+      const cacheAge = new Date().getTime() - parseInt(timestamp);
+      const isValid = cacheAge < this.CACHE_DURATION;
+
+      console.log(
+        `🕐 Cache-Alter: ${Math.round(cacheAge / 1000)}s, Gültig: ${isValid}`
+      );
+      return isValid;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Löscht Cache
+   */
+  clearCache(): void {
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+      localStorage.removeItem(this.STORAGE_TIMESTAMP_KEY);
+      console.log('🗑️ Cache gelöscht');
+    } catch (error) {
+      console.error('❌ Fehler beim Löschen des Cache:', error);
+    }
+  }
+
+  // ==========================================
+  // API METHODS
+  // ==========================================
+
   /**
    * Alle Alarme abrufen mit Pagination
+   * Speichert automatisch im LocalStorage
    */
   getAllAlarms(
     page: number = 1,
     limit: number = 50
   ): Observable<AlarmListResponse> {
-    return this.http.get<AlarmListResponse>(
-      `${this.API_URL}/alerts?page=${page}&limit=${limit}`,
-      { headers: this.getHeaders() }
-    );
+    return this.http
+      .get<AlarmListResponse>(
+        `${this.API_URL}/alerts?page=${page}&limit=${limit}`,
+        { headers: this.getHeaders() }
+      )
+      .pipe(
+        tap((response) => {
+          // Automatisch im LocalStorage speichern
+          if (response.success && response.alerts) {
+            this.saveAlarmsToLocalStorage(response.alerts);
+          }
+        })
+      );
   }
 
   /**
@@ -98,6 +187,10 @@ export class AlarmService {
       { headers: this.getHeaders() }
     );
   }
+
+  // ==========================================
+  // HELPER METHODS
+  // ==========================================
 
   /**
    * Formatiert Datum für Anzeige
