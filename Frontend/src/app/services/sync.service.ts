@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, Injector } from '@angular/core';
 import { BehaviorSubject, Observable, fromEvent, merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { RestService } from './rest.service';
@@ -48,10 +48,28 @@ export class SyncService {
   private lastSyncSubject = new BehaviorSubject<Date | null>(null);
   private pendingActionsSubject = new BehaviorSubject<number>(0);
 
-  constructor(
-    private restService: RestService,
-    private socketService: SocketService
-  ) {
+  // SocketService optional
+  private socketService?: SocketService;
+
+  constructor(private restService: RestService) {
+    // Socket Service optional injizieren
+    try {
+      const injector = inject(Injector);
+      this.socketService = injector.get(SocketService, null) ?? undefined;
+      if (this.socketService) {
+        console.log('✅ SocketService in SyncService verfügbar');
+      } else {
+        console.warn(
+          '⚠️ SocketService nicht verfügbar - SyncService läuft ohne Socket'
+        );
+      }
+    } catch (error) {
+      console.warn(
+        '⚠️ SocketService konnte nicht in SyncService geladen werden:',
+        error
+      );
+    }
+
     this.initDatabase();
     this.loadSyncQueue();
     this.loadCachedPosts();
@@ -138,8 +156,8 @@ export class SyncService {
   private async handleNetworkReconnect(): Promise<void> {
     console.log('🔄 Netzwerk wiederhergestellt - starte Synchronisation...');
 
-    // 1. Versuche Socket-Reconnect
-    if (!this.socketService.isSocketConnected()) {
+    // 1. Versuche Socket-Reconnect (nur wenn verfügbar)
+    if (this.socketService && !this.socketService.isSocketConnected()) {
       try {
         await this.socketService.connect();
         console.log('✅ Socket verbunden');
@@ -421,9 +439,9 @@ export class SyncService {
   private async syncUpdateAction(action: SyncAction): Promise<void> {
     const { postId, status, comment } = action.data;
 
-    if (this.socketService.isSocketConnected()) {
+    if (this.socketService?.isSocketConnected()) {
       // Via Socket
-      this.socketService.updatePost(postId, status, comment);
+      await this.socketService.updatePost(postId, status, comment);
       // Warte kurz für Socket-Bestätigung
       await this.delay(500);
     } else {
@@ -442,9 +460,9 @@ export class SyncService {
   private async syncCommentAction(action: SyncAction): Promise<void> {
     const { postId, comment } = action.data;
 
-    if (this.socketService.isSocketConnected()) {
+    if (this.socketService?.isSocketConnected()) {
       // Via Socket
-      this.socketService.updateComment(postId, comment);
+      await this.socketService.updateComment(postId, comment);
       await this.delay(500);
     } else {
       // Via REST API
@@ -458,7 +476,7 @@ export class SyncService {
     console.log('🔄 Aktualisiere Daten vom Server...');
 
     try {
-      if (this.socketService.isSocketConnected()) {
+      if (this.socketService?.isSocketConnected()) {
         // Via Socket
         this.socketService.getPosts();
         await this.delay(1000);
