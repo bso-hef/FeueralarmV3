@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const checkAuth = require("../middleware/check-auth"); // ← KORRIGIERT
-const s3Service = require("../services/s3.service");
+const s3Service = require("../service/s3.service");
 const Post = require("../models/post"); // Dein Teacher/Post Model
 
 /**
