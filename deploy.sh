@@ -7,7 +7,7 @@ APP_ROOT="/var/www/Deployment"
 REPO_DIR="$APP_ROOT/Repository"
 FRONTEND_DIR="$REPO_DIR/Frontend"
 WEBROOT="$FRONTEND_DIR/www"                   # Webserver zeigt DIREKT hierhin
-BRANCH="UAP-3.3.2-Sync-bei-Netzverfügbarkeit"
+BRANCH="UAP-4.2.2-Fotos-&-Notizen-anhängen"
 REPO_SSH="git@github.com:MarlonH05/FeueralarmV3.git"
 
 echo "==> Check SSH-Verbindung zu $REMOTE"

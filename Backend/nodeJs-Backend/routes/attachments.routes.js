@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const { authenticateToken } = require("../middleware/auth");
+const checkAuth = require("../middleware/check-auth"); // ← KORRIGIERT
 const s3Service = require("../services/s3.service");
-const Post = require("../models/Post"); // Dein Teacher/Post Model
+const Post = require("../models/post"); // Dein Teacher/Post Model
 
 /**
  * POST /api/teachers/:id/photos
  * Upload ein Foto für einen Teacher
  */
-router.post("/:id/photos", authenticateToken, async (req, res) => {
+router.post("/:id/photos", checkAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { photo, filename } = req.body;
@@ -35,7 +35,7 @@ router.post("/:id/photos", authenticateToken, async (req, res) => {
       filename: filename || "photo.jpg",
       mimeType: "image/jpeg",
       uploadedAt: new Date().toISOString(),
-      uploadedBy: req.user.userId,
+      uploadedBy: req.userData.userId,
     };
 
     // Update Post/Teacher mit neuem Attachment
@@ -64,7 +64,7 @@ router.post("/:id/photos", authenticateToken, async (req, res) => {
  * POST /api/teachers/:id/files
  * Upload eine Datei für einen Teacher
  */
-router.post("/:id/files", authenticateToken, async (req, res) => {
+router.post("/:id/files", checkAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { file, filename, mimeType } = req.body;
@@ -96,7 +96,7 @@ router.post("/:id/files", authenticateToken, async (req, res) => {
       mimeType: mimeType || s3Service.getMimeTypeFromFilename(filename),
       size: fileBuffer.length,
       uploadedAt: new Date().toISOString(),
-      uploadedBy: req.user.userId,
+      uploadedBy: req.userData.userId,
     };
 
     // Update Post/Teacher mit neuem Attachment
@@ -125,7 +125,7 @@ router.post("/:id/files", authenticateToken, async (req, res) => {
  * GET /api/teachers/:id/attachments
  * Lade alle Attachments für einen Teacher
  */
-router.get("/:id/attachments", authenticateToken, async (req, res) => {
+router.get("/:id/attachments", checkAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -155,7 +155,7 @@ router.get("/:id/attachments", authenticateToken, async (req, res) => {
  * DELETE /api/teachers/:id/attachments/:attachmentId
  * Lösche ein Attachment
  */
-router.delete("/:id/attachments/:attachmentId", authenticateToken, async (req, res) => {
+router.delete("/:id/attachments/:attachmentId", checkAuth, async (req, res) => {
   try {
     const { id, attachmentId } = req.params;
 
