@@ -1,6 +1,7 @@
 {
   "name": "Frontend",
   "version": "0.0.1",
+  "main": "electron.js",
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
   "scripts": {
@@ -9,7 +10,11 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "electron": "electron .",
+    "electron:dev": "concurrently \"ng serve\" \"wait-on http://localhost:8100 && electron .\"",
+    "electron:build": "ng build --configuration production && electron-builder build --win",
+    "electron:build:all": "ng build --configuration production && electron-builder build --win --x64 --ia32"
   },
   "private": true,
   "dependencies": {
@@ -56,6 +61,9 @@
     "@types/socket.io-client": "^1.4.36",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
+    "concurrently": "^9.2.1",
+    "electron": "^39.2.0",
+    "electron-builder": "^26.0.12",
     "eslint": "^9.16.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsdoc": "^48.2.1",
@@ -67,7 +75,36 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.5.0"
+    "typescript": "~5.5.0",
+    "wait-on": "^9.0.3"
   },
-  "description": "An Ionic project"
+  "description": "An Ionic project",
+  "build": {
+    "appId": "de.bso.feueralarm",
+    "productName": "Feueralarm BSO",
+    "directories": {
+      "output": "dist-electron",
+      "buildResources": "build"
+    },
+    "files": [
+      "www/**/*",
+      "electron.js"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "src/assets/icon/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "Feueralarm-BSO-Portable.exe"
+    }
+  }
 }
