@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { RestService } from './rest.service';
+import { SyncService } from './sync.service'; // ← NEU
 import { Archive } from '../interfaces/archive.interface';
 
 import { environment } from '../../environments/environment';
@@ -18,7 +19,11 @@ export class SocketService {
   private isConnected = false;
   private isFetched = false;
 
-  constructor(private socket: Socket, private restService: RestService) {}
+  constructor(
+    private socket: Socket,
+    private restService: RestService,
+    private syncService: SyncService // ← NEU
+  ) {}
 
   // ==========================================
   // CONNECTION MANAGEMENT
@@ -50,9 +55,17 @@ export class SocketService {
     const socketAny = this.socket as any;
 
     // Connection events
-    socketAny.on('connect', () => {
+    socketAny.on('connect', async () => {
+      // ← GEÄNDERT: async
       console.log('✅ Socket connected');
       this.isConnected = true;
+
+      // *** NEU: Sync nach Reconnect ***
+      try {
+        await this.syncService.syncOfflineChanges();
+      } catch (error) {
+        console.error('❌ Sync fehlgeschlagen:', error);
+      }
     });
 
     socketAny.on('disconnect', (reason: string) => {
@@ -141,7 +154,20 @@ export class SocketService {
     this.socket.emit('fetchPosts', { alertId: alertId || null });
   }
 
-  updatePost(id: string, status?: string, comment?: string): void {
+  async updatePost(
+    id: string,
+    status?: string,
+    comment?: string
+  ): Promise<void> {
+    // ← GEÄNDERT: async Promise
+    // *** NEU: Offline-Check ***
+    if (!this.syncService.isOnline()) {
+      console.log('📴 Offline - speichere in Queue');
+      await this.syncService.queueUpdate(id, status, comment);
+      return;
+    }
+
+    // Online: Normal senden
     console.log('📤 Updating post:', id, status, comment);
     const payload: any = { id };
     if (status) payload.status = status;
@@ -150,7 +176,16 @@ export class SocketService {
     this.socket.emit('updatePost', payload);
   }
 
-  updateComment(id: string, comment: string): void {
+  async updateComment(id: string, comment: string): Promise<void> {
+    // ← GEÄNDERT: async Promise
+    // *** NEU: Offline-Check ***
+    if (!this.syncService.isOnline()) {
+      console.log('📴 Offline - speichere Kommentar in Queue');
+      await this.syncService.queueComment(id, comment);
+      return;
+    }
+
+    // Online: Normal senden
     console.log('📤 Updating comment:', id, comment);
     this.socket.emit('updatePost', {
       id,

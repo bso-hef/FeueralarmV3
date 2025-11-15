@@ -2,6 +2,15 @@
   <ion-toolbar>
     <ion-title>Feueralarm</ion-title>
     <ion-buttons slot="end">
+      <!-- *** NEU: Online/Offline Status *** -->
+      <ion-chip
+        [color]="isOnline ? 'success' : 'danger'"
+        style="margin-right: 8px"
+      >
+        <ion-icon [name]="isOnline ? 'wifi' : 'cloud-offline'"></ion-icon>
+        <ion-label>{{ isOnline ? 'Online' : 'Offline' }}</ion-label>
+      </ion-chip>
+
       <!-- Admin User Management Button -->
       <ion-button *ngIf="isAdmin" (click)="openUserManagement()">
         <ion-icon name="people-outline" slot="icon-only"></ion-icon>
@@ -21,6 +30,48 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <!-- *** NEU: Sync-Status Banner (nur wenn offline oder pending) *** -->
+  <ion-card
+    *ngIf="!isOnline || pendingActions > 0"
+    color="warning"
+    style="margin: 8px"
+  >
+    <ion-card-content>
+      <div style="display: flex; align-items: center; gap: 12px">
+        <ion-icon
+          [name]="isSyncing ? 'sync-outline' : 'cloud-offline'"
+          size="large"
+        ></ion-icon>
+        <div style="flex: 1">
+          <strong *ngIf="!isOnline">Offline-Modus</strong>
+          <strong *ngIf="isOnline && pendingActions > 0"
+            >{{ pendingActions }} ausstehende Änderungen</strong
+          >
+          <p style="margin: 4px 0 0 0; font-size: 0.9em">
+            <span *ngIf="!isOnline">Änderungen werden lokal gespeichert</span>
+            <span *ngIf="isOnline && pendingActions > 0"
+              >Klicke auf Sync um zu synchronisieren</span
+            >
+          </p>
+        </div>
+        <ion-button
+          *ngIf="isOnline && pendingActions > 0"
+          (click)="forceSyncNow()"
+          [disabled]="isSyncing"
+          size="small"
+        >
+          <ion-icon slot="start" name="sync-outline"></ion-icon>
+          {{ isSyncing ? 'Syncing...' : 'Sync' }}
+        </ion-button>
+      </div>
+      <ion-progress-bar
+        *ngIf="isSyncing"
+        type="indeterminate"
+        style="margin-top: 8px"
+      ></ion-progress-bar>
+    </ion-card-content>
+  </ion-card>
+
   <!-- Admin: Feueralarm Button -->
   <div class="alarm-section" *ngIf="isAdmin">
     <div class="alarm-controls">

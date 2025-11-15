@@ -9,6 +9,7 @@ import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
+import { SyncService } from './services/sync.service'; // ← NEU
 
 const socketConfig: SocketIoConfig = {
   url: environment.socketUrl,
@@ -24,5 +25,6 @@ export const appConfig: ApplicationConfig = {
     provideIonicAngular(),
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(SocketIoModule.forRoot(socketConfig)),
+    SyncService, // ← NEU
   ],
 };
