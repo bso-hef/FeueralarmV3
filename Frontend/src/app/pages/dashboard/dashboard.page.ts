@@ -97,6 +97,15 @@ interface DashboardStats {
     IonRow,
     IonCol,
   ],
+  // ✅ NEU: Providers hinzugefügt für Standalone Component
+  providers: [
+    AlarmService,
+    SocketService,
+    SyncService,
+    RestService,
+    FeedbackService,
+    DataService,
+  ],
 })
 export class DashboardPage implements OnInit, OnDestroy {
   // Data
@@ -145,6 +154,8 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    console.log('🎯 Dashboard ngOnInit gestartet');
+
     // Prüfe ob User Admin/Verwaltung ist
     await this.checkAdminAccess();
 
@@ -170,6 +181,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   private async checkAdminAccess() {
     // Hole Role direkt aus localStorage (nicht Observable)
     const role = localStorage.getItem('role');
+    console.log('🔐 Dashboard - User Role:', role);
 
     if (role !== 'admin' && role !== 'verwaltung') {
       console.warn('⚠️ Kein Admin-Zugriff - Weiterleitung zu Home');
@@ -187,6 +199,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   async loadDashboardData() {
     try {
       this.isLoading = true;
+      console.log('📊 Lade Dashboard-Daten...');
 
       // Lade alle Alarme
       const response = await this.alarmService.getAllAlarms(1, 100).toPromise();
@@ -194,6 +207,8 @@ export class DashboardPage implements OnInit, OnDestroy {
       if (response && response.alerts) {
         // Nur aktive Alarme
         this.activeAlarms = response.alerts.filter((a) => !a.archived);
+
+        console.log(`✅ ${this.activeAlarms.length} aktive Alarme geladen`);
 
         // Berechne Statistiken
         this.calculateStats();
