@@ -16,7 +16,7 @@ ssh -o BatchMode=yes "$REMOTE" 'echo ok' >/dev/null
 echo "==> Repo aktualisieren (Branch: $BRANCH)"
 ssh "$REMOTE" "set -e; \
   if [ -d '$REPO_DIR/.git' ]; then \
-    cd '$REPO_DIR' && git fetch --all && git checkout '$BRANCH' && git reset --hard origin/'$BRANCH' && git clean -fd && git pull --ff-only; \
+    cd '$REPO_DIR' && git fetch --all && git reset --hard HEAD && git clean -fd && git checkout '$BRANCH' && git reset --hard origin/'$BRANCH' && git pull --ff-only; \
   else \
     mkdir -p '$APP_ROOT' && cd '$APP_ROOT' && git clone '$REPO_SSH' 'Repository'; \
     cd '$REPO_DIR' && git checkout '$BRANCH'; \
