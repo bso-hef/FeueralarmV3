@@ -42,4 +42,10 @@ export const routes: Routes = [
       import('./pages/dashboard/dashboard.page').then((m) => m.DashboardPage),
     canActivate: [authGuard], // Nur für eingeloggte User - Admin-Check ist in der Komponente
   },
+  {
+    path: 'audit-logs',
+    loadComponent: () =>
+      import('./pages/audit-logs/audit-logs.page').then((m) => m.AuditLogsPage),
+    canActivate: [authGuard], // UAP 9.3.2: Audit-Logs Ansicht
+  },
 ];

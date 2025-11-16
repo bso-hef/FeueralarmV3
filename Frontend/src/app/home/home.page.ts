@@ -41,6 +41,7 @@ import {
   wifi,
   cloudOffline,
   syncOutline,
+  documentTextOutline,
 } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
@@ -172,6 +173,7 @@ export class HomePage implements OnInit, OnDestroy {
       wifi,
       cloudOffline,
       syncOutline,
+      documentTextOutline,
     });
   }
 
@@ -724,6 +726,12 @@ export class HomePage implements OnInit, OnDestroy {
   openDashboard(): void {
     console.log('🎯 Opening Dashboard...');
     this.router.navigate(['/dashboard']);
+  }
+
+  // ✅ Audit-Logs-Navigation (nur für Admin/Verwaltung)
+  openAuditLogs(): void {
+    console.log('📋 Opening Audit-Logs...');
+    this.router.navigate(['/audit-logs']);
   }
 
   async openSettings(): Promise<void> {

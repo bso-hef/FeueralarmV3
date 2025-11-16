@@ -2,6 +2,7 @@ const Post = require("../models/post");
 const Alert = require("../models/alert");
 const untis = require("../untis/requests");
 const permission = require("../middleware/check-permission");
+const auditService = require("../service/audit.service");
 
 /**
  * DSGVO UAP9.1.2: Validiert Kommentare auf personenbezogene Daten
@@ -137,6 +138,9 @@ exports.updatePost = async (data) => {
   let id = data.id;
   let status = data.status;
   let comment = data.comment;
+  // UAP 9.3.1: User-Informationen für Audit-Logging
+  let userId = data.userId;
+  let username = data.username;
 
   // DSGVO UAP9.1.2: Validiere Kommentar auf personenbezogene Daten
   if (comment && comment.trim().length > 0) {
@@ -169,6 +173,10 @@ exports.updatePost = async (data) => {
         posts: [],
       };
 
+    // UAP 9.3.1: Alte Werte für Audit-Log speichern
+    const oldStatus = post.status;
+    const oldComment = post.comment;
+
     let time = new Date();
     time.setHours(time.getHours() + 1);
 
@@ -185,6 +193,36 @@ exports.updatePost = async (data) => {
         // NEU: Stats aktualisieren
         const AlertController = require("./alerts");
         await AlertController.updateAlertStats(post.alert);
+
+        // UAP 9.3.1: Audit-Logging für Status-Änderung
+        if (status && status !== oldStatus && userId && username) {
+          await auditService.logStatusChange({
+            userId,
+            username,
+            postId: post._id,
+            oldStatus,
+            newStatus: status,
+            alertId: post.alert,
+            className: post.class?.name,
+            classNumber: post.class?.number,
+          });
+        }
+
+        // UAP 9.3.1: Audit-Logging für Kommentar-Änderung
+        if (comment && comment !== oldComment && userId && username) {
+          const action = oldComment ? "comment_updated" : "comment_added";
+          await auditService.logCommentChange({
+            userId,
+            username,
+            postId: post._id,
+            oldComment,
+            newComment: comment,
+            action,
+            alertId: post.alert,
+            className: post.class?.name,
+            classNumber: post.class?.number,
+          });
+        }
 
         return {
           success: true,
