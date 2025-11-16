@@ -7,7 +7,7 @@ APP_ROOT="/var/www/Deployment"
 REPO_DIR="$APP_ROOT/Repository"
 FRONTEND_DIR="$REPO_DIR/Frontend"
 WEBROOT="$FRONTEND_DIR/www"                   # Webserver zeigt DIREKT hierhin
-BRANCH="UAP-4.2.2-Fotos-&-Notizen-anhängen"
+BRANCH="UAP6.1-Exportfunktionen"
 REPO_SSH="git@github.com:MarlonH05/FeueralarmV3.git"
 
 echo "==> Check SSH-Verbindung zu $REMOTE"
@@ -16,7 +16,7 @@ ssh -o BatchMode=yes "$REMOTE" 'echo ok' >/dev/null
 echo "==> Repo aktualisieren (Branch: $BRANCH)"
 ssh "$REMOTE" "set -e; \
   if [ -d '$REPO_DIR/.git' ]; then \
-    cd '$REPO_DIR' && git fetch --all && git checkout '$BRANCH' && git reset --hard origin/'$BRANCH' && git clean -fd && git pull --ff-only; \
+    cd '$REPO_DIR' && git fetch --all && git reset --hard HEAD && git clean -fd && git checkout '$BRANCH' && git reset --hard origin/'$BRANCH' && git pull --ff-only; \
   else \
     mkdir -p '$APP_ROOT' && cd '$APP_ROOT' && git clone '$REPO_SSH' 'Repository'; \
     cd '$REPO_DIR' && git checkout '$BRANCH'; \

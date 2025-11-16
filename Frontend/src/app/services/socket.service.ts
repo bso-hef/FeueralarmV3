@@ -2,11 +2,14 @@ import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { RestService } from './rest.service';
-import { SyncService } from './sync.service'; // ← NEU
+import { SyncService } from './sync.service';
 import { Archive } from '../interfaces/archive.interface';
 
 import { environment } from '../../environments/environment';
 
+@Injectable({
+  providedIn: 'root',
+})
 export class SocketService {
   private readonly SERVER_URL = environment.socketUrl;
 
@@ -22,7 +25,7 @@ export class SocketService {
   constructor(
     private socket: Socket,
     private restService: RestService,
-    private syncService: SyncService // ← NEU
+    private syncService: SyncService
   ) {}
 
   // ==========================================
@@ -56,7 +59,6 @@ export class SocketService {
 
     // Connection events
     socketAny.on('connect', async () => {
-      // ← GEÄNDERT: async
       console.log('✅ Socket connected');
       this.isConnected = true;
 
@@ -159,7 +161,6 @@ export class SocketService {
     status?: string,
     comment?: string
   ): Promise<void> {
-    // ← GEÄNDERT: async Promise
     // *** NEU: Offline-Check ***
     if (!this.syncService.isOnline()) {
       console.log('📴 Offline - speichere in Queue');
@@ -177,7 +178,6 @@ export class SocketService {
   }
 
   async updateComment(id: string, comment: string): Promise<void> {
-    // ← GEÄNDERT: async Promise
     // *** NEU: Offline-Check ***
     if (!this.syncService.isOnline()) {
       console.log('📴 Offline - speichere Kommentar in Queue');

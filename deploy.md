@@ -26,3 +26,5 @@ npm run start
 
 Username: admin
 Passwort: Admin2024!Secure
+
+Username: verwaltung Passwort: Verwaltung2024!

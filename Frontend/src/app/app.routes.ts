@@ -12,7 +12,6 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
   },
-
   {
     path: 'login',
     canActivate: [loginGuard],
@@ -31,5 +30,11 @@ export const routes: Routes = [
     path: 'archive',
     loadComponent: () =>
       import('./pages/archive/archive.page').then((m) => m.ArchivePage),
+  },
+  {
+    path: 'dashboard',
+    loadComponent: () =>
+      import('./pages/dashboard/dashboard.page').then((m) => m.DashboardPage),
+    canActivate: [authGuard], // Nur für eingeloggte User - Admin-Check ist in der Komponente
   },
 ];

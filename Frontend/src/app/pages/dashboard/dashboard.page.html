@@ -1,0 +1,218 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Dashboard - Schulleitung</ion-title>
+    <ion-buttons slot="end">
+      <!-- Online/Offline Status -->
+      <ion-chip
+        [color]="isOnline ? 'success' : 'danger'"
+        style="margin-right: 8px"
+      >
+        <ion-icon [name]="isOnline ? 'wifi' : 'cloud-offline'"></ion-icon>
+        <ion-label>{{ isOnline ? 'Online' : 'Offline' }}</ion-label>
+      </ion-chip>
+
+      <!-- Refresh Button -->
+      <ion-button (click)="refreshDashboard()">
+        <ion-icon name="refresh" slot="icon-only"></ion-icon>
+      </ion-button>
+
+      <!-- Archive Button -->
+      <ion-button (click)="openArchive()">
+        <ion-icon name="stats-chart-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Lade Dashboard...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div class="dashboard-container" *ngIf="!isLoading">
+    <!-- Header Info -->
+    <div class="dashboard-header">
+      <h2>Echtzeit-Übersicht</h2>
+      <p class="last-update" *ngIf="lastUpdate">
+        Letzte Aktualisierung: {{ lastUpdate | date:'HH:mm:ss' }}
+      </p>
+    </div>
+
+    <!-- Stats Overview -->
+    <ion-grid class="stats-grid">
+      <ion-row>
+        <!-- Aktive Alarme -->
+        <ion-col size="12" size-md="6" size-lg="3">
+          <ion-card class="stat-card">
+            <ion-card-content>
+              <div class="stat-icon alert">
+                <ion-icon name="alert-circle"></ion-icon>
+              </div>
+              <h3>{{ stats.activeAlarms }}</h3>
+              <p>Aktive Alarme</p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <!-- Gesamt Klassen -->
+        <ion-col size="12" size-md="6" size-lg="3">
+          <ion-card class="stat-card">
+            <ion-card-content>
+              <div class="stat-icon total">
+                <ion-icon name="people-outline"></ion-icon>
+              </div>
+              <h3>{{ stats.totalClasses }}</h3>
+              <p>Gesamt Klassen</p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <!-- Vollständig -->
+        <ion-col size="12" size-md="6" size-lg="3">
+          <ion-card class="stat-card">
+            <ion-card-content>
+              <div class="stat-icon success">
+                <ion-icon name="checkmark-circle"></ion-icon>
+              </div>
+              <h3>{{ stats.completedClasses }}</h3>
+              <p>Vollständig</p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <!-- Unvollständig -->
+        <ion-col size="12" size-md="6" size-lg="3">
+          <ion-card class="stat-card">
+            <ion-card-content>
+              <div class="stat-icon warning">
+                <ion-icon name="close-circle"></ion-icon>
+              </div>
+              <h3>{{ stats.incompleteClasses }}</h3>
+              <p>Unvollständig</p>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <!-- Progress Overview -->
+    <ion-card class="progress-card" *ngIf="stats.totalClasses > 0">
+      <ion-card-header>
+        <ion-card-title>Gesamtfortschritt</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="progress-info">
+          <span>{{ stats.completionRate }}% Abgeschlossen</span>
+          <span
+            >{{ stats.completedClasses }} / {{ stats.totalClasses }}
+            Klassen</span
+          >
+        </div>
+        <ion-progress-bar
+          [value]="stats.completionRate / 100"
+          [color]="getCompletionColor()"
+        ></ion-progress-bar>
+
+        <div class="progress-details">
+          <div class="detail-item success">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            <span>{{ stats.completedClasses }} Vollständig</span>
+          </div>
+          <div class="detail-item warning">
+            <ion-icon name="close-circle"></ion-icon>
+            <span>{{ stats.incompleteClasses }} Unvollständig</span>
+          </div>
+          <div class="detail-item medium" *ngIf="stats.openClasses > 0">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>{{ stats.openClasses }} Offen</span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Empty State - Keine aktiven Alarme -->
+    <div class="empty-state" *ngIf="activeAlarms.length === 0">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      <h3>Keine aktiven Alarme</h3>
+      <p>Aktuell sind keine Feueralarme aktiv.</p>
+      <ion-button (click)="openArchive()" fill="outline">
+        <ion-icon name="stats-chart-outline" slot="start"></ion-icon>
+        Archiv anzeigen
+      </ion-button>
+    </div>
+
+    <!-- Active Alarms List -->
+    <div class="alarms-section" *ngIf="activeAlarms.length > 0">
+      <h3 class="section-title">
+        <ion-icon name="alert-circle"></ion-icon>
+        Laufende Alarme ({{ activeAlarms.length }})
+      </h3>
+
+      <div class="alarm-list">
+        <ion-card
+          class="alarm-card"
+          *ngFor="let alarm of activeAlarms"
+          (click)="viewAlarmDetails(alarm)"
+        >
+          <!-- Header -->
+          <div class="alarm-header">
+            <div class="alarm-info">
+              <h4>Alarm {{ formatAlarmDate(alarm.created) }}</h4>
+              <p class="alarm-time">
+                <ion-icon name="time-outline"></ion-icon>
+                {{ getTimeSince(alarm.created) }}
+              </p>
+            </div>
+            <ion-badge [color]="getStatusBadgeColor(alarm)">
+              {{ getAlarmCompletionRate(alarm) }}%
+            </ion-badge>
+          </div>
+
+          <!-- Stats -->
+          <div class="alarm-stats" *ngIf="alarm.stats">
+            <div class="stat-chip">
+              <ion-icon name="people-outline"></ion-icon>
+              <span>{{ alarm.stats.total }} Klassen</span>
+            </div>
+            <div class="stat-chip success" *ngIf="alarm.stats.complete > 0">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              <span>{{ alarm.stats.complete }} Vollständig</span>
+            </div>
+            <div class="stat-chip warning" *ngIf="alarm.stats.incomplete > 0">
+              <ion-icon name="close-circle"></ion-icon>
+              <span>{{ alarm.stats.incomplete }} Unvollständig</span>
+            </div>
+            <div class="stat-chip medium" *ngIf="alarm.stats.undefined > 0">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>{{ alarm.stats.undefined }} Offen</span>
+            </div>
+          </div>
+
+          <!-- Progress -->
+          <div
+            class="alarm-progress"
+            *ngIf="alarm.stats && alarm.stats.total > 0"
+          >
+            <ion-progress-bar
+              [value]="alarm.stats.complete / alarm.stats.total"
+              [color]="getStatusBadgeColor(alarm)"
+            ></ion-progress-bar>
+          </div>
+        </ion-card>
+      </div>
+    </div>
+  </div>
+</ion-content>
