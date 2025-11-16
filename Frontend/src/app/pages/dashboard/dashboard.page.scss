@@ -1,0 +1,457 @@
+// ==========================================
+// DASHBOARD CONTAINER
+// ==========================================
+
+.dashboard-container {
+  padding: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// ==========================================
+// HEADER
+// ==========================================
+
+.dashboard-header {
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0 0 8px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--ion-color-dark);
+  }
+
+  .last-update {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ion-color-medium);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    ion-icon {
+      font-size: 1rem;
+    }
+  }
+}
+
+// ==========================================
+// LOADING STATE
+// ==========================================
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: var(--ion-color-medium);
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+// ==========================================
+// STATS GRID
+// ==========================================
+
+.stats-grid {
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  margin: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  ion-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+
+      ion-icon {
+        font-size: 2rem;
+        color: white;
+      }
+
+      &.alert {
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+      }
+
+      &.total {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+      }
+
+      &.success {
+        background: linear-gradient(135deg, #10b981, #059669);
+      }
+
+      &.warning {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+      }
+    }
+
+    h3 {
+      margin: 0 0 4px;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--ion-color-dark);
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--ion-color-medium);
+      font-weight: 500;
+    }
+  }
+}
+
+// ==========================================
+// PROGRESS CARD
+// ==========================================
+
+.progress-card {
+  margin: 0 0 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  ion-card-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--ion-color-light);
+
+    ion-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+  }
+
+  ion-card-content {
+    padding: 20px;
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+
+      span {
+        font-size: 0.9rem;
+        font-weight: 500;
+
+        &:first-child {
+          color: var(--ion-color-dark);
+          font-size: 1.1rem;
+          font-weight: 600;
+        }
+
+        &:last-child {
+          color: var(--ion-color-medium);
+        }
+      }
+    }
+
+    ion-progress-bar {
+      height: 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+
+    .progress-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+
+      .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.9rem;
+
+        ion-icon {
+          font-size: 1.1rem;
+        }
+
+        &.success {
+          color: #10b981;
+        }
+
+        &.warning {
+          color: #ef4444;
+        }
+
+        &.medium {
+          color: var(--ion-color-medium);
+        }
+      }
+    }
+  }
+}
+
+// ==========================================
+// EMPTY STATE
+// ==========================================
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+
+  ion-icon {
+    font-size: 80px;
+    color: #10b981;
+    opacity: 0.5;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+  }
+
+  p {
+    margin: 0 0 20px;
+    font-size: 0.95rem;
+    color: var(--ion-color-medium);
+  }
+
+  ion-button {
+    margin-top: 8px;
+  }
+}
+
+// ==========================================
+// ALARMS SECTION
+// ==========================================
+
+.alarms-section {
+  margin-top: 20px;
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+
+    ion-icon {
+      font-size: 1.4rem;
+      color: #f59e0b;
+    }
+  }
+}
+
+.alarm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alarm-card {
+  margin: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #f59e0b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    border-left-color: #f97316;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  .alarm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px 16px 12px;
+
+    .alarm-info {
+      flex: 1;
+
+      h4 {
+        margin: 0 0 4px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+      }
+
+      .alarm-time {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--ion-color-medium);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        ion-icon {
+          font-size: 0.9rem;
+        }
+      }
+    }
+
+    ion-badge {
+      font-size: 0.9rem;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+  }
+
+  .alarm-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 16px 12px;
+
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: var(--ion-color-light);
+      border-radius: 16px;
+      font-size: 0.85rem;
+      color: var(--ion-color-dark);
+
+      ion-icon {
+        font-size: 1rem;
+        color: var(--ion-color-medium);
+      }
+
+      &.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+
+        ion-icon {
+          color: #10b981;
+        }
+      }
+
+      &.warning {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+
+        ion-icon {
+          color: #ef4444;
+        }
+      }
+
+      &.medium {
+        background: rgba(156, 163, 175, 0.1);
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+
+  .alarm-progress {
+    padding: 0 16px 16px;
+
+    ion-progress-bar {
+      height: 8px;
+      border-radius: 4px;
+    }
+  }
+}
+
+// ==========================================
+// RESPONSIVE
+// ==========================================
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .stat-card {
+    ion-card-content {
+      padding: 16px;
+
+      .stat-icon {
+        width: 50px;
+        height: 50px;
+
+        ion-icon {
+          font-size: 1.6rem;
+        }
+      }
+
+      h3 {
+        font-size: 1.6rem;
+      }
+    }
+  }
+}
+
+// ==========================================
+// DARK MODE
+// ==========================================
+
+@media (prefers-color-scheme: dark) {
+  .stat-card,
+  .progress-card,
+  .alarm-card {
+    background: var(--ion-card-background, #1e1e1e);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+  }
+}
+
+// ==========================================
+// ANIMATIONS
+// ==========================================
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-card,
+.alarm-card {
+  animation: fadeIn 0.3s ease;
+}

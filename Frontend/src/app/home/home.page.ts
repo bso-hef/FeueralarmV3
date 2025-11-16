@@ -37,12 +37,11 @@ import {
   searchOutline,
   peopleOutline,
   archiveOutline,
-  wifi, // ← NEU
-  cloudOffline, // ← NEU
-  syncOutline, // ← NEU
-  attachOutline, // ← NEU
+  statsChartOutline, // ← NEU für Dashboard
+  wifi,
+  cloudOffline,
+  syncOutline,
 } from 'ionicons/icons';
-import { AttachmentModalComponent } from '../components/attachment-modal/attachment-modal.component'; // ← NEU
 import { Subscription } from 'rxjs';
 import moment from 'moment';
 
@@ -168,10 +167,10 @@ export class HomePage implements OnInit, OnDestroy {
       searchOutline,
       peopleOutline,
       archiveOutline,
-      wifi, // ← NEU
-      cloudOffline, // ← NEU
-      attachOutline, // ← NEU
-      syncOutline, // ← NEU
+      statsChartOutline, // ← NEU für Dashboard
+      wifi,
+      cloudOffline,
+      syncOutline,
     });
   }
 
@@ -656,6 +655,11 @@ export class HomePage implements OnInit, OnDestroy {
     this.router.navigate(['/archive']);
   }
 
+  // ✅ Neue Methode für Dashboard-Navigation (nur für Admin/Verwaltung)
+  openDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
   async openSettings(): Promise<void> {
     const modal = await this.modalCtrl.create({
       component: SettingsModal,
@@ -708,21 +712,6 @@ export class HomePage implements OnInit, OnDestroy {
         'Synchronisation fehlgeschlagen'
       );
     }
-  }
-
-  // ==========================================
-  // ATTACHMENTS
-  // ==========================================
-
-  async openAttachments(teacher: Teacher): Promise<void> {
-    const modal = await this.modalCtrl.create({
-      component: AttachmentModalComponent,
-      componentProps: {
-        teacher,
-      },
-    });
-
-    await modal.present();
   }
 
   // ==========================================
