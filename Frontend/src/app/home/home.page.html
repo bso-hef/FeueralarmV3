@@ -11,8 +11,8 @@
         <ion-label>{{ isOnline ? 'Online' : 'Offline' }}</ion-label>
       </ion-chip>
 
-      <!-- *** NEU: Dashboard Button (nur für Admin/Verwaltung) *** -->
-      <ion-button *ngIf="isAdmin" (click)="openDashboard()">
+      <!-- *** GEÄNDERT: Dashboard Button (nur für Admin/Verwaltung) *** -->
+      <ion-button *ngIf="canAccessDashboard" (click)="openDashboard()">
         <ion-icon name="stats-chart-outline" slot="icon-only"></ion-icon>
       </ion-button>
 

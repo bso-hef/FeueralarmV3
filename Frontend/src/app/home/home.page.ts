@@ -17,10 +17,10 @@ import {
   IonLabel,
   IonSearchbar,
   IonSpinner,
-  IonChip, // ← NEU
-  IonCard, // ← NEU
-  IonCardContent, // ← NEU
-  IonProgressBar, // ← NEU
+  IonChip,
+  IonCard,
+  IonCardContent,
+  IonProgressBar,
   ModalController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -37,7 +37,7 @@ import {
   searchOutline,
   peopleOutline,
   archiveOutline,
-  statsChartOutline, // ← NEU für Dashboard
+  statsChartOutline,
   wifi,
   cloudOffline,
   syncOutline,
@@ -52,7 +52,7 @@ import {
 } from '../interfaces/teacher.interface';
 import { RestService } from '../services/rest.service';
 import { SocketService } from '../services/socket.service';
-import { SyncService } from '../services/sync.service'; // ← NEU
+import { SyncService } from '../services/sync.service';
 import { DataService } from '../services/data.service';
 import { FeedbackService } from '../services/feedback.service';
 import { SettingsService } from '../services/settings.service';
@@ -81,10 +81,10 @@ import { InformationModal } from '../modals/information/information.modal';
     IonLabel,
     IonSearchbar,
     IonSpinner,
-    IonChip, // ← NEU
-    IonCard, // ← NEU
-    IonCardContent, // ← NEU
-    IonProgressBar, // ← NEU
+    IonChip,
+    IonCard,
+    IonCardContent,
+    IonProgressBar,
   ],
 })
 export class HomePage implements OnInit, OnDestroy {
@@ -98,6 +98,7 @@ export class HomePage implements OnInit, OnDestroy {
   // UI State
   isLoading = true;
   isAdmin = false;
+  canAccessDashboard = false; // ✅ NEU: Separate Variable für Dashboard-Zugriff
   searchTerm = '';
   selectedStatus: string = '4'; // 4 = All
   sortBy: 'teacher' | 'class' = 'teacher';
@@ -138,7 +139,7 @@ export class HomePage implements OnInit, OnDestroy {
     private settingsService: SettingsService,
     private modalCtrl: ModalController,
     private router: Router,
-    private syncService: SyncService // ← NEU
+    private syncService: SyncService
   ) {
     // Socket Service optional injizieren
     try {
@@ -167,7 +168,7 @@ export class HomePage implements OnInit, OnDestroy {
       searchOutline,
       peopleOutline,
       archiveOutline,
-      statsChartOutline, // ← NEU für Dashboard
+      statsChartOutline,
       wifi,
       cloudOffline,
       syncOutline,
@@ -175,8 +176,10 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    // Check if user is admin
-    this.isAdmin = this.restService.getRoleValue() === 'admin';
+    // ✅ GEÄNDERT: Check if user is admin or verwaltung
+    const role = this.restService.getRoleValue();
+    this.isAdmin = role === 'admin';
+    this.canAccessDashboard = role === 'admin' || role === 'verwaltung';
 
     // Get settings
     this.sortBy = this.settingsService.getSortBy();
@@ -650,13 +653,13 @@ export class HomePage implements OnInit, OnDestroy {
     this.router.navigate(['/admin-users']);
   }
 
-  // ✅ Neue Methode für Archive-Navigation
   openArchive(): void {
     this.router.navigate(['/archive']);
   }
 
-  // ✅ Neue Methode für Dashboard-Navigation (nur für Admin/Verwaltung)
+  // ✅ Dashboard-Navigation (nur für Admin/Verwaltung)
   openDashboard(): void {
+    console.log('🎯 Opening Dashboard...');
     this.router.navigate(['/dashboard']);
   }
 
