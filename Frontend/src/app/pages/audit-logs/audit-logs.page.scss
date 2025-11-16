@@ -1,0 +1,132 @@
+// Statistiken
+.stat-col {
+  text-align: center;
+  padding: 8px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--ion-color-primary);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--ion-color-medium);
+  text-transform: uppercase;
+}
+
+// Loading
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+  }
+}
+
+// Log Items
+ion-item {
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
+
+  ion-label {
+    margin: 12px 0;
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+
+      ion-badge {
+        font-size: 0.75rem;
+      }
+
+      .entity-type {
+        font-size: 0.9rem;
+        color: var(--ion-color-medium);
+        font-weight: normal;
+      }
+    }
+
+    h3 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+
+      strong {
+        color: var(--ion-color-dark);
+      }
+
+      .timestamp {
+        font-size: 0.85rem;
+        color: var(--ion-color-medium);
+        font-weight: normal;
+      }
+    }
+
+    .changes {
+      font-size: 0.9rem;
+      color: var(--ion-color-step-600);
+      margin: 4px 0;
+      font-family: "Courier New", monospace;
+      background: var(--ion-color-light);
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .metadata {
+      font-size: 0.85rem;
+      color: var(--ion-color-medium);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      ion-icon {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+// Filter Card
+ion-card {
+  ion-select,
+  ion-searchbar {
+    --background: var(--ion-color-light);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .stat-value {
+    font-size: 1.2rem;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+  }
+
+  ion-item {
+    ion-label {
+      h3 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+    }
+  }
+}

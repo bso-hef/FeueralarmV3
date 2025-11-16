@@ -1,0 +1,175 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Audit-Logs</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadLogs()">
+        <ion-icon slot="icon-only" name="refresh"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Statistiken -->
+  <ion-toolbar *ngIf="stats" color="light">
+    <ion-grid>
+      <ion-row>
+        <ion-col size="3" class="stat-col">
+          <div class="stat-value">{{ stats.total }}</div>
+          <div class="stat-label">Gesamt</div>
+        </ion-col>
+        <ion-col size="3" class="stat-col">
+          <div class="stat-value">{{ stats.last24h }}</div>
+          <div class="stat-label">24h</div>
+        </ion-col>
+        <ion-col size="6" class="stat-col">
+          <div
+            class="stat-value"
+            *ngIf="stats.topUsers && stats.topUsers.length > 0"
+          >
+            {{ stats.topUsers[0]._id }}
+          </div>
+          <div class="stat-label">Top User</div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Filter -->
+  <ion-card>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="12" size-md="4">
+            <ion-select
+              [(ngModel)]="filterEntityType"
+              (ionChange)="onFilterChange()"
+              placeholder="Typ filtern"
+              interface="popover"
+            >
+              <ion-select-option
+                *ngFor="let type of entityTypes"
+                [value]="type.value"
+              >
+                {{ type.label }}
+              </ion-select-option>
+            </ion-select>
+          </ion-col>
+
+          <ion-col size="12" size-md="4">
+            <ion-select
+              [(ngModel)]="filterAction"
+              (ionChange)="onFilterChange()"
+              placeholder="Aktion filtern"
+              interface="popover"
+            >
+              <ion-select-option
+                *ngFor="let action of actions"
+                [value]="action.value"
+              >
+                {{ action.label }}
+              </ion-select-option>
+            </ion-select>
+          </ion-col>
+
+          <ion-col size="12" size-md="4">
+            <ion-select
+              [(ngModel)]="filterDateRange"
+              (ionChange)="onFilterChange()"
+              placeholder="Zeitraum"
+              interface="popover"
+            >
+              <ion-select-option
+                *ngFor="let range of dateRanges"
+                [value]="range.value"
+              >
+                {{ range.label }}
+              </ion-select-option>
+            </ion-select>
+          </ion-col>
+        </ion-row>
+
+        <ion-row>
+          <ion-col size="12">
+            <ion-searchbar
+              [(ngModel)]="searchTerm"
+              (ionInput)="onSearchChange()"
+              placeholder="Suchen..."
+              debounce="300"
+            ></ion-searchbar>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Fehler-Nachricht -->
+  <ion-card *ngIf="error" color="danger">
+    <ion-card-content>
+      <ion-icon name="alert-circle"></ion-icon>
+      {{ error }}
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading -->
+  <div *ngIf="loading && filteredLogs.length === 0" class="loading-container">
+    <ion-spinner></ion-spinner>
+    <p>Lade Audit-Logs...</p>
+  </div>
+
+  <!-- Logs Liste -->
+  <ion-list *ngIf="!loading || filteredLogs.length > 0">
+    <ion-item *ngFor="let log of filteredLogs" lines="full">
+      <ion-label>
+        <h2>
+          <ion-badge [color]="getActionColor(log.action)">
+            {{ formatAction(log.action) }}
+          </ion-badge>
+          <span class="entity-type"
+            >{{ formatEntityType(log.entityType) }}</span
+          >
+        </h2>
+
+        <h3>
+          <strong>{{ log.username }}</strong>
+          <span class="timestamp">{{ formatTimestamp(log.timestamp) }}</span>
+        </h3>
+
+        <p class="changes">{{ formatChanges(log) }}</p>
+
+        <p class="metadata" *ngIf="log.metadata?.className">
+          <ion-icon name="school"></ion-icon>
+          Klasse: {{ log.metadata.className }}
+        </p>
+      </ion-label>
+    </ion-item>
+
+    <!-- Keine Ergebnisse -->
+    <ion-item *ngIf="filteredLogs.length === 0 && !loading">
+      <ion-label class="ion-text-center">
+        <p>Keine Audit-Logs gefunden</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <!-- Infinite Scroll -->
+  <ion-infinite-scroll
+    *ngIf="hasMore"
+    threshold="100px"
+    (ionInfinite)="loadMoreLogs($event)"
+  >
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Lade weitere Logs..."
+    >
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+</ion-content>

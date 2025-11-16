@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const userRoutes = require("./routes/users");
 const alertRoutes = require("./routes/alerts");
 const postRoutes = require("./routes/posts"); // UAP 9.3.1: Posts mit Audit-Logging
+const auditLogRoutes = require("./routes/audit-logs"); // UAP 9.3.2: Audit-Logs Ansicht
 const attachmentRoutes = require("./routes/attachments.routes");
 const exportRoutes = require("./routes/export"); // UAP 6.3: Export-API
 
@@ -42,6 +43,7 @@ app.use((req, res, next) => {
 app.use("/api/users/", userRoutes);
 app.use("/api/alerts/", alertRoutes);
 app.use("/api/posts/", postRoutes); // ← UAP 9.3.1: Posts mit Audit-Logging
+app.use("/api/audit-logs/", auditLogRoutes); // ← UAP 9.3.2: Audit-Logs Ansicht
 app.use("/api/teachers/", attachmentRoutes); // ← NEU: Attachment Routes
 app.use("/api/export/", exportRoutes); // ← UAP 6.3: Export-API mit Auth
 
