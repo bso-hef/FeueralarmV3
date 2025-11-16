@@ -1,5 +1,6 @@
 const Alert = require("../models/alert");
 const Post = require("../models/post");
+const auditService = require("../service/audit.service");
 
 // ==========================================
 // ALLE ALARME ABRUFEN
@@ -122,6 +123,15 @@ exports.archiveAlert = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Alarm nicht gefunden",
+      });
+    }
+
+    // UAP 9.3.1: Audit-Logging für Archivierung
+    if (req.userData) {
+      await auditService.logAlertArchived({
+        userId: req.userData.userId,
+        username: req.userData.username,
+        alertId: alert._id,
       });
     }
 
