@@ -7,6 +7,10 @@
     </ion-buttons>
     <ion-title>Alarm Archiv</ion-title>
     <ion-buttons slot="end">
+      <!-- NEU: Export All Button -->
+      <ion-button (click)="exportAllAlarmsCSV()" *ngIf="alarms.length > 0">
+        <ion-icon name="download-outline" slot="icon-only"></ion-icon>
+      </ion-button>
       <ion-button (click)="refreshAlarms()">
         <ion-icon name="refresh" slot="icon-only"></ion-icon>
       </ion-button>
@@ -72,13 +76,9 @@
 
   <!-- Alarm List -->
   <div class="alarm-list" *ngIf="!isLoading && filteredAlarms.length > 0">
-    <div
-      class="alarm-card"
-      *ngFor="let alarm of filteredAlarms"
-      (click)="viewAlarmDetails(alarm)"
-    >
+    <div class="alarm-card" *ngFor="let alarm of filteredAlarms">
       <!-- Header -->
-      <div class="alarm-header">
+      <div class="alarm-header" (click)="viewAlarmDetails(alarm)">
         <div class="alarm-info">
           <h3>Alarm {{ formatAlarmDate(alarm.created) }}</h3>
           <p class="alarm-time">{{ getTimeSince(alarm.created) }}</p>
@@ -89,7 +89,11 @@
       </div>
 
       <!-- Stats -->
-      <div class="alarm-stats" *ngIf="alarm.stats">
+      <div
+        class="alarm-stats"
+        *ngIf="alarm.stats"
+        (click)="viewAlarmDetails(alarm)"
+      >
         <div class="stat-chip">
           <ion-icon name="people-outline"></ion-icon>
           <span>{{ alarm.stats.total }} Klassen</span>
@@ -108,13 +112,34 @@
         </div>
       </div>
 
-      <!-- Footer -->
+      <!-- Footer mit Export-Buttons -->
       <div class="alarm-footer">
-        <div class="alarm-meta">
+        <div class="alarm-meta" (click)="viewAlarmDetails(alarm)">
           <ion-icon name="calendar-outline"></ion-icon>
           <span>{{ alarm.classCount }} Klassen</span>
         </div>
-        <ion-icon name="chevron-forward-outline" class="arrow-icon"></ion-icon>
+
+        <!-- NEU: Export Buttons -->
+        <div class="export-buttons">
+          <ion-button
+            fill="clear"
+            size="small"
+            (click)="exportAlarmPDF(alarm); $event.stopPropagation()"
+            title="Als PDF exportieren"
+          >
+            <ion-icon name="document-text-outline" slot="start"></ion-icon>
+            PDF
+          </ion-button>
+          <ion-button
+            fill="clear"
+            size="small"
+            (click)="exportAlarmCSV(alarm); $event.stopPropagation()"
+            title="Als CSV exportieren"
+          >
+            <ion-icon name="download-outline" slot="start"></ion-icon>
+            CSV
+          </ion-button>
+        </div>
       </div>
     </div>
   </div>

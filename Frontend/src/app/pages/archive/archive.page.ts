@@ -30,11 +30,14 @@ import {
   checkmarkCircle,
   closeCircle,
   chevronForwardOutline,
+  documentTextOutline, // ← NEU für PDF
+  downloadOutline, // ← NEU für CSV
 } from 'ionicons/icons';
 
 import { AlarmService, AlarmData } from '../../services/alarm.service';
 import { FeedbackService } from '../../services/feedback.service';
 import { DataService } from '../../services/data.service';
+import { ExportService } from '../../services/export.service'; // ← NEU
 
 @Component({
   selector: 'app-archive',
@@ -80,7 +83,8 @@ export class ArchivePage implements OnInit {
     private alarmService: AlarmService,
     private feedbackService: FeedbackService,
     private dataService: DataService,
-    private router: Router
+    private router: Router,
+    private exportService: ExportService // ← NEU
   ) {
     addIcons({
       arrowBack,
@@ -93,6 +97,8 @@ export class ArchivePage implements OnInit {
       checkmarkCircle,
       closeCircle,
       chevronForwardOutline,
+      documentTextOutline, // ← NEU
+      downloadOutline, // ← NEU
     });
   }
 
@@ -278,8 +284,131 @@ export class ArchivePage implements OnInit {
   }
 
   // ==========================================
+  // EXPORT FUNCTIONS (NEU!)
+  // ==========================================
+
+  async exportAlarmPDF(alarm: AlarmData) {
+    try {
+      await this.feedbackService.showLoading('PDF wird erstellt...');
+
+      // Lade vollständige Alarm-Daten
+      const response = await this.alarmService
+        .getAlarmById(alarm._id)
+        .toPromise();
+
+      if (!response || !response.posts) {
+        throw new Error('Keine Daten verfügbar');
+      }
+
+      const teachers = this.dataService.parseTeachersFromAPI(response.posts);
+
+      // Konvertiere Teacher[] zu ExportTeacherData[]
+      const exportData = teachers.map((t) => ({
+        name: t.names && t.names.length > 0 ? t.names.join(', ') : 'Unbekannt',
+        klasse: t.class || t.classNumber || '',
+        status: this.mapTeacherStateToStatus(t.state),
+        comment: t.comment || '',
+        raum: t.room && t.room.length > 0 ? t.room.join(', ') : '',
+      }));
+
+      // Exportiere PDF
+      this.exportService.exportAlarmToPDF(alarm, exportData);
+
+      await this.feedbackService.hideLoading();
+      await this.feedbackService.showSuccessToast(
+        'PDF erfolgreich exportiert! 📄'
+      );
+    } catch (error) {
+      await this.feedbackService.hideLoading();
+      await this.feedbackService.showError(error, 'PDF-Export fehlgeschlagen');
+    }
+  }
+
+  async exportAlarmCSV(alarm: AlarmData) {
+    try {
+      await this.feedbackService.showLoading('CSV wird erstellt...');
+
+      // Lade vollständige Alarm-Daten
+      const response = await this.alarmService
+        .getAlarmById(alarm._id)
+        .toPromise();
+
+      if (!response || !response.posts) {
+        throw new Error('Keine Daten verfügbar');
+      }
+
+      const teachers = this.dataService.parseTeachersFromAPI(response.posts);
+
+      // Konvertiere Teacher[] zu ExportTeacherData[]
+      const exportData = teachers.map((t) => ({
+        name: t.names && t.names.length > 0 ? t.names.join(', ') : 'Unbekannt',
+        klasse: t.class || t.classNumber || '',
+        status: this.mapTeacherStateToStatus(t.state),
+        comment: t.comment || '',
+        raum: t.room && t.room.length > 0 ? t.room.join(', ') : '',
+      }));
+
+      // Exportiere CSV
+      this.exportService.exportAlarmToCSV(alarm, exportData);
+
+      await this.feedbackService.hideLoading();
+      await this.feedbackService.showSuccessToast(
+        'CSV erfolgreich exportiert! 📊'
+      );
+    } catch (error) {
+      await this.feedbackService.hideLoading();
+      await this.feedbackService.showError(error, 'CSV-Export fehlgeschlagen');
+    }
+  }
+
+  async exportAllAlarmsCSV() {
+    try {
+      await this.feedbackService.showLoading('CSV-Übersicht wird erstellt...');
+
+      if (this.alarms.length === 0) {
+        await this.feedbackService.hideLoading();
+        await this.feedbackService.showWarningToast(
+          'Keine Alarme zum Exportieren vorhanden'
+        );
+        return;
+      }
+
+      this.exportService.exportAllAlarmsToCSV(this.alarms);
+
+      await this.feedbackService.hideLoading();
+      await this.feedbackService.showSuccessToast(
+        'CSV-Übersicht exportiert! 📊'
+      );
+    } catch (error) {
+      await this.feedbackService.hideLoading();
+      await this.feedbackService.showError(error, 'CSV-Export fehlgeschlagen');
+    }
+  }
+
+  // ==========================================
   // HELPERS
   // ==========================================
+
+  /**
+   * Konvertiert TeacherState Enum zu lesbarem Status-String
+   */
+  private mapTeacherStateToStatus(state?: number): string {
+    if (state === undefined || state === null) {
+      return 'unbekannt';
+    }
+
+    // TeacherState Enum mapping
+    switch (state) {
+      case 1: // OPEN
+        return 'unbekannt';
+      case 2: // PRESENT
+        return 'anwesend';
+      case 3: // INCOMPLETE
+        return 'abwesend';
+      default:
+        return 'unbekannt';
+    }
+  }
 
   formatAlarmDate(dateString: string): string {
     return this.alarmService.formatAlarmDate(dateString);
