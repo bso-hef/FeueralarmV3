@@ -118,16 +118,17 @@
         Rechtliches
       </h3>
       <ion-list>
-        <ion-item button detail="false">
+        <!-- DSGVO: Datenschutzerklärung als erstes und clickbar -->
+        <ion-item button detail="true" (click)="openPrivacy()">
           <ion-label>
-            <h4>Lizenz</h4>
-            <p>MIT License</p>
+            <h4>Datenschutzerklärung</h4>
+            <p>Informationen zur Datenverarbeitung (DSGVO)</p>
           </ion-label>
         </ion-item>
         <ion-item button detail="false">
           <ion-label>
-            <h4>Datenschutz</h4>
-            <p>Alle Daten werden lokal verarbeitet</p>
+            <h4>Lizenz</h4>
+            <p>MIT License</p>
           </ion-label>
         </ion-item>
       </ion-list>

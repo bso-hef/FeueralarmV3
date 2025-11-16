@@ -3,6 +3,76 @@ const Alert = require("../models/alert");
 const untis = require("../untis/requests");
 const permission = require("../middleware/check-permission");
 
+/**
+ * DSGVO UAP9.1.2: Validiert Kommentare auf personenbezogene Daten
+ * Verhindert das Speichern von Schülernamen, Geburtsdaten und anderen sensiblen Informationen
+ *
+ * @param {string} comment - Der zu validierende Kommentar
+ * @returns {Object} - { isValid: boolean, error?: string }
+ */
+function validateCommentForPrivacy(comment) {
+  if (!comment || comment.trim().length === 0) {
+    return { isValid: true };
+  }
+
+  const trimmedComment = comment.trim();
+
+  // Pattern für mögliche Namen (z.B. "Max Müller", "Anna Schmidt")
+  const namePattern = /\b[A-ZÄÖÜ][a-zäöüß]+ [A-ZÄÖÜ][a-zäöüß]+\b/;
+
+  // Pattern für Geburtsdaten (z.B. "15.03.2005", "3.7.05")
+  const datePattern = /\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/;
+
+  // Verdächtige Begriffe die auf personenbezogene Daten hinweisen
+  const suspiciousPatterns = [
+    { pattern: /schüler.*name/i, message: "enthält möglicherweise Schülernamen" },
+    { pattern: /student.*name/i, message: "enthält möglicherweise Studentennamen" },
+    { pattern: /heißt/i, message: 'enthält möglicherweise Namen (Wort "heißt")' },
+    { pattern: /ist\s+\d+\s+jahre\s+alt/i, message: "enthält Altersangaben" },
+    { pattern: /geburtsdatum/i, message: "enthält Geburtsdatum" },
+    { pattern: /\badresse\b/i, message: "enthält Adressdaten" },
+    { pattern: /wohnt\s+(in|im|an)/i, message: "enthält Wohnortangaben" },
+    { pattern: /telefon|handy|mobil/i, message: "enthält Telefonnummern" },
+    { pattern: /@.*\.(de|com|net|org)/i, message: "enthält E-Mail-Adressen" },
+  ];
+
+  // Prüfe auf Namen
+  if (namePattern.test(trimmedComment)) {
+    return {
+      isValid: false,
+      error: "Kommentar enthält möglicherweise Namen. Bitte keine Schülernamen verwenden!",
+    };
+  }
+
+  // Prüfe auf Geburtsdaten
+  if (datePattern.test(trimmedComment)) {
+    return {
+      isValid: false,
+      error: "Kommentar enthält ein Datum. Bitte keine Geburtsdaten oder persönliche Daten eingeben!",
+    };
+  }
+
+  // Prüfe auf verdächtige Begriffe
+  for (const { pattern, message } of suspiciousPatterns) {
+    if (pattern.test(trimmedComment)) {
+      return {
+        isValid: false,
+        error: `Kommentar ${message}. Bitte nur allgemeine Informationen zur Situation eingeben!`,
+      };
+    }
+  }
+
+  // Prüfe Länge (optional: verhindert extrem lange Kommentare)
+  if (trimmedComment.length > 500) {
+    return {
+      isValid: false,
+      error: "Kommentar ist zu lang (max. 500 Zeichen)",
+    };
+  }
+
+  return { isValid: true };
+}
+
 exports.getAlertId = async (data) => {
   if (data && data.alertId) return data.alertId;
 
@@ -67,6 +137,19 @@ exports.updatePost = async (data) => {
   let id = data.id;
   let status = data.status;
   let comment = data.comment;
+
+  // DSGVO UAP9.1.2: Validiere Kommentar auf personenbezogene Daten
+  if (comment && comment.trim().length > 0) {
+    const validation = validateCommentForPrivacy(comment);
+    if (!validation.isValid) {
+      console.warn(`⚠️ DSGVO: Kommentar-Validierung fehlgeschlagen für Post ${id}: ${validation.error}`);
+      return {
+        success: false,
+        msg: `DSGVO-Validierung: ${validation.error}`,
+        posts: [],
+      };
+    }
+  }
 
   if (!validUpdateParams(id, status, comment))
     return {

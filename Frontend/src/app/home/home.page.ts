@@ -347,6 +347,7 @@ export class HomePage implements OnInit, OnDestroy {
         classNumber: 'EL301',
         room: ['R312'],
         state: TeacherState.INCOMPLETE,
+        // DSGVO: Kommentar enthält KEINE Schülernamen - nur Anzahl
         comment: 'Nur 15 Schüler anwesend',
       },
       {
@@ -451,20 +452,81 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async addComment(teacher: Teacher): Promise<void> {
+    // DSGVO: Warnung anzeigen, keine Schülernamen in Kommentare
     const comment = await this.feedbackService.showPrompt(
       'Kommentar hinzufügen',
-      'Kommentar eingeben...',
+      'Bitte KEINE Schülernamen eingeben! Nur allgemeine Informationen zur Situation.',
       'text',
       teacher.comment || ''
     );
 
     if (comment !== null && comment.trim() !== '') {
+      // DSGVO: Validiere Kommentar auf verdächtige Patterns
+      const validationWarning = this.validateCommentForPrivacy(comment.trim());
+
+      if (validationWarning) {
+        const proceed = await this.feedbackService.showConfirm(
+          'Datenschutz-Warnung',
+          validationWarning +
+            '\n\nMöchten Sie den Kommentar trotzdem speichern?',
+          'Ja, speichern',
+          'Abbrechen'
+        );
+
+        if (!proceed) {
+          return;
+        }
+      }
+
       teacher.comment = comment.trim();
 
       if (this.socketService) {
         await this.socketService.updateComment(teacher.id, comment.trim());
       }
     }
+  }
+
+  /**
+   * DSGVO: Validiert Kommentare auf personenbezogene Daten
+   * Warnt vor möglichen Schülernamen oder sensiblen Daten
+   */
+  private validateCommentForPrivacy(comment: string): string | null {
+    // Pattern für mögliche Namen (Großbuchstabe gefolgt von Kleinbuchstaben)
+    const namePattern = /\b[A-ZÄÖÜ][a-zäöüß]+ [A-ZÄÖÜ][a-zäöüß]+\b/;
+
+    // Pattern für Geburtsdaten
+    const datePattern = /\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/;
+
+    // Verdächtige Begriffe
+    const suspiciousWords = [
+      'schüler.*name',
+      'student.*name',
+      'heißt',
+      'ist.*jahre.*alt',
+      'geburtsdatum',
+      'adresse',
+      'wohnt',
+      'telefon',
+      'handy',
+      'email',
+    ];
+
+    if (namePattern.test(comment)) {
+      return '⚠️ Der Kommentar enthält möglicherweise Namen. Bitte verwenden Sie KEINE Schülernamen!';
+    }
+
+    if (datePattern.test(comment)) {
+      return '⚠️ Der Kommentar enthält ein Datum. Bitte keine Geburtsdaten oder persönliche Daten eingeben!';
+    }
+
+    for (const word of suspiciousWords) {
+      const regex = new RegExp(word, 'i');
+      if (regex.test(comment)) {
+        return '⚠️ Der Kommentar enthält möglicherweise personenbezogene Daten. Bitte nur allgemeine Informationen eingeben!';
+      }
+    }
+
+    return null;
   }
 
   async deleteComment(teacher: Teacher): Promise<void> {
@@ -547,6 +609,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   /**
    * Erstellt Mock-Lehrer-Daten für einen Test-Alarm
+   * DSGVO: Enthält nur Klassenbezeichnungen, KEINE Schülerdaten
    */
   private getMockTeachersForAlarm(): Teacher[] {
     const hourLabel = this.getHourLabel(this.selectedHour);

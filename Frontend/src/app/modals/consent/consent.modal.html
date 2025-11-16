@@ -1,0 +1,217 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Datenschutz & Nutzung</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="consent-container">
+    <!-- Header -->
+    <div class="consent-header">
+      <div class="icon-wrapper">
+        <ion-icon name="shield-checkmark" class="consent-icon"></ion-icon>
+      </div>
+      <h1>Willkommen bei der Feueralarm App!</h1>
+      <p class="subtitle">
+        Bevor Sie die App nutzen können, benötigen wir Ihre Zustimmung zur
+        Datenverarbeitung gemäß DSGVO.
+      </p>
+    </div>
+
+    <!-- Wichtige Info -->
+    <div class="info-card">
+      <div class="info-icon">
+        <ion-icon name="information-circle"></ion-icon>
+      </div>
+      <div class="info-content">
+        <h3>Was wir verarbeiten</h3>
+        <p>
+          Diese App erfasst <strong>nur die notwendigen Daten</strong> für
+          Feueralarmübungen: Lehrkräfte, Klassenbezeichnungen und Räume.
+          <strong>Keine individuellen Schülerdaten!</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- Zusammenfassung -->
+    <div class="summary-section">
+      <h3>
+        <ion-icon name="list"></ion-icon>
+        Zusammenfassung
+      </h3>
+
+      <div class="summary-items">
+        <div class="summary-item">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <div>
+            <strong>Datenminimierung</strong>
+            <p>Nur notwendige Daten werden erfasst</p>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <div>
+            <strong>Keine Schülerdaten</strong>
+            <p>Nur Klassenbezeichnungen, keine Namen</p>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <div>
+            <strong>Lokale Verarbeitung</strong>
+            <p>Daten bleiben innerhalb der BSO</p>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <div>
+            <strong>Ihre Rechte</strong>
+            <p>Auskunft, Löschung und Widerruf jederzeit möglich</p>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <div>
+            <strong>Verschlüsselte Übertragung</strong>
+            <p>HTTPS/TLS und sichere Passwort-Speicherung</p>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <div>
+            <strong>Kein Tracking</strong>
+            <p>Keine Analyse-Tools oder Werbung</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details (ausklappbar) -->
+    <div class="details-section">
+      <ion-button
+        expand="block"
+        fill="clear"
+        (click)="toggleDetails()"
+        class="details-toggle"
+      >
+        <ion-icon
+          [name]="showDetails ? 'chevron-up' : 'chevron-down'"
+          slot="start"
+        ></ion-icon>
+        {{ showDetails ? 'Details ausblenden' : 'Details anzeigen' }}
+      </ion-button>
+
+      <div class="details-content" *ngIf="showDetails">
+        <h4>Welche Daten werden verarbeitet?</h4>
+        <ul>
+          <li>Benutzername und verschlüsseltes Passwort</li>
+          <li>Namen von Lehrkräften</li>
+          <li>Klassenbezeichnungen (z.B. "IT23")</li>
+          <li>Raumbezeichnungen</li>
+          <li>Anwesenheitsstatus und Zeitstempel</li>
+          <li>Optional: Kommentare und Fotos zur Dokumentation</li>
+        </ul>
+
+        <h4>Rechtsgrundlage</h4>
+        <ul>
+          <li>Art. 6 Abs. 1 lit. e DSGVO (öffentliches Interesse)</li>
+          <li>§ 83 Hessisches Schulgesetz</li>
+          <li>Ihre Einwilligung (für optionale Features)</li>
+        </ul>
+
+        <h4>Speicherdauer</h4>
+        <ul>
+          <li>Aktive Alarmdaten: Während der Übung</li>
+          <li>Archivierte Daten: Bis zu 2 Jahre (Dokumentationspflicht)</li>
+          <li>Benutzerdaten: Solange das Konto aktiv ist</li>
+        </ul>
+
+        <h4>Ihre Rechte</h4>
+        <ul>
+          <li>Auskunft über Ihre gespeicherten Daten</li>
+          <li>Berichtigung unrichtiger Daten</li>
+          <li>Löschung Ihrer Daten</li>
+          <li>Einschränkung der Verarbeitung</li>
+          <li>Widerspruch gegen die Verarbeitung</li>
+          <li>Datenübertragbarkeit</li>
+          <li>Beschwerde bei der Aufsichtsbehörde</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Vollständige Datenschutzerklärung -->
+    <div class="privacy-link">
+      <ion-button expand="block" fill="outline" (click)="openPrivacyPolicy()">
+        <ion-icon name="document-text" slot="start"></ion-icon>
+        Vollständige Datenschutzerklärung lesen
+      </ion-button>
+    </div>
+
+    <!-- Zustimmungs-Checkboxen -->
+    <div class="consent-checkboxes">
+      <div class="checkbox-item required">
+        <ion-checkbox
+          [(ngModel)]="privacyAccepted"
+          class="consent-checkbox"
+        ></ion-checkbox>
+        <label (click)="privacyAccepted = !privacyAccepted">
+          Ich habe die
+          <a (click)="openPrivacyPolicy(); $event.stopPropagation()">
+            Datenschutzerklärung
+          </a>
+          gelesen und akzeptiere die Verarbeitung meiner Daten wie beschrieben.
+          <span class="required-badge">Erforderlich</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Hinweis -->
+    <div class="notice">
+      <ion-icon name="information-circle"></ion-icon>
+      <p>
+        <strong>Hinweis:</strong> Die Zustimmung ist erforderlich, um die App zu
+        nutzen. Sie können Ihre Zustimmung jederzeit in den Einstellungen
+        widerrufen.
+      </p>
+    </div>
+
+    <!-- Buttons -->
+    <div class="button-group">
+      <ion-button
+        expand="block"
+        color="primary"
+        (click)="acceptAndContinue()"
+        [disabled]="!canContinue()"
+        class="accept-button"
+      >
+        <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+        Zustimmen und fortfahren
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        fill="clear"
+        color="medium"
+        (click)="decline()"
+        class="decline-button"
+      >
+        Ablehnen
+      </ion-button>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="footer-info">
+      <p>
+        <ion-icon name="shield-checkmark"></ion-icon>
+        Berufliche Schulen Obersberg |
+        <a href="mailto:datenschutz@bso-hef.de">datenschutz@bso-hef.de</a>
+      </p>
+      <p class="version">Version 1.0.0 | Stand: 16.11.2025</p>
+    </div>
+  </div>
+</ion-content>
