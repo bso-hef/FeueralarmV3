@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { attachmentSchema } = require("./attachment.schema");
 const uniqueValidator = require("mongoose-unique-validator");
 
 const postSchema = mongoose.Schema({

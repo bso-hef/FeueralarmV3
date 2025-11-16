@@ -1,0 +1,86 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Anhänge - {{ teacher.class }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Upload Button -->
+  <div class="upload-section">
+    <ion-button
+      expand="block"
+      (click)="showUploadOptions()"
+      [disabled]="isUploading"
+    >
+      <ion-icon slot="start" name="cloud-upload"></ion-icon>
+      Anhang hinzufügen
+    </ion-button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Lade Anhänge...</p>
+  </div>
+
+  <!-- Attachments List -->
+  <ion-list *ngIf="!isLoading">
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="attachments.length === 0">
+      <ion-icon name="document"></ion-icon>
+      <h3>Keine Anhänge</h3>
+      <p>Füge Fotos, Dateien oder Notizen hinzu</p>
+    </div>
+
+    <!-- Attachment Items -->
+    <ion-item *ngFor="let attachment of attachments" lines="full">
+      <!-- Thumbnail für Bilder -->
+      <ion-thumbnail slot="start" *ngIf="isImage(attachment)">
+        <img [src]="attachment.url" alt="Foto" />
+      </ion-thumbnail>
+
+      <!-- Icon für andere Dateien -->
+      <ion-icon
+        slot="start"
+        [name]="getAttachmentIcon(attachment.type)"
+        *ngIf="!isImage(attachment)"
+        style="font-size: 32px; margin-right: 16px"
+      ></ion-icon>
+
+      <!-- Info -->
+      <ion-label>
+        <h3>{{ attachment.filename }}</h3>
+        <p *ngIf="attachment.size">
+          {{ photoService.formatFileSize(attachment.size) }}
+        </p>
+        <p class="upload-date">
+          {{ photoService.formatDate(attachment.uploadedAt) }}
+        </p>
+      </ion-label>
+
+      <!-- Actions -->
+      <ion-button
+        slot="end"
+        fill="clear"
+        color="primary"
+        (click)="window.open(attachment.url, '_blank')"
+      >
+        <ion-icon slot="icon-only" name="eye-outline"></ion-icon>
+      </ion-button>
+
+      <ion-button
+        slot="end"
+        fill="clear"
+        color="danger"
+        (click)="deleteAttachment(attachment)"
+      >
+        <ion-icon slot="icon-only" name="trash"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+</ion-content>

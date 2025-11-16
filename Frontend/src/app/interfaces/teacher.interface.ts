@@ -6,6 +6,18 @@ export interface Teacher {
   room?: string[];
   state?: TeacherState;
   comment?: string;
+  attachments?: Attachment[]; // ← NEU: Fotos & Dateien
+}
+
+export interface Attachment {
+  id: string;
+  type: 'photo' | 'document' | 'note';
+  url: string;
+  filename: string;
+  mimeType?: string;
+  size?: number;
+  uploadedAt: string;
+  uploadedBy?: string;
 }
 
 export enum TeacherState {

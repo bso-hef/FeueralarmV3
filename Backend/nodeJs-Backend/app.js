@@ -6,7 +6,8 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
 const userRoutes = require("./routes/users");
-const alertRoutes = require("./routes/alerts"); // NEU
+const alertRoutes = require("./routes/alerts");
+const attachmentRoutes = require("./routes/attachments.routes");
 
 const app = express();
 
@@ -19,8 +20,8 @@ mongoose
     console.log("Connection failed!");
   });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({ limit: "10mb" })); // ← ERWEITERT: Größeres Limit für Fotos
+app.use(bodyParser.urlencoded({ extended: false, limit: "10mb" })); // ← ERWEITERT
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -37,6 +38,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/users/", userRoutes);
-app.use("/api/alerts/", alertRoutes); // NEU
+app.use("/api/alerts/", alertRoutes);
+app.use("/api/teachers/", attachmentRoutes); // ← NEU: Attachment Routes
 
 module.exports = app;

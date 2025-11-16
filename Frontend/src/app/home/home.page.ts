@@ -40,7 +40,9 @@ import {
   wifi, // ← NEU
   cloudOffline, // ← NEU
   syncOutline, // ← NEU
+  attachOutline, // ← NEU
 } from 'ionicons/icons';
+import { AttachmentModalComponent } from '../components/attachment-modal/attachment-modal.component'; // ← NEU
 import { Subscription } from 'rxjs';
 import moment from 'moment';
 
@@ -168,6 +170,7 @@ export class HomePage implements OnInit, OnDestroy {
       archiveOutline,
       wifi, // ← NEU
       cloudOffline, // ← NEU
+      attachOutline, // ← NEU
       syncOutline, // ← NEU
     });
   }
@@ -705,6 +708,21 @@ export class HomePage implements OnInit, OnDestroy {
         'Synchronisation fehlgeschlagen'
       );
     }
+  }
+
+  // ==========================================
+  // ATTACHMENTS
+  // ==========================================
+
+  async openAttachments(teacher: Teacher): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: AttachmentModalComponent,
+      componentProps: {
+        teacher,
+      },
+    });
+
+    await modal.present();
   }
 
   // ==========================================
