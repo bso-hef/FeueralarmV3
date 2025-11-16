@@ -97,15 +97,7 @@ interface DashboardStats {
     IonRow,
     IonCol,
   ],
-  // ✅ NEU: Providers hinzugefügt für Standalone Component
-  providers: [
-    AlarmService,
-    SocketService,
-    SyncService,
-    RestService,
-    FeedbackService,
-    DataService,
-  ],
+  // ✅ Kein providers Array mehr nötig - alle Services haben providedIn: 'root'
 })
 export class DashboardPage implements OnInit, OnDestroy {
   // Data
