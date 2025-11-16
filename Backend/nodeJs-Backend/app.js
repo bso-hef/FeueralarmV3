@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const userRoutes = require("./routes/users");
 const alertRoutes = require("./routes/alerts");
 const attachmentRoutes = require("./routes/attachments.routes");
+const exportRoutes = require("./routes/export"); // UAP 6.3: Export-API
 
 const app = express();
 
@@ -40,5 +41,6 @@ app.use((req, res, next) => {
 app.use("/api/users/", userRoutes);
 app.use("/api/alerts/", alertRoutes);
 app.use("/api/teachers/", attachmentRoutes); // ← NEU: Attachment Routes
+app.use("/api/export/", exportRoutes); // ← UAP 6.3: Export-API mit Auth
 
 module.exports = app;
