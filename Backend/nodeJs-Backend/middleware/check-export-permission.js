@@ -3,8 +3,7 @@ module.exports = (req, res, next) => {
     const role = req.userData.role;
     const username = req.userData.username;
 
-    // Rollen die Export-Rechte haben
-    // Admin und Verwaltung können exportieren
+    // Erlaubte Rollen
     const allowedRoles = ["admin", "verwaltung"];
 
     if (role && allowedRoles.includes(role)) {
@@ -21,31 +20,5 @@ module.exports = (req, res, next) => {
       message: "Sie haben keine Berechtigung für Export-Funktionen",
       detail: "Nur Administratoren und Verwaltungspersonal können Daten exportieren",
     });
-  }
-};
-
-/**
- * Optional: Exportierbare Version für programmatische Checks
- */
-module.exports.checkExportPermission = (userData) => {
-  try {
-    const allowedRoles = ["admin", "verwaltung"];
-
-    if (userData.role && allowedRoles.includes(userData.role)) {
-      return {
-        hasPermission: true,
-        message: "Export-Berechtigung vorhanden",
-      };
-    } else {
-      return {
-        hasPermission: false,
-        message: "Keine Export-Berechtigung",
-      };
-    }
-  } catch (error) {
-    return {
-      hasPermission: false,
-      message: error.message,
-    };
   }
 };
