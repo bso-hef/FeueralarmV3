@@ -156,4 +156,15 @@ export class InformationModal implements OnInit {
   close(): void {
     this.modalCtrl.dismiss();
   }
+
+  /**
+   * DSGVO: Öffnet die Datenschutzerklärung
+   */
+  async openPrivacy(): Promise<void> {
+    // Close modal first
+    await this.modalCtrl.dismiss();
+
+    // Navigate to privacy page
+    this.router.navigate(['/privacy']);
+  }
 }

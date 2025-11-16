@@ -1,0 +1,667 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Datenschutzerklärung</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="privacy-container">
+    <!-- Header -->
+    <div class="privacy-header">
+      <ion-icon name="shield-checkmark" class="header-icon"></ion-icon>
+      <h1>Datenschutzerklärung</h1>
+      <p class="subtitle">Feueralarm App - Berufliche Schulen Obersberg</p>
+      <p class="last-updated">Stand: {{ lastUpdated }}</p>
+    </div>
+
+    <!-- Quick Navigation -->
+    <div class="quick-nav">
+      <h3>Schnellnavigation</h3>
+      <ion-list>
+        <ion-item button (click)="scrollToSection('verantwortlicher')">
+          <ion-icon name="person-circle" slot="start"></ion-icon>
+          <ion-label>Verantwortlicher</ion-label>
+        </ion-item>
+        <ion-item button (click)="scrollToSection('datenverarbeitung')">
+          <ion-icon name="document-text" slot="start"></ion-icon>
+          <ion-label>Datenverarbeitung</ion-label>
+        </ion-item>
+        <ion-item button (click)="scrollToSection('rechte')">
+          <ion-icon name="hand-right" slot="start"></ion-icon>
+          <ion-label>Ihre Rechte</ion-label>
+        </ion-item>
+        <ion-item button (click)="scrollToSection('sicherheit')">
+          <ion-icon name="lock-closed" slot="start"></ion-icon>
+          <ion-label>Datensicherheit</ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Einleitung -->
+    <section class="privacy-section">
+      <h2>Einleitung</h2>
+      <p>
+        Der Schutz Ihrer personenbezogenen Daten ist uns sehr wichtig. Diese
+        Datenschutzerklärung informiert Sie über die Verarbeitung Ihrer
+        personenbezogenen Daten bei der Nutzung der Feueralarm-App der
+        Beruflichen Schulen Obersberg.
+      </p>
+      <p>
+        Wir verarbeiten Ihre Daten ausschließlich auf Grundlage der gesetzlichen
+        Bestimmungen, insbesondere der Datenschutz-Grundverordnung (DSGVO) und
+        des Hessischen Datenschutz- und Informationsfreiheitsgesetzes (HDSIG).
+      </p>
+    </section>
+
+    <!-- 1. Verantwortlicher -->
+    <section id="verantwortlicher" class="privacy-section">
+      <h2>
+        <ion-icon name="person-circle"></ion-icon>
+        1. Verantwortlicher
+      </h2>
+      <p>Verantwortlich für die Datenverarbeitung ist:</p>
+      <div class="info-box">
+        <p><strong>Berufliche Schulen Obersberg</strong></p>
+        <p>Hauswirtschaftsweg 2</p>
+        <p>36251 Bad Hersfeld</p>
+        <p>
+          <ion-icon name="call"></ion-icon>
+          Tel: <a href="tel:+496621400930">06621 400930</a>
+        </p>
+        <p>
+          <ion-icon name="mail"></ion-icon>
+          E-Mail: <a href="mailto:info@bso-hef.de">info@bso-hef.de</a>
+        </p>
+        <p>
+          <ion-icon name="globe"></ion-icon>
+          Web:
+          <a href="https://www.bso-hef.de" target="_blank">www.bso-hef.de</a>
+        </p>
+      </div>
+
+      <h3>Datenschutzbeauftragter</h3>
+      <p>
+        Bei Fragen zum Datenschutz können Sie sich an den
+        Datenschutzbeauftragten der Beruflichen Schulen Obersberg wenden:
+      </p>
+      <div class="info-box">
+        <p>
+          <ion-icon name="mail"></ion-icon>
+          E-Mail:
+          <a href="mailto:datenschutz@bso-hef.de">datenschutz@bso-hef.de</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- 2. Zweck der Datenverarbeitung -->
+    <section id="datenverarbeitung" class="privacy-section">
+      <h2>
+        <ion-icon name="document-text"></ion-icon>
+        2. Zweck der Datenverarbeitung
+      </h2>
+
+      <h3>Hauptzweck der App</h3>
+      <p>
+        Die Feueralarm-App dient der
+        <strong
+          >Koordination und Dokumentation von Feueralarmübungen und
+          Evakuierungsmaßnahmen</strong
+        >
+        an den Beruflichen Schulen Obersberg. Sie unterstützt Lehrkräfte dabei,
+        die Anwesenheit ihrer Lerngruppen während einer Evakuierung schnell und
+        zuverlässig zu erfassen.
+      </p>
+
+      <h3>Verarbeitete Daten</h3>
+      <ion-list>
+        <ion-item>
+          <ion-icon
+            name="checkmark-circle"
+            slot="start"
+            color="success"
+          ></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <h4>Benutzerdaten</h4>
+            <p>
+              Benutzername, verschlüsseltes Passwort, Benutzerrolle
+              (Lehrer/Admin)
+            </p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            name="checkmark-circle"
+            slot="start"
+            color="success"
+          ></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <h4>Lehrkraftdaten</h4>
+            <p>Namen der Lehrkräfte (zur Zuordnung von Klassen und Räumen)</p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            name="checkmark-circle"
+            slot="start"
+            color="success"
+          ></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <h4>Klassendaten</h4>
+            <p>
+              Klassenbezeichnungen (z.B. "IT23", "KBS-A") - OHNE individuelle
+              Schülernamen
+            </p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            name="checkmark-circle"
+            slot="start"
+            color="success"
+          ></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <h4>Raumdaten</h4>
+            <p>Raumbezeichnungen und Raumnummern</p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            name="checkmark-circle"
+            slot="start"
+            color="success"
+          ></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <h4>Status- und Zeitdaten</h4>
+            <p>
+              Anwesenheitsstatus, Zeitstempel der Meldungen, Kommentare zur
+              Situation
+            </p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            name="checkmark-circle"
+            slot="start"
+            color="success"
+          ></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <h4>Optionale Anhänge</h4>
+            <p>
+              Fotos oder Dokumente zur Dokumentation (z.B. Raumbelegung,
+              besondere Vorkommnisse)
+            </p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <div class="warning-box">
+        <ion-icon name="warning"></ion-icon>
+        <div>
+          <h4>Wichtig: Keine Schülerdaten!</h4>
+          <p>
+            Die App erfasst
+            <strong>KEINE individuellen Schülerdaten</strong> (Namen,
+            Geburtsdaten, Adressen etc.). Es werden ausschließlich
+            Klassenbezeichnungen und der Anwesenheitsstatus der gesamten Klasse
+            erfasst.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Rechtsgrundlage -->
+    <section class="privacy-section">
+      <h2>
+        <ion-icon name="document"></ion-icon>
+        3. Rechtsgrundlage der Verarbeitung
+      </h2>
+      <p>
+        Die Verarbeitung Ihrer personenbezogenen Daten erfolgt auf folgenden
+        Rechtsgrundlagen:
+      </p>
+
+      <div class="legal-basis">
+        <h4>Art. 6 Abs. 1 lit. e DSGVO - Öffentliches Interesse</h4>
+        <p>
+          Die Datenverarbeitung ist zur Erfüllung der schulischen Aufgaben
+          erforderlich, insbesondere zur Gewährleistung der Sicherheit von
+          Schülern und Lehrkräften bei Notfallsituationen und
+          Evakuierungsübungen.
+        </p>
+      </div>
+
+      <div class="legal-basis">
+        <h4>§ 83 Hessisches Schulgesetz (HSchG)</h4>
+        <p>
+          Die Schule ist berechtigt und verpflichtet, personenbezogene Daten zu
+          verarbeiten, soweit dies zur Erfüllung des Bildungs- und
+          Erziehungsauftrages erforderlich ist.
+        </p>
+      </div>
+
+      <div class="legal-basis">
+        <h4>Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO)</h4>
+        <p>
+          Für bestimmte Datenverarbeitungen (z.B. Upload von Fotos/Dokumenten)
+          holen wir Ihre explizite Einwilligung ein, die Sie jederzeit
+          widerrufen können.
+        </p>
+      </div>
+    </section>
+
+    <!-- 4. Datenminimierung -->
+    <section class="privacy-section">
+      <h2>
+        <ion-icon name="file-tray-stacked"></ion-icon>
+        4. Datenminimierung
+      </h2>
+      <p>
+        Wir befolgen den Grundsatz der Datenminimierung und verarbeiten nur die
+        Daten, die für den jeweiligen Zweck tatsächlich erforderlich sind.
+      </p>
+
+      <div class="success-box">
+        <ion-icon name="shield-checkmark"></ion-icon>
+        <div>
+          <h4>Was wir NICHT speichern:</h4>
+          <ul>
+            <li>❌ Individuelle Schülernamen</li>
+            <li>❌ Geburtsdaten von Schülern</li>
+            <li>❌ Adressen oder Kontaktdaten von Schülern</li>
+            <li>❌ Fehlzeitendetails einzelner Schüler</li>
+            <li>❌ Gesundheitsdaten</li>
+            <li>❌ Biometrische Daten</li>
+          </ul>
+        </div>
+      </div>
+
+      <p>
+        <strong>Hinweis zu Kommentaren und Uploads:</strong> Bitte achten Sie
+        darauf, in Kommentaren oder Foto-Uploads keine personenbezogenen Daten
+        von Schülern zu erfassen.
+      </p>
+    </section>
+
+    <!-- 5. Empfänger der Daten -->
+    <section class="privacy-section">
+      <h2>
+        <ion-icon name="people"></ion-icon>
+        5. Empfänger der Daten
+      </h2>
+      <p>
+        Ihre Daten werden ausschließlich an folgende Empfänger weitergegeben:
+      </p>
+
+      <ion-list>
+        <ion-item>
+          <ion-label class="ion-text-wrap">
+            <h4>Lehrkräfte der BSO</h4>
+            <p>
+              Zugriff auf Alarmdaten und Anwesenheitsstatus im Rahmen ihrer
+              Aufgaben während Feueralarmübungen
+            </p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label class="ion-text-wrap">
+            <h4>Administratoren</h4>
+            <p>
+              IT-Administratoren der BSO zur technischen Verwaltung und Wartung
+              der App
+            </p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label class="ion-text-wrap">
+            <h4>Hosting-Provider</h4>
+            <p>
+              Server-Hosting erfolgt durch [Provider-Name einfügen]. Der
+              Standort der Server befindet sich in Deutschland/EU.
+            </p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <p>
+        <strong>Keine Weitergabe an Dritte:</strong> Ihre Daten werden nicht an
+        kommerzielle Dritte verkauft oder zu Werbezwecken verwendet.
+      </p>
+    </section>
+
+    <!-- 6. Speicherdauer -->
+    <section class="privacy-section">
+      <h2>
+        <ion-icon name="time"></ion-icon>
+        6. Speicherdauer
+      </h2>
+
+      <ion-list>
+        <ion-item>
+          <ion-label class="ion-text-wrap">
+            <h4>Aktive Alarmdaten</h4>
+            <p>Während der laufenden Feueralarmübung</p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label class="ion-text-wrap">
+            <h4>Archivierte Alarmdaten</h4>
+            <p>
+              Bis zu 2 Jahre nach Durchführung der Übung (Dokumentationspflicht
+              für Notfallübungen)
+            </p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label class="ion-text-wrap">
+            <h4>Benutzerdaten</h4>
+            <p>
+              Solange das Benutzerkonto aktiv ist; nach Beendigung des
+              Dienstverhältnisses bzw. auf Wunsch des Nutzers
+            </p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-label class="ion-text-wrap">
+            <h4>Lokale Daten (Offline-Modus)</h4>
+            <p>
+              Werden beim Logout oder bei Deinstallation der App automatisch
+              gelöscht
+            </p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <p>
+        Nach Ablauf der Speicherfrist werden die Daten automatisch gelöscht,
+        sofern keine gesetzlichen Aufbewahrungspflichten bestehen.
+      </p>
+    </section>
+
+    <!-- 7. Ihre Rechte -->
+    <section id="rechte" class="privacy-section">
+      <h2>
+        <ion-icon name="hand-right"></ion-icon>
+        7. Ihre Rechte nach DSGVO
+      </h2>
+      <p>Sie haben folgende Rechte bezüglich Ihrer personenbezogenen Daten:</p>
+
+      <div class="rights-grid">
+        <div class="right-card">
+          <ion-icon name="information-circle"></ion-icon>
+          <h4>Auskunftsrecht (Art. 15 DSGVO)</h4>
+          <p>
+            Sie können Auskunft über Ihre gespeicherten personenbezogenen Daten
+            verlangen.
+          </p>
+        </div>
+
+        <div class="right-card">
+          <ion-icon name="create"></ion-icon>
+          <h4>Berichtigungsrecht (Art. 16 DSGVO)</h4>
+          <p>Sie können die Berichtigung unrichtiger Daten verlangen.</p>
+        </div>
+
+        <div class="right-card">
+          <ion-icon name="trash"></ion-icon>
+          <h4>Löschungsrecht (Art. 17 DSGVO)</h4>
+          <p>
+            Sie können die Löschung Ihrer Daten verlangen, sofern keine
+            gesetzlichen Aufbewahrungspflichten entgegenstehen.
+          </p>
+        </div>
+
+        <div class="right-card">
+          <ion-icon name="pause-circle"></ion-icon>
+          <h4>Einschränkungsrecht (Art. 18 DSGVO)</h4>
+          <p>
+            Sie können die Einschränkung der Verarbeitung Ihrer Daten verlangen.
+          </p>
+        </div>
+
+        <div class="right-card">
+          <ion-icon name="download"></ion-icon>
+          <h4>Datenübertragbarkeit (Art. 20 DSGVO)</h4>
+          <p>
+            Sie können die Herausgabe Ihrer Daten in einem strukturierten Format
+            verlangen.
+          </p>
+        </div>
+
+        <div class="right-card">
+          <ion-icon name="close-circle"></ion-icon>
+          <h4>Widerspruchsrecht (Art. 21 DSGVO)</h4>
+          <p>Sie können der Verarbeitung Ihrer Daten widersprechen.</p>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <p>
+          <strong>Kontakt zur Geltendmachung Ihrer Rechte:</strong><br />
+          E-Mail:
+          <a href="mailto:datenschutz@bso-hef.de">datenschutz@bso-hef.de</a
+          ><br />
+          oder schriftlich an die oben genannte Adresse der Beruflichen Schulen
+          Obersberg
+        </p>
+      </div>
+
+      <h3>Beschwerderecht bei Aufsichtsbehörde</h3>
+      <p>
+        Sie haben das Recht, sich bei der zuständigen
+        Datenschutzaufsichtsbehörde zu beschweren:
+      </p>
+      <div class="info-box">
+        <p>
+          <strong
+            >Der Hessische Beauftragte für Datenschutz und
+            Informationsfreiheit</strong
+          >
+        </p>
+        <p>Postfach 3163</p>
+        <p>65021 Wiesbaden</p>
+        <p>
+          <ion-icon name="mail"></ion-icon>
+          E-Mail:
+          <a href="mailto:poststelle@datenschutz.hessen.de"
+            >poststelle@datenschutz.hessen.de</a
+          >
+        </p>
+        <p>
+          <ion-icon name="globe"></ion-icon>
+          Web:
+          <a href="https://datenschutz.hessen.de" target="_blank"
+            >datenschutz.hessen.de</a
+          >
+        </p>
+      </div>
+    </section>
+
+    <!-- 8. Datensicherheit -->
+    <section id="sicherheit" class="privacy-section">
+      <h2>
+        <ion-icon name="lock-closed"></ion-icon>
+        8. Datensicherheit
+      </h2>
+      <p>
+        Wir setzen technische und organisatorische Sicherheitsmaßnahmen ein, um
+        Ihre Daten gegen zufällige oder vorsätzliche Manipulationen, Verlust,
+        Zerstörung oder den Zugriff unberechtigter Personen zu schützen.
+      </p>
+
+      <h3>Technische Maßnahmen</h3>
+      <ion-list>
+        <ion-item>
+          <ion-icon
+            name="shield-checkmark"
+            slot="start"
+            color="primary"
+          ></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <strong>Verschlüsselte Datenübertragung:</strong>
+            HTTPS/TLS-Verschlüsselung
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            name="shield-checkmark"
+            slot="start"
+            color="primary"
+          ></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <strong>Passwort-Hashing:</strong> Passwörter werden mit bcrypt
+            gehashed
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            name="shield-checkmark"
+            slot="start"
+            color="primary"
+          ></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <strong>Zugangskontrolle:</strong> JWT-basierte Authentifizierung
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            name="shield-checkmark"
+            slot="start"
+            color="primary"
+          ></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <strong>Rollenbasierte Berechtigungen:</strong> Unterschiedliche
+            Zugriffslevel
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon
+            name="shield-checkmark"
+            slot="start"
+            color="primary"
+          ></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <strong>Regelmäßige Backups:</strong> Automatische Datensicherung
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <h3>Organisatorische Maßnahmen</h3>
+      <ul>
+        <li>Zugriffsbeschränkung auf autorisiertes Personal</li>
+        <li>Schulung der Mitarbeiter im Datenschutz</li>
+        <li>Regelmäßige Sicherheitsüberprüfungen</li>
+        <li>Datenschutzfreundliche Voreinstellungen (Privacy by Design)</li>
+      </ul>
+    </section>
+
+    <!-- 9. Offline-Modus -->
+    <section class="privacy-section">
+      <h2>
+        <ion-icon name="cloud-offline"></ion-icon>
+        9. Offline-Modus und lokale Datenspeicherung
+      </h2>
+      <p>
+        Die App verfügt über einen Offline-Modus, der es ermöglicht, die App
+        auch ohne Internetverbindung zu nutzen. Dabei werden Daten temporär auf
+        Ihrem Gerät gespeichert.
+      </p>
+
+      <h3>Lokale Speicherung</h3>
+      <ul>
+        <li>
+          <strong>LocalStorage/IndexedDB:</strong> Login-Daten (verschlüsselt),
+          App-Einstellungen
+        </li>
+        <li>
+          <strong>Cache:</strong> Temporäre Alarmdaten während Offline-Nutzung
+        </li>
+        <li>
+          <strong>Automatische Synchronisation:</strong> Daten werden bei
+          Wiederherstellung der Internetverbindung mit dem Server synchronisiert
+        </li>
+      </ul>
+
+      <div class="info-box">
+        <p>
+          <strong>Hinweis:</strong> Beim Logout oder bei Deinstallation der App
+          werden alle lokal gespeicherten Daten automatisch gelöscht.
+        </p>
+      </div>
+    </section>
+
+    <!-- 10. Cookies und Tracking -->
+    <section class="privacy-section">
+      <h2>
+        <ion-icon name="analytics"></ion-icon>
+        10. Cookies und Tracking
+      </h2>
+      <p>
+        Diese App verwendet <strong>keine Tracking-Cookies</strong> und
+        <strong>keine Analyse-Tools</strong> von Drittanbietern (wie Google
+        Analytics).
+      </p>
+
+      <h3>Technisch notwendige Daten</h3>
+      <p>Wir speichern ausschließlich technisch notwendige Informationen:</p>
+      <ul>
+        <li>Session-Token (JWT) für Authentifizierung</li>
+        <li>App-Einstellungen (Theme, Sprache)</li>
+        <li>Offline-Daten-Cache</li>
+      </ul>
+
+      <div class="success-box">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        <div>
+          <p>
+            <strong>Kein Tracking, keine Werbung:</strong> Wir sammeln keine
+            Daten zu Analysezwecken und geben keine Daten an Werbenetzwerke
+            weiter.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. Änderungen der Datenschutzerklärung -->
+    <section class="privacy-section">
+      <h2>
+        <ion-icon name="refresh"></ion-icon>
+        11. Änderungen dieser Datenschutzerklärung
+      </h2>
+      <p>
+        Wir behalten uns vor, diese Datenschutzerklärung anzupassen, um sie an
+        geänderte Rechtslagen oder bei Änderungen der App anzupassen.
+      </p>
+      <p><strong>Aktuelle Version:</strong> {{ lastUpdated }}</p>
+      <p>
+        Bei wesentlichen Änderungen werden Sie beim nächsten App-Start über die
+        Aktualisierung informiert und müssen Ihre Zustimmung erneut erteilen.
+      </p>
+    </section>
+
+    <!-- Footer -->
+    <div class="privacy-footer">
+      <ion-icon name="checkmark-circle" color="success"></ion-icon>
+      <p>
+        Diese Datenschutzerklärung wurde sorgfältig erstellt und berücksichtigt
+        die Anforderungen der DSGVO.
+      </p>
+      <p class="small-text">
+        Bei Fragen oder Anmerkungen wenden Sie sich bitte an:
+        <a href="mailto:datenschutz@bso-hef.de">datenschutz@bso-hef.de</a>
+      </p>
+    </div>
+
+    <!-- Back Button -->
+    <div class="back-button-container">
+      <ion-button expand="block" (click)="goBack()">
+        <ion-icon name="arrow-back" slot="start"></ion-icon>
+        Zurück zum Login
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
