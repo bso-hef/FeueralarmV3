@@ -455,3 +455,148 @@
 .alarm-card {
   animation: fadeIn 0.3s ease;
 }
+
+// ==========================================
+// API DOCUMENTATION WIDGET (UAP 7.2.1)
+// ==========================================
+
+.api-docs-widget {
+  margin: 16px 0;
+  border-left: 4px solid var(--ion-color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  ion-card-header {
+    padding-bottom: 8px;
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--ion-color-primary);
+
+      ion-icon {
+        font-size: 1.5rem;
+      }
+    }
+  }
+
+  .api-description {
+    margin: 0 0 16px;
+    color: var(--ion-color-medium);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .api-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: var(--ion-color-light);
+    border-radius: 8px;
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+
+      ion-icon {
+        font-size: 1.2rem;
+        color: var(--ion-color-primary);
+      }
+
+      span {
+        color: var(--ion-color-dark);
+      }
+    }
+  }
+
+  .api-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    ion-button {
+      --border-radius: 8px;
+      font-weight: 500;
+    }
+  }
+
+  .api-preview {
+    margin-top: 16px;
+    border: 1px solid var(--ion-color-light);
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+  }
+
+  .api-endpoints {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ion-color-light);
+
+    .endpoints-title {
+      margin: 0 0 12px;
+      font-weight: 600;
+      color: var(--ion-color-dark);
+      font-size: 0.95rem;
+    }
+
+    .endpoints-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 0.85rem;
+
+        &:not(:last-child) {
+          border-bottom: 1px solid var(--ion-color-light-shade);
+        }
+
+        ion-badge {
+          min-width: 45px;
+          font-size: 0.7rem;
+          font-weight: 600;
+        }
+
+        code {
+          background: var(--ion-color-light);
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-family: "Courier New", monospace;
+          font-size: 0.8rem;
+          color: var(--ion-color-dark);
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (min-width: 768px) {
+  .api-docs-widget {
+    .api-actions {
+      flex-direction: row;
+
+      ion-button {
+        flex: 1;
+      }
+    }
+  }
+}

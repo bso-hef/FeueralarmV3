@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {
   IonHeader,
   IonToolbar,
@@ -39,6 +40,15 @@ import {
   location,
   wifi,
   cloudOffline,
+  downloadOutline,
+  documentTextOutline,
+  documentOutline,
+  codeSlashOutline,
+  openOutline,
+  eyeOutline,
+  eyeOffOutline,
+  shieldCheckmarkOutline,
+  serverOutline,
 } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 
@@ -115,6 +125,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   isLoading = true;
   isOnline = true;
   lastUpdate: Date | null = null;
+  showAPIPreview = false; // API Docs Preview Toggle
 
   // Subscriptions
   private subscriptions: Subscription[] = [];
@@ -126,7 +137,8 @@ export class DashboardPage implements OnInit, OnDestroy {
     private restService: RestService,
     private feedbackService: FeedbackService,
     private dataService: DataService,
-    private router: Router
+    private router: Router,
+    private sanitizer: DomSanitizer
   ) {
     addIcons({
       arrowBack,
@@ -142,6 +154,15 @@ export class DashboardPage implements OnInit, OnDestroy {
       location,
       wifi,
       cloudOffline,
+      downloadOutline,
+      documentTextOutline,
+      documentOutline,
+      codeSlashOutline,
+      openOutline,
+      eyeOutline,
+      eyeOffOutline,
+      shieldCheckmarkOutline,
+      serverOutline,
     });
   }
 
@@ -352,5 +373,51 @@ export class DashboardPage implements OnInit, OnDestroy {
       return 0;
     }
     return Math.round((alarm.stats.complete / alarm.stats.total) * 100);
+  }
+
+  /**
+   * UAP 7.2.1: API-Dokumentation Widget
+   * Prüft ob User Zugriff auf API-Docs hat (nur Admin & Verwaltung)
+   */
+  canAccessAPIDocs(): boolean {
+    // User-Daten aus localStorage holen
+    const userDataString = localStorage.getItem('userData');
+    if (!userDataString) {
+      return false;
+    }
+
+    try {
+      const userData = JSON.parse(userDataString);
+      // Nur Admin und Verwaltung haben Zugriff
+      return userData.role === 'admin' || userData.role === 'verwaltung';
+    } catch (error) {
+      console.error('Error parsing userData:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Öffnet die API-Dokumentation in neuem Tab
+   */
+  openAPIDocsNewTab(): void {
+    const apiDocsURL = `${window.location.origin}/api-docs`;
+    window.open(apiDocsURL, '_blank');
+  }
+
+  /**
+   * Toggle API Docs Preview (iframe)
+   */
+  toggleAPIDocsPreview(): void {
+    this.showAPIPreview = !this.showAPIPreview;
+  }
+
+  /**
+   * Gibt die URL für das iframe zurück (als SafeResourceUrl für Angular Security)
+   */
+  getAPIDocsURL(): SafeResourceUrl {
+    // Hinweis: In production sollte hier die tatsächliche Backend-URL stehen
+    const backendURL = 'http://localhost:3000'; // oder aus environment
+    const apiDocsURL = `${backendURL}/api-docs`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(apiDocsURL);
   }
 }
