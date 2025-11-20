@@ -554,8 +554,11 @@ export class HomePage implements OnInit, OnDestroy {
 
   async triggerAlarm(): Promise<void> {
     console.log('🚨 triggerAlarm() wurde aufgerufen!');
-    alert('triggerAlarm wurde aufgerufen!'); // Debug
 
+    // 🔧 DEBUG: Confirm-Dialog temporär deaktiviert
+    const confirmed = true; // ← Änderung: Immer true für Debug
+
+    /* ORIGINAL CODE (für später wieder aktivieren):
     const confirmed = await this.feedbackService.showConfirm(
       'Feueralarm auslösen',
       `Möchtest du den Feueralarm für die ${this.getHourLabel(
@@ -564,15 +567,24 @@ export class HomePage implements OnInit, OnDestroy {
       'Auslösen',
       'Abbrechen'
     );
+    */
+
+    console.log('✅ Confirmed:', confirmed);
 
     if (confirmed) {
       try {
+        console.log('🚀 Starting alarm trigger process...');
         await this.feedbackService.showLoading('Feueralarm wird ausgelöst...');
         const day = moment().format('YYYYMMDD');
 
+        console.log('📅 Day:', day);
+        console.log('⏰ Selected Hour:', this.selectedHour);
+
         if (this.socketService) {
           // Mit Socket - normaler Weg
+          console.log('🔌 Triggering via Socket...');
           this.socketService.triggerAlert(this.selectedHour, day);
+
           await this.delay(2000);
           await this.feedbackService.hideLoading();
           await this.feedbackService.showSuccessToast('Feueralarm ausgelöst!');
@@ -600,12 +612,15 @@ export class HomePage implements OnInit, OnDestroy {
           this.isLoading = false;
         }
       } catch (error) {
+        console.error('❌ Error in triggerAlarm:', error);
         await this.feedbackService.hideLoading();
         await this.feedbackService.showError(
           error,
           'Fehler beim Auslösen des Alarms'
         );
       }
+    } else {
+      console.log('❌ Alarm trigger cancelled by user');
     }
   }
 
