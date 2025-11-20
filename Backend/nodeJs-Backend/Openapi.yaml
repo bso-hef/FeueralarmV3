@@ -1,0 +1,628 @@
+openapi: 3.0.3
+info:
+  title: FeueralarmV3 Export API
+  description: |
+    Export-API für das Feueralarm-Management-System.
+
+    Diese API ermöglicht den Export von Feueralarm-Daten in verschiedenen Formaten (CSV, PDF, JSON).
+
+    **Authentifizierung:**
+    - Alle Endpunkte erfordern einen gültigen JWT-Token
+    - Token muss im `Authorization` Header als `Bearer <token>` übergeben werden
+
+    **Berechtigungen:**
+    - Export-Funktionen erfordern spezielle Export-Berechtigungen
+    - Nur Benutzer mit `export` oder `admin` Rolle können exportieren
+
+    **UAP-Zuordnung:**
+    - UAP 7.2.1: API-Spezifikation
+    - UAP 7.2.2: Datenbereitstellung in verschiedenen Formaten
+
+  version: 1.0.0
+  contact:
+    name: FeueralarmV3 Team
+    email: support@feueralarm.de
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:3000/api
+    description: Lokale Entwicklungsumgebung
+  - url: https://api.feueralarm.example.com/api
+    description: Produktionsserver
+
+tags:
+  - name: Export
+    description: Export-Funktionen für Alarmdaten
+  - name: Statistics
+    description: Statistik-Abfragen
+
+paths:
+  /export/alarms/{id}/csv:
+    get:
+      tags:
+        - Export
+      summary: Exportiert einen Alarm als CSV-Datei
+      description: |
+        Exportiert detaillierte Informationen eines einzelnen Feueralarms als CSV-Datei.
+
+        Die CSV-Datei enthält:
+        - Alarm-Metadaten (Zeitstempel, ID)
+        - Liste aller Klassen mit Anwesenheitsstatus
+        - Lehrer-Informationen
+        - Räume
+        - Kommentare
+
+        **Format:** CSV mit UTF-8 BOM für korrekte Darstellung in Excel
+      operationId: exportAlarmCSV
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: MongoDB ObjectID des Alarms
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F]{24}$"
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        "200":
+          description: CSV-Datei erfolgreich generiert
+          headers:
+            Content-Disposition:
+              description: Dateiname für Download
+              schema:
+                type: string
+                example: 'attachment; filename="Feueralarm_2025-11-20_16-30.csv"'
+            Content-Type:
+              description: MIME-Type der Response
+              schema:
+                type: string
+                example: "text/csv; charset=utf-8"
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+              example: |
+                Alarm-ID;Erstellt am;Klasse;Lehrer;Status;Raum;Kommentar
+                507f1f77bcf86cd799439011;2025-11-20 16:30:00;10a;Max Müller;Vollständig;A101;Alle anwesend
+                507f1f77bcf86cd799439011;2025-11-20 16:30:00;10b;Anna Schmidt;Unvollständig;A102;2 Schüler fehlen
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /export/alarms/{id}/pdf:
+    get:
+      tags:
+        - Export
+      summary: Exportiert einen Alarm als PDF-Dokument
+      description: |
+        Generiert einen formatierten PDF-Bericht für einen Feueralarm.
+
+        Das PDF enthält:
+        - Professionelle Formatierung mit Header und Footer
+        - Alarm-Metadaten
+        - Tabellarische Übersicht aller Klassen
+        - Statistiken (Vollständig/Unvollständig)
+        - Zeitstempel
+
+        **Format:** PDF/A für Archivierung geeignet
+      operationId: exportAlarmPDF
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: MongoDB ObjectID des Alarms
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F]{24}$"
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        "200":
+          description: PDF erfolgreich generiert
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: 'attachment; filename="Feueralarm_2025-11-20_16-30.pdf"'
+            Content-Type:
+              schema:
+                type: string
+                example: "application/pdf"
+            Content-Length:
+              schema:
+                type: integer
+                example: 52428
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /export/alarms/{id}/json:
+    get:
+      tags:
+        - Export
+      summary: Exportiert einen Alarm als JSON
+      description: |
+        Exportiert alle Alarm-Daten im JSON-Format für programmatische Verarbeitung.
+
+        Ideal für:
+        - Datenimport in andere Systeme
+        - API-Integration
+        - Archivierung
+        - Datenanalyse
+
+        **Format:** Strukturiertes JSON mit Metadaten, Alarm-Daten und Statistiken
+      operationId: exportAlarmJSON
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: MongoDB ObjectID des Alarms
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F]{24}$"
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        "200":
+          description: JSON-Daten erfolgreich abgerufen
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: 'attachment; filename="Feueralarm_2025-11-20_16-30.json"'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlarmExport"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /export/alarms/all/csv:
+    get:
+      tags:
+        - Export
+      summary: Exportiert alle Alarme als CSV-Übersicht
+      description: |
+        Generiert eine CSV-Übersicht aller im System gespeicherten Alarme.
+
+        Die Übersicht enthält:
+        - Alarm-ID
+        - Erstellungsdatum
+        - Anzahl Klassen
+        - Status (Aktiv/Archiviert)
+        - Auslöser
+
+        **Verwendung:** Für Gesamtübersichten und Reports
+      operationId: exportAllAlarmsCSV
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: CSV-Übersicht erfolgreich generiert
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: 'attachment; filename="Feueralarm_Übersicht_2025-11-20.csv"'
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Keine Alarme gefunden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                success: false
+                message: "Keine Alarme gefunden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /export/alarms/active/csv:
+    get:
+      tags:
+        - Export
+      summary: Exportiert nur aktive Alarme als CSV
+      description: |
+        Generiert eine CSV-Übersicht nur der aktiven (nicht archivierten) Alarme.
+
+        **Filter:** Nur Alarme mit `archived: false`
+      operationId: exportActiveAlarmsCSV
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: CSV-Export aktiver Alarme erfolgreich
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: 'attachment; filename="Feueralarm_Aktiv_2025-11-20.csv"'
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Keine aktiven Alarme gefunden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /export/alarms/{id}/statistics:
+    get:
+      tags:
+        - Statistics
+      summary: Gibt Statistiken für einen Alarm zurück
+      description: |
+        Liefert detaillierte Statistiken zu einem Feueralarm im JSON-Format.
+
+        **Statistiken beinhalten:**
+        - Anzahl Posts (gesamt, vollständig, unvollständig)
+        - Vollständigkeitsrate in Prozent
+        - Anzahl Klassen
+        - Zeitstempel
+      operationId: getAlarmStatistics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: MongoDB ObjectID des Alarms
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F]{24}$"
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        "200":
+          description: Statistiken erfolgreich abgerufen
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlarmStatistics"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT-Token für Authentifizierung.
+
+        Token kann über `/api/users/login` erhalten werden.
+
+        **Format:** `Authorization: Bearer <token>`
+
+  schemas:
+    AlarmExport:
+      type: object
+      description: Vollständiger Alarm-Export mit Metadaten
+      properties:
+        export:
+          type: object
+          description: Export-Metadaten
+          properties:
+            format:
+              type: string
+              example: "JSON"
+            timestamp:
+              type: string
+              format: date-time
+              example: "2025-11-20T16:30:00.000Z"
+            exportedBy:
+              type: string
+              description: Benutzername des Exportierenden
+              example: "admin"
+            userId:
+              type: string
+              description: MongoDB ObjectID des Benutzers
+              example: "507f1f77bcf86cd799439011"
+        alarm:
+          $ref: "#/components/schemas/Alarm"
+        posts:
+          type: array
+          description: Liste aller Posts (Klassen-Status)
+          items:
+            $ref: "#/components/schemas/Post"
+        statistics:
+          $ref: "#/components/schemas/Statistics"
+
+    Alarm:
+      type: object
+      description: Feueralarm-Daten
+      properties:
+        _id:
+          type: string
+          description: MongoDB ObjectID
+          example: "507f1f77bcf86cd799439011"
+        created:
+          type: string
+          format: date-time
+          description: Erstellungszeitpunkt
+          example: "2025-11-20T16:30:00.000Z"
+        updated:
+          type: string
+          format: date-time
+          description: Letzter Update
+          example: "2025-11-20T16:35:00.000Z"
+        archived:
+          type: boolean
+          description: Ob der Alarm archiviert ist
+          example: false
+        classCount:
+          type: integer
+          description: Anzahl der betroffenen Klassen
+          example: 25
+        triggeredBy:
+          type: string
+          description: Wer den Alarm ausgelöst hat
+          example: "admin"
+        description:
+          type: string
+          description: Optionale Beschreibung
+          example: "Feueralarmübung Gebäude A"
+        location:
+          type: string
+          description: Optionaler Ort
+          example: "Hauptgebäude"
+
+    Post:
+      type: object
+      description: Klassen-Status bei einem Alarm
+      properties:
+        _id:
+          type: string
+          example: "507f1f77bcf86cd799439012"
+        alert:
+          type: string
+          description: Referenz zum Alarm
+          example: "507f1f77bcf86cd799439011"
+        class:
+          type: string
+          description: Klassenbezeichnung
+          example: "10a"
+        teacher:
+          type: string
+          description: Lehrername
+          example: "Max Müller"
+        room:
+          type: string
+          description: Raumnummer
+          example: "A101"
+        status:
+          type: string
+          enum: [complete, incomplete, undefined]
+          description: Anwesenheitsstatus
+          example: "complete"
+        comment:
+          type: string
+          description: Optionaler Kommentar
+          example: "Alle Schüler anwesend"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-11-20T16:31:00.000Z"
+        attachments:
+          type: array
+          description: Angehängte Fotos/Dokumente
+          items:
+            $ref: "#/components/schemas/Attachment"
+
+    Attachment:
+      type: object
+      description: Angehängte Datei (Foto, Dokument)
+      properties:
+        type:
+          type: string
+          enum: [photo, document, note]
+          example: "photo"
+        url:
+          type: string
+          format: uri
+          description: S3-URL zur Datei
+          example: "https://s3.amazonaws.com/feueralarm/photos/abc123.jpg"
+        filename:
+          type: string
+          example: "klassenraum_10a.jpg"
+        uploadedAt:
+          type: string
+          format: date-time
+          example: "2025-11-20T16:32:00.000Z"
+
+    Statistics:
+      type: object
+      description: Statistiken zu einem Alarm
+      properties:
+        total:
+          type: integer
+          description: Gesamtanzahl Posts
+          example: 25
+        complete:
+          type: integer
+          description: Anzahl vollständige Posts
+          example: 20
+        incomplete:
+          type: integer
+          description: Anzahl unvollständige Posts
+          example: 3
+        undefined:
+          type: integer
+          description: Anzahl undefinierte Posts
+          example: 2
+
+    AlarmStatistics:
+      type: object
+      description: Detaillierte Alarm-Statistiken
+      properties:
+        success:
+          type: boolean
+          example: true
+        statistics:
+          type: object
+          properties:
+            alarmId:
+              type: string
+              example: "507f1f77bcf86cd799439011"
+            created:
+              type: string
+              format: date-time
+              example: "2025-11-20T16:30:00.000Z"
+            archived:
+              type: boolean
+              example: false
+            classCount:
+              type: integer
+              example: 25
+            posts:
+              $ref: "#/components/schemas/Statistics"
+            completionRate:
+              type: integer
+              description: Vollständigkeitsrate in Prozent
+              example: 80
+        queriedBy:
+          type: string
+          description: Benutzername
+          example: "admin"
+        queriedAt:
+          type: string
+          format: date-time
+          example: "2025-11-20T17:00:00.000Z"
+
+    Error:
+      type: object
+      description: Fehler-Response
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: Fehlerbeschreibung
+          example: "Alarm nicht gefunden"
+        error:
+          type: string
+          description: Technische Fehlerdetails (optional)
+          example: "Cast to ObjectId failed"
+
+  responses:
+    Unauthorized:
+      description: Nicht authentifiziert - JWT-Token fehlt oder ungültig
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            success: false
+            message: "Authentifizierung fehlgeschlagen"
+
+    Forbidden:
+      description: Keine Berechtigung - Export-Berechtigung erforderlich
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            success: false
+            message: "Keine Berechtigung für Export-Funktionen"
+
+    NotFound:
+      description: Ressource nicht gefunden
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            success: false
+            message: "Alarm nicht gefunden"
+
+    InternalServerError:
+      description: Interner Serverfehler
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            success: false
+            message: "Fehler beim CSV-Export"
+            error: "Database connection failed"
+
+  examples:
+    AlarmExportExample:
+      summary: Vollständiger Alarm-Export
+      value:
+        export:
+          format: "JSON"
+          timestamp: "2025-11-20T17:00:00.000Z"
+          exportedBy: "admin"
+          userId: "507f1f77bcf86cd799439011"
+        alarm:
+          _id: "507f1f77bcf86cd799439011"
+          created: "2025-11-20T16:30:00.000Z"
+          updated: "2025-11-20T16:35:00.000Z"
+          archived: false
+          classCount: 25
+          triggeredBy: "admin"
+        posts:
+          - _id: "507f1f77bcf86cd799439012"
+            alert: "507f1f77bcf86cd799439011"
+            class: "10a"
+            teacher: "Max Müller"
+            room: "A101"
+            status: "complete"
+            comment: "Alle anwesend"
+        statistics:
+          total: 25
+          complete: 20
+          incomplete: 3
+          undefined: 2

@@ -154,6 +154,101 @@
       </ion-button>
     </div>
 
+    <!-- API Documentation Widget - Nur für Admin & Verwaltung -->
+    <ion-card class="api-docs-widget" *ngIf="canAccessAPIDocs()">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="code-slash-outline"></ion-icon>
+          API-Dokumentation
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="api-description">
+          Zugriff auf die vollständige Export-API Dokumentation für externe
+          Systeme und Integrationen.
+        </p>
+
+        <div class="api-info">
+          <div class="info-item">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <span>OpenAPI 3.0 Spezifikation</span>
+          </div>
+          <div class="info-item">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+            <span>JWT Bearer Authentication</span>
+          </div>
+          <div class="info-item">
+            <ion-icon name="server-outline"></ion-icon>
+            <span>6 Export-Endpunkte verfügbar</span>
+          </div>
+        </div>
+
+        <div class="api-actions">
+          <ion-button
+            expand="block"
+            (click)="openAPIDocsNewTab()"
+            fill="solid"
+            color="primary"
+          >
+            <ion-icon name="open-outline" slot="start"></ion-icon>
+            API-Dokumentation öffnen
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            (click)="toggleAPIDocsPreview()"
+            fill="outline"
+            color="primary"
+          >
+            <ion-icon
+              [name]="showAPIPreview ? 'eye-off-outline' : 'eye-outline'"
+              slot="start"
+            ></ion-icon>
+            {{ showAPIPreview ? 'Vorschau ausblenden' : 'Vorschau anzeigen' }}
+          </ion-button>
+        </div>
+
+        <!-- API Docs Preview (iframe) -->
+        <div class="api-preview" *ngIf="showAPIPreview">
+          <iframe
+            [src]="getAPIDocsURL()"
+            title="API Documentation"
+            frameborder="0"
+          ></iframe>
+        </div>
+
+        <div class="api-endpoints">
+          <p class="endpoints-title">Verfügbare Endpunkte:</p>
+          <ul class="endpoints-list">
+            <li>
+              <ion-badge color="success">GET</ion-badge>
+              <code>/api/export/alarms/:id/csv</code>
+            </li>
+            <li>
+              <ion-badge color="danger">GET</ion-badge>
+              <code>/api/export/alarms/:id/pdf</code>
+            </li>
+            <li>
+              <ion-badge color="primary">GET</ion-badge>
+              <code>/api/export/alarms/:id/json</code>
+            </li>
+            <li>
+              <ion-badge color="success">GET</ion-badge>
+              <code>/api/export/alarms/all/csv</code>
+            </li>
+            <li>
+              <ion-badge color="success">GET</ion-badge>
+              <code>/api/export/alarms/active/csv</code>
+            </li>
+            <li>
+              <ion-badge color="warning">GET</ion-badge>
+              <code>/api/export/alarms/:id/statistics</code>
+            </li>
+          </ul>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
     <!-- Active Alarms List -->
     <div class="alarms-section" *ngIf="activeAlarms.length > 0">
       <h3 class="section-title">
