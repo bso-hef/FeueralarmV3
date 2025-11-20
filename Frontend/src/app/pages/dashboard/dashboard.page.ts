@@ -395,7 +395,9 @@ export class DashboardPage implements OnInit, OnDestroy {
    * Öffnet die API-Dokumentation in neuem Tab
    */
   openAPIDocsNewTab(): void {
-    const apiDocsURL = `${window.location.origin}/api-docs`;
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    const apiDocsURL = `${protocol}//${hostname}:3000/api-docs`;
     window.open(apiDocsURL, '_blank');
   }
 
