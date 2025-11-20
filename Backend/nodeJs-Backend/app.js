@@ -4,6 +4,8 @@ const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const swaggerUi = require("swagger-ui-express");
+const YAML = require("yamljs");
 
 const userRoutes = require("./routes/users");
 const alertRoutes = require("./routes/alerts");
@@ -11,6 +13,9 @@ const postRoutes = require("./routes/posts"); // UAP 9.3.1: Posts mit Audit-Logg
 const auditLogRoutes = require("./routes/audit-logs"); // UAP 9.3.2: Audit-Logs Ansicht
 const attachmentRoutes = require("./routes/attachments.routes");
 const exportRoutes = require("./routes/export"); // UAP 6.3: Export-API
+
+// UAP 7.2.1: OpenAPI Spezifikation laden
+const swaggerDocument = YAML.load(path.join(__dirname, "openapi.yaml"));
 
 const app = express();
 
@@ -46,5 +51,15 @@ app.use("/api/posts/", postRoutes); // ← UAP 9.3.1: Posts mit Audit-Logging
 app.use("/api/audit-logs/", auditLogRoutes); // ← UAP 9.3.2: Audit-Logs Ansicht
 app.use("/api/teachers/", attachmentRoutes); // ← NEU: Attachment Routes
 app.use("/api/export/", exportRoutes); // ← UAP 6.3: Export-API mit Auth
+
+// UAP 7.2.1: API-Dokumentation mit Swagger UI
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, {
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "FeueralarmV3 API Documentation",
+  })
+);
 
 module.exports = app;
