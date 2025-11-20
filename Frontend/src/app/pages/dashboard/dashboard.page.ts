@@ -380,20 +380,15 @@ export class DashboardPage implements OnInit, OnDestroy {
    * Prüft ob User Zugriff auf API-Docs hat (nur Admin & Verwaltung)
    */
   canAccessAPIDocs(): boolean {
-    // User-Daten aus localStorage holen
-    const userDataString = localStorage.getItem('userData');
-    if (!userDataString) {
+    // Rolle wird separat im localStorage gespeichert
+    const role = localStorage.getItem('role');
+
+    if (!role) {
       return false;
     }
 
-    try {
-      const userData = JSON.parse(userDataString);
-      // Nur Admin und Verwaltung haben Zugriff
-      return userData.role === 'admin' || userData.role === 'verwaltung';
-    } catch (error) {
-      console.error('Error parsing userData:', error);
-      return false;
-    }
+    // Nur Admin und Verwaltung haben Zugriff
+    return role === 'admin' || role === 'verwaltung';
   }
 
   /**
