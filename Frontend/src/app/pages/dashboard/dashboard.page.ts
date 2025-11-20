@@ -395,9 +395,9 @@ export class DashboardPage implements OnInit, OnDestroy {
    * Öffnet die API-Dokumentation in neuem Tab
    */
   openAPIDocsNewTab(): void {
-    const protocol = window.location.protocol;
+    // Backend läuft auf Port 3000 über HTTP (nicht HTTPS!)
     const hostname = window.location.hostname;
-    const apiDocsURL = `${protocol}//${hostname}:3000/api-docs`;
+    const apiDocsURL = `http://${hostname}:3000/api-docs`;
     window.open(apiDocsURL, '_blank');
   }
 
@@ -412,9 +412,9 @@ export class DashboardPage implements OnInit, OnDestroy {
    * Gibt die URL für das iframe zurück (als SafeResourceUrl für Angular Security)
    */
   getAPIDocsURL(): SafeResourceUrl {
-    // Hinweis: In production sollte hier die tatsächliche Backend-URL stehen
-    const backendURL = 'http://localhost:3000'; // oder aus environment
-    const apiDocsURL = `${backendURL}/api-docs`;
+    // Backend läuft auf Port 3000 über HTTP (nicht HTTPS!)
+    const hostname = window.location.hostname;
+    const apiDocsURL = `http://${hostname}:3000/api-docs`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(apiDocsURL);
   }
 }
