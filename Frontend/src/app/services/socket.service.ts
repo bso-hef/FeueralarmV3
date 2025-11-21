@@ -210,8 +210,8 @@ export class SocketService {
 
   triggerAlert(time: string, day: string): void {
     console.log('🚨 Triggering alarm:', time, day);
-    const token = this.restService.getToken();
-    this.socket.emit('alert', { token, time, day });
+    // Token wird nicht mehr hier mitgeschickt - ist bereits in socket.auth!
+    this.socket.emit('alert', { time, day });
   }
 
   // ==========================================
