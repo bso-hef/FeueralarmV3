@@ -281,7 +281,8 @@ exports.alert = async (data) => {
   try {
     busyWithUntis = true;
 
-    if (!(await untis.getUntisSession())) {
+    const untisSession = await untis.getUntisSession();
+    if (!untisSession || !untisSession.ok) {
       console.error("❌ WebUntis authentication failed");
       return {
         success: false,
