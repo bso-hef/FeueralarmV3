@@ -22,6 +22,11 @@ cd /var/www/Deployment/Repository/Frontend
 npx ng build --configuration=production
 sudo rsync -av --delete www/ /var/www/Deployment/Webserver/
 sudo nginx -t && sudo systemctl reload nginx
+ionic build --prod
+npm run start
+
+Backend:
+mv Openapi.yaml openapi.yaml
 npm run start
 
 Username: admin
