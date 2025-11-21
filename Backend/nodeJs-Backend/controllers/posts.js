@@ -281,6 +281,7 @@ exports.alert = async (data) => {
   try {
     busyWithUntis = true;
 
+    // 🔧 FIX: Prüfe auf .ok Property
     const untisSession = await untis.getUntisSession();
     if (!untisSession || !untisSession.ok) {
       console.error("❌ WebUntis authentication failed");
@@ -293,7 +294,8 @@ exports.alert = async (data) => {
 
     if (debugging) console.log("auth worked");
 
-    let teachers = await untis.getTeachers();
+    // 🔧 FIX: Übergebe untisSession als Parameter
+    let teachers = await untis.getTeachers(untisSession);
     if (!teachers) {
       console.error("❌ Failed to fetch teachers from WebUntis");
       return {
@@ -305,7 +307,8 @@ exports.alert = async (data) => {
 
     if (debugging) console.log("teachers worked");
 
-    let classes = await untis.getClasses();
+    // 🔧 FIX: Übergebe untisSession als Parameter
+    let classes = await untis.getClasses(untisSession);
     if (!classes) {
       console.error("❌ Failed to fetch classes from WebUntis");
       return {
@@ -317,7 +320,8 @@ exports.alert = async (data) => {
 
     if (debugging) console.log("classes worked");
 
-    let rooms = await untis.getRooms();
+    // 🔧 FIX: Übergebe untisSession als Parameter
+    let rooms = await untis.getRooms(untisSession);
     if (!rooms) {
       console.error("❌ Failed to fetch rooms from WebUntis");
       return {

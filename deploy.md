@@ -27,7 +27,8 @@ npm run start
 
 Backend:
 mv Openapi.yaml openapi.yaml
-npm run start
+pm2 restart backend
+pm2 logs backend
 
 Username: admin
 Passwort: Admin2024!Secure
