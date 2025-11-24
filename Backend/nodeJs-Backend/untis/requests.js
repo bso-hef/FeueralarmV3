@@ -184,14 +184,30 @@ exports.getTimetable = async (session, overrides = {}) => {
     }
 
     const body = clone(timetableBodyBase);
-    // overrides z. B. { params: { element: { id: 123, type: 1 }, startDate: "20250101", endDate: "20250107" } }
-    Object.assign(body, overrides);
+
+    // 🔧 FIX: WebUntis braucht params.options wrapper und startDate/endDate als Zahlen!
+    if (overrides.params) {
+      // Wenn overrides params direkt hat, wrappe in options
+      if (!body.params) body.params = {};
+      if (!body.params.options) body.params.options = {};
+
+      // Merge in options
+      Object.assign(body.params.options, overrides.params);
+
+      // Konvertiere Datum-Strings zu Zahlen
+      if (body.params.options.startDate && typeof body.params.options.startDate === "string") {
+        body.params.options.startDate = parseInt(body.params.options.startDate);
+      }
+      if (body.params.options.endDate && typeof body.params.options.endDate === "string") {
+        body.params.options.endDate = parseInt(body.params.options.endDate);
+      }
+    }
 
     console.log(`🔎 getTimetable request:`, JSON.stringify(body, null, 2));
 
     const resTT = await postUntis(requestURL, body, session.headers, "getTimetable");
 
-    console.log(`📥 getTimetable response for element ${body.params?.element?.id}:`, JSON.stringify(resTT.data, null, 2));
+    console.log(`📥 getTimetable response for element ${body.params?.options?.element?.id}:`, JSON.stringify(resTT.data, null, 2));
 
     if (resTT.data && resTT.data.result) {
       console.log(`✅ Result has ${Array.isArray(resTT.data.result) ? resTT.data.result.length : "unknown"} items`);
