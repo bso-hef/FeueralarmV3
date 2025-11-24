@@ -553,59 +553,29 @@ export class HomePage implements OnInit, OnDestroy {
   // ==========================================
 
   async triggerAlarm(): Promise<void> {
-    console.log('🚨 triggerAlarm() wurde aufgerufen!');
-    alert('triggerAlarm wurde aufgerufen!'); // Debug
+    console.log('🚨 triggerAlarm() START');
 
-    const confirmed = await this.feedbackService.showConfirm(
-      'Feueralarm auslösen',
-      `Möchtest du den Feueralarm für die ${this.getHourLabel(
-        this.selectedHour
-      )} auslösen?`,
-      'Auslösen',
-      'Abbrechen'
-    );
+    try {
+      const day = moment().format('YYYYMMDD');
+      console.log('📅 Day:', day);
+      console.log('⏰ Hour:', this.selectedHour);
+      console.log('🔌 SocketService exists:', !!this.socketService);
 
-    if (confirmed) {
-      try {
-        await this.feedbackService.showLoading('Feueralarm wird ausgelöst...');
-        const day = moment().format('YYYYMMDD');
+      if (this.socketService) {
+        console.log('🔌 Calling socketService.triggerAlert...');
+        this.socketService.triggerAlert(this.selectedHour, day);
+        console.log('✅ triggerAlert called successfully!');
 
-        if (this.socketService) {
-          // Mit Socket - normaler Weg
-          this.socketService.triggerAlert(this.selectedHour, day);
-          await this.delay(2000);
-          await this.feedbackService.hideLoading();
-          await this.feedbackService.showSuccessToast('Feueralarm ausgelöst!');
-          await this.loadData();
-        } else {
-          // Ohne Socket - Erstelle Mock-Alarm für Tests
-          console.log(
-            '📦 Kein Socket verfügbar - erstelle Test-Alarm mit Mock-Daten'
-          );
-
-          await this.delay(1000);
-          await this.feedbackService.hideLoading();
-          await this.feedbackService.showSuccessToast(
-            'Test-Alarm ausgelöst! (Mock-Daten)'
-          );
-
-          console.log(
-            `📚 Erstelle Mock-Daten für ${this.getHourLabel(this.selectedHour)}`
-          );
-
-          // Erstelle Mock-Daten für diese Stunde
-          this.teachers = this.getMockTeachersForAlarm();
-          this.applyFilters();
-          this.updateStats();
-          this.isLoading = false;
-        }
-      } catch (error) {
-        await this.feedbackService.hideLoading();
-        await this.feedbackService.showError(
-          error,
-          'Fehler beim Auslösen des Alarms'
-        );
+        // Warte kurz und lade dann Daten neu
+        setTimeout(() => {
+          console.log('🔄 Reloading data...');
+          this.loadData();
+        }, 2000);
+      } else {
+        console.log('❌ No socketService available!');
       }
+    } catch (error) {
+      console.error('❌ Error in triggerAlarm:', error);
     }
   }
 

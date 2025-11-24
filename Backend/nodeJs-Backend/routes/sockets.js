@@ -18,9 +18,10 @@ module.exports = (io) => {
       // Token verifizieren
       const decoded = jwt.verify(token, process.env.JWT_KEY);
 
-      // User-ID im Socket speichern
+      // User-ID und Email im Socket speichern
       socket.userId = decoded.userId;
-      socket.email = decoded.email;
+      socket.email = decoded.email || decoded.username || "unknown";
+      socket.role = decoded.role;
 
       console.log(`✅ User authenticated: ${socket.email} (${socket.userId})`);
       next();
@@ -41,6 +42,11 @@ module.exports = (io) => {
       const release = await untisLock.acquire();
 
       try {
+        // 🔧 FIX: Füge userId und email hinzu (statt token)
+        data.userId = socket.userId;
+        data.email = socket.email;
+        data.role = socket.role;
+
         let res = await PostController.alert(data);
 
         if (res.message === "OK") {

@@ -35,16 +35,22 @@ export class SocketService {
   async connect(): Promise<void> {
     console.log('🔌 Connecting to socket server...');
 
+    // 🔧 FIX: Token ZUERST holen und setzen (VOR connect!)
+    const token = this.restService.getToken();
+
+    if (token) {
+      // Token in Socket-Auth setzen BEVOR connect() aufgerufen wird
+      (this.socket.ioSocket as any).auth = { token };
+      console.log('🔐 Token set for socket authentication');
+    } else {
+      console.warn('⚠️ No token available for socket authentication!');
+    }
+
+    // DANN verbinden
     this.socket.connect();
 
     // Setup event listeners
     this.setupSocketListeners();
-
-    // Authenticate
-    const token = this.restService.getToken();
-    if (token) {
-      this.socket.emit('authenticate', { token });
-    }
   }
 
   disconnect(): void {
@@ -87,6 +93,10 @@ export class SocketService {
 
     socketAny.on('error', (error: any) => {
       console.error('❌ Socket error:', error);
+    });
+
+    socketAny.on('connect_error', (error: any) => {
+      console.error('❌ Socket connection error:', error);
     });
 
     // Socket ID
@@ -200,8 +210,8 @@ export class SocketService {
 
   triggerAlert(time: string, day: string): void {
     console.log('🚨 Triggering alarm:', time, day);
-    const token = this.restService.getToken();
-    this.socket.emit('alert', { token, time, day });
+    // Token wird nicht mehr hier mitgeschickt - ist bereits in socket.auth!
+    this.socket.emit('alert', { time, day });
   }
 
   // ==========================================

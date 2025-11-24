@@ -259,59 +259,77 @@ function validUpdateParams(id, status, comment) {
   } else return false;
 }
 
+// 🔧 KORRIGIERTE exports.alert Funktion - Nutzt Socket-Auth statt Token
 exports.alert = async (data) => {
-  let debugging = false;
+  let debugging = true;
 
-  let result = permission.checkPermission(data.token);
-
-  if (!result.hasPermission)
+  // 🔧 FIX: Keine Token-Prüfung mehr - userId kommt bereits von Socket-Authentication
+  // Permission wurde bereits durch Socket-Middleware geprüft
+  if (!data.userId) {
+    console.error("❌ Alert failed: No userId provided");
     return {
       success: false,
-      msg: result.message,
+      msg: "Nicht authentifiziert",
       posts: [],
     };
+  }
+
+  console.log(`🚨 Processing alert from user: ${data.email || data.userId}`);
 
   if (debugging) console.log("start");
 
   try {
     busyWithUntis = true;
 
-    if (!(await untis.getUntisSession()))
+    // 🔧 FIX: Prüfe auf .ok Property
+    const untisSession = await untis.getUntisSession();
+    if (!untisSession || !untisSession.ok) {
+      console.error("❌ WebUntis authentication failed");
       return {
         success: false,
         msg: "Authentifizierung bei WebUntis ist fehlgeschlagen.",
         posts: [],
       };
+    }
 
     if (debugging) console.log("auth worked");
 
-    let teachers = await untis.getTeachers();
-    if (!teachers)
+    // 🔧 FIX: Übergebe untisSession als Parameter
+    let teachers = await untis.getTeachers(untisSession);
+    if (!teachers) {
+      console.error("❌ Failed to fetch teachers from WebUntis");
       return {
         success: false,
         msg: "Abrufen der Lehrer von WebUntis ist fehlgeschlagen.",
         posts: [],
       };
+    }
 
     if (debugging) console.log("teachers worked");
 
-    let classes = await untis.getClasses();
-    if (!classes)
+    // 🔧 FIX: Übergebe untisSession als Parameter
+    let classes = await untis.getClasses(untisSession);
+    if (!classes) {
+      console.error("❌ Failed to fetch classes from WebUntis");
       return {
         success: false,
         msg: "Abrufen der Klassen von WebUntis ist fehlgeschlagen.",
         posts: [],
       };
+    }
 
     if (debugging) console.log("classes worked");
 
-    let rooms = await untis.getRooms();
-    if (!rooms)
+    // 🔧 FIX: Übergebe untisSession als Parameter
+    let rooms = await untis.getRooms(untisSession);
+    if (!rooms) {
+      console.error("❌ Failed to fetch rooms from WebUntis");
       return {
         success: false,
         msg: "Abrufen der Räume von WebUntis ist fehlgeschlagen.",
         posts: [],
       };
+    }
 
     if (debugging) console.log("rooms worked");
 
@@ -323,13 +341,17 @@ exports.alert = async (data) => {
     let time = date.getHours() * 100 + date.getMinutes();
     if (data.time && data.time > 0 && data.time < 2400) time = data.time;
 
+    console.log(`📅 Fetching schedule for day: ${day}, time: ${time}`);
+
     posts = await untis.getPostsMultiThreaded(teachers, classes, rooms, day, time);
-    if (!posts)
+    if (!posts) {
+      console.error("❌ No ongoing classes found");
       return {
         success: false,
         msg: "Es konnten keine laufenden Unterrichte gefunden werden.",
         posts: [],
       };
+    }
 
     posts = untis.getProcessedPostList(posts);
 
@@ -349,6 +371,8 @@ exports.alert = async (data) => {
           undefined: posts.length,
         },
       });
+
+      console.log(`✅ Alert created with ${posts.length} classes`);
 
       try {
         for (let post of posts) post.alert = alert._id;
@@ -370,11 +394,11 @@ exports.alert = async (data) => {
         }
 
         return {
-          success: true,
-          msg: "Laden der Klassen war erfolgreich.",
-          posts,
+          message: "OK", // ← WICHTIG: "message" statt "msg" für Socket-Handler
+          teachers: posts,
         };
       } catch (err) {
+        console.error("❌ Error creating posts:", err.message);
         Alert.deleteOne({ _id: alert._id });
 
         return {
@@ -384,6 +408,7 @@ exports.alert = async (data) => {
         };
       }
     } catch (err) {
+      console.error("❌ Error creating alert:", err.message);
       return {
         success: false,
         msg: err.message,
@@ -391,7 +416,7 @@ exports.alert = async (data) => {
       };
     }
   } catch (error) {
-    console.log(error.message);
+    console.error("❌ Unexpected error in alert:", error.message);
     return {
       success: false,
       msg: "Ein unerwartetes Problem ist aufgetreten. -> " + error.message,

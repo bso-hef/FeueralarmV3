@@ -22,9 +22,17 @@ cd /var/www/Deployment/Repository/Frontend
 npx ng build --configuration=production
 sudo rsync -av --delete www/ /var/www/Deployment/Webserver/
 sudo nginx -t && sudo systemctl reload nginx
+ionic build --prod
 npm run start
+
+Backend:
+mv Openapi.yaml openapi.yaml
+pm2 restart backend
+pm2 logs backend
 
 Username: admin
 Passwort: Admin2024!Secure
 
 Username: verwaltung Passwort: Verwaltung2024!
+
+...
