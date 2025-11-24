@@ -191,9 +191,10 @@ exports.getTimetable = async (session, overrides = {}) => {
 
     const resTT = await postUntis(requestURL, body, session.headers, "getTimetable");
 
-    console.log(`📥 getTimetable response:`, resTT.data ? "Has data" : "No data");
+    console.log(`📥 getTimetable response for element ${body.params?.element?.id}:`, JSON.stringify(resTT.data, null, 2));
 
     if (resTT.data && resTT.data.result) {
+      console.log(`✅ Result has ${Array.isArray(resTT.data.result) ? resTT.data.result.length : "unknown"} items`);
       return resTT.data.result;
     }
     return null;
@@ -231,6 +232,12 @@ exports.getPostsMultiThreaded = async (teachers, classes, rooms, day, time) => {
 
     // Für jeden Lehrer den Stundenplan abrufen
     for (const teacherId of teacherIds) {
+      // 🔧 DEBUG: Teste nur ersten Lehrer
+      if (Object.keys(teachers).indexOf(teacherId) > 0) {
+        console.log(`⏭️ Skipping teacher ${teacherId} (testing first teacher only)`);
+        continue;
+      }
+
       try {
         console.log(`🔍 Fetching timetable for teacher ${teacherId}...`);
 
