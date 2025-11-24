@@ -178,18 +178,27 @@ exports.getTimeUnits = async (session) => {
 // Timetable anfragen
 exports.getTimetable = async (session, overrides = {}) => {
   try {
-    if (!session || !session.ok || !session.headers) return null;
+    if (!session || !session.ok || !session.headers) {
+      console.warn("⚠️ getTimetable: Invalid session");
+      return null;
+    }
 
     const body = clone(timetableBodyBase);
     // overrides z. B. { params: { element: { id: 123, type: 1 }, startDate: "20250101", endDate: "20250107" } }
     Object.assign(body, overrides);
 
+    console.log(`🔎 getTimetable request:`, JSON.stringify(body, null, 2));
+
     const resTT = await postUntis(requestURL, body, session.headers, "getTimetable");
+
+    console.log(`📥 getTimetable response:`, resTT.data ? "Has data" : "No data");
+
     if (resTT.data && resTT.data.result) {
       return resTT.data.result;
     }
     return null;
-  } catch {
+  } catch (error) {
+    console.error("❌ getTimetable error:", error.message);
     return null;
   }
 };
