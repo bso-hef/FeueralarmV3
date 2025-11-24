@@ -239,8 +239,13 @@ exports.getPostsMultiThreaded = async (teachers, classes, rooms, day, time) => {
           continue;
         }
 
+        console.log(`📚 Teacher ${teacherId}: Found ${timetable.length} lessons`);
+
         // Durch alle Unterrichtsstunden dieses Lehrers gehen
         for (const lesson of timetable) {
+          // 🔧 DEBUG: Zeige alle Stunden
+          console.log(`📋 Lesson: Start=${lesson.startTime}, End=${lesson.endTime}, Time=${time}`);
+
           // Prüfe ob diese Stunde zur gewünschten Zeit läuft
           if (lesson.startTime && lesson.endTime) {
             const lessonStart = lesson.startTime;
