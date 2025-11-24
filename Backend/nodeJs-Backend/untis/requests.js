@@ -175,15 +175,13 @@ exports.getTimeUnits = async (session) => {
   }
 };
 
-// Beispiel: Timetable anfragen, falls du das hier brauchst.
-// Wir klonen den Basis-Body, damit wir Parameter dynamisch setzen können.
+// Timetable anfragen
 exports.getTimetable = async (session, overrides = {}) => {
   try {
     if (!session || !session.ok || !session.headers) return null;
 
     const body = clone(timetableBodyBase);
     // overrides z. B. { params: { element: { id: 123, type: 1 }, startDate: "20250101", endDate: "20250107" } }
-    // flach mergen, je nach Bedarf:
     Object.assign(body, overrides);
 
     const resTT = await postUntis(requestURL, body, session.headers, "getTimetable");
@@ -196,9 +194,168 @@ exports.getTimetable = async (session, overrides = {}) => {
   }
 };
 
-// Beispiel für Multi-Threaded Posts – unverändert, aber Session wird jetzt von außen übergeben.
-// Passe diese Funktion an, falls du hier intern noch auf requestHeader zugreifen wolltest.
+/**
+ * 🔧 NEUE IMPLEMENTIERUNG: Holt Stundenpläne für alle Lehrer und erstellt Posts
+ * @param {Object} teachers - Objekt mit Lehrer-IDs als Keys
+ * @param {Object} classes - Objekt mit Klassen-IDs als Keys
+ * @param {Object} rooms - Objekt mit Raum-IDs als Keys
+ * @param {Number} day - Datum im Format YYYYMMDD (z.B. 20251124)
+ * @param {Number} time - Uhrzeit im Format HHMM (z.B. 0745)
+ * @returns {Array} Array von Post-Objekten oder null
+ */
 exports.getPostsMultiThreaded = async (teachers, classes, rooms, day, time) => {
-  // implementierung abhängig von deinem Worker-Setup
-  // hier bleibt es wie bei dir, sofern du hier keinen direkten ENV-Zugriff brauchst
+  try {
+    // Session holen
+    const session = await exports.getUntisSession();
+    if (!session || !session.ok) {
+      console.error("❌ No valid WebUntis session in getPostsMultiThreaded");
+      return null;
+    }
+
+    const posts = [];
+    const teacherIds = Object.keys(teachers);
+
+    console.log(`📊 Fetching timetables for ${teacherIds.length} teachers...`);
+
+    // Datum formatieren für WebUntis API
+    const dateStr = day.toString();
+
+    // Für jeden Lehrer den Stundenplan abrufen
+    for (const teacherId of teacherIds) {
+      try {
+        // Timetable für diesen Lehrer abrufen
+        const timetable = await exports.getTimetable(session, {
+          params: {
+            element: {
+              id: parseInt(teacherId),
+              type: 2, // 2 = Lehrer (1 = Klasse, 3 = Raum)
+            },
+            startDate: dateStr,
+            endDate: dateStr,
+          },
+        });
+
+        if (!timetable || timetable.length === 0) {
+          continue;
+        }
+
+        // Durch alle Unterrichtsstunden dieses Lehrers gehen
+        for (const lesson of timetable) {
+          // Prüfe ob diese Stunde zur gewünschten Zeit läuft
+          if (lesson.startTime && lesson.endTime) {
+            const lessonStart = lesson.startTime;
+            const lessonEnd = lesson.endTime;
+
+            // Prüfe ob die angegebene Zeit in diese Stunde fällt
+            if (time >= lessonStart && time <= lessonEnd) {
+              // Erstelle Post-Objekt
+              const post = {
+                // Lehrer
+                teachers: lesson.te
+                  ? lesson.te.map((t) => {
+                      const teacher = teachers[t.id];
+                      return teacher ? `${teacher.foreName || ""} ${teacher.lastName || teacher.name}`.trim() : `Teacher ${t.id}`;
+                    })
+                  : [`Teacher ${teacherId}`],
+
+                // Klasse
+                class:
+                  lesson.kl && lesson.kl.length > 0
+                    ? {
+                        number: classes[lesson.kl[0].id]?.number || `Class ${lesson.kl[0].id}`,
+                        name: classes[lesson.kl[0].id]?.name || `Class ${lesson.kl[0].id}`,
+                      }
+                    : {
+                        number: "Unknown",
+                        name: "Unknown Class",
+                      },
+
+                // Räume
+                rooms: lesson.ro
+                  ? lesson.ro.map((r) => ({
+                      number: rooms[r.id]?.name || `Room ${r.id}`,
+                      name: rooms[r.id]?.longName || rooms[r.id]?.name || `Room ${r.id}`,
+                    }))
+                  : [{ number: "Unknown", name: "Unknown Room" }],
+
+                // Zeiten
+                start: lessonStart,
+                end: lessonEnd,
+                day: day,
+
+                // Status & Kommentar
+                status: "invalid", // Standardstatus: offen
+                comment: "",
+
+                // Timestamps
+                created: new Date(),
+                updated: new Date(),
+              };
+
+              posts.push(post);
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`❌ Error fetching timetable for teacher ${teacherId}:`, error.message);
+        // Weiter mit nächstem Lehrer
+        continue;
+      }
+    }
+
+    console.log(`✅ Found ${posts.length} ongoing classes`);
+    return posts.length > 0 ? posts : null;
+  } catch (error) {
+    console.error("❌ Error in getPostsMultiThreaded:", error.message);
+    return null;
+  }
+};
+
+/**
+ * 🔧 NEUE IMPLEMENTIERUNG: Verarbeitet die Posts-Liste (dedupliziert, sortiert)
+ * @param {Array} posts - Array von Post-Objekten
+ * @returns {Array} Verarbeitete Posts
+ */
+exports.getProcessedPostList = (posts) => {
+  if (!posts || posts.length === 0) return [];
+
+  // Deduplizierung nach Klasse (falls eine Klasse mehrfach vorkommt durch mehrere Lehrer)
+  const uniquePosts = [];
+  const seenClasses = new Set();
+
+  for (const post of posts) {
+    const classKey = post.class.number;
+
+    if (!seenClasses.has(classKey)) {
+      seenClasses.add(classKey);
+      uniquePosts.push(post);
+    } else {
+      // Klasse existiert schon - füge ggf. zusätzliche Lehrer/Räume hinzu
+      const existingPost = uniquePosts.find((p) => p.class.number === classKey);
+      if (existingPost) {
+        // Merge Lehrer
+        for (const teacher of post.teachers) {
+          if (!existingPost.teachers.includes(teacher)) {
+            existingPost.teachers.push(teacher);
+          }
+        }
+        // Merge Räume
+        for (const room of post.rooms) {
+          const roomExists = existingPost.rooms.some((r) => r.number === room.number);
+          if (!roomExists) {
+            existingPost.rooms.push(room);
+          }
+        }
+      }
+    }
+  }
+
+  // Sortiere nach Klassennummer
+  uniquePosts.sort((a, b) => {
+    if (a.class.number < b.class.number) return -1;
+    if (a.class.number > b.class.number) return 1;
+    return 0;
+  });
+
+  return uniquePosts;
 };

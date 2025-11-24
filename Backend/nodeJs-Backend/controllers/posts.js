@@ -261,7 +261,7 @@ function validUpdateParams(id, status, comment) {
 
 // 🔧 KORRIGIERTE exports.alert Funktion - Nutzt Socket-Auth statt Token
 exports.alert = async (data) => {
-  let debugging = false;
+  let debugging = true;
 
   // 🔧 FIX: Keine Token-Prüfung mehr - userId kommt bereits von Socket-Authentication
   // Permission wurde bereits durch Socket-Middleware geprüft
