@@ -223,6 +223,8 @@ exports.getPostsMultiThreaded = async (teachers, classes, rooms, day, time) => {
     // Für jeden Lehrer den Stundenplan abrufen
     for (const teacherId of teacherIds) {
       try {
+        console.log(`🔍 Fetching timetable for teacher ${teacherId}...`);
+
         // Timetable für diesen Lehrer abrufen
         const timetable = await exports.getTimetable(session, {
           params: {
@@ -234,6 +236,8 @@ exports.getPostsMultiThreaded = async (teachers, classes, rooms, day, time) => {
             endDate: dateStr,
           },
         });
+
+        console.log(`📦 Timetable result for teacher ${teacherId}:`, timetable ? `${timetable.length} lessons` : "null");
 
         if (!timetable || timetable.length === 0) {
           continue;
