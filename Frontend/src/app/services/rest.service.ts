@@ -5,7 +5,7 @@ import {
   HttpErrorResponse,
 } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { catchError, timeout } from 'rxjs/operators';
+import { catchError, tap, timeout } from 'rxjs/operators';
 import { NavController } from '@ionic/angular';
 import { JwtHelperService } from '@auth0/angular-jwt';
 
@@ -568,5 +568,19 @@ export class RestService {
 
     console.log('✅ Test-Login erfolgreich (Offline-Login aktiviert)');
     return { success: true };
+  }
+  archiveAlert(alertId: string): Observable<any> {
+    const url = `${this.API_URL}/alerts/${alertId}/archive`;
+    console.log('📦 Archiving alert:', alertId);
+
+    return this.http.put(url, {}, { headers: this.getHeaders() }).pipe(
+      tap((response) => {
+        console.log('✅ Alert archived successfully:', response);
+      }),
+      catchError((error) => {
+        console.error('❌ Error archiving alert:', error);
+        return throwError(() => error);
+      })
+    );
   }
 }

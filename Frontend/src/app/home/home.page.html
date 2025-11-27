@@ -237,3 +237,11 @@
     </div>
   </div>
 </ion-content>
+<!-- Alarm Footer -->
+<app-alarm-footer
+  [hasActiveAlarm]="hasActiveAlarm"
+  [isProcessing]="isProcessingAlarm"
+  (endAlarm)="endAndArchiveAlarm()"
+  (exportPDF)="exportCurrentAlarmPDF()"
+  (exportCSV)="exportCurrentAlarmCSV()"
+></app-alarm-footer>
