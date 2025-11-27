@@ -23,7 +23,7 @@ public class ConfigLoader {
         String[] possiblePaths = {
             ".env",
             "../.env",
-            "../../.env",
+            "../../../../nodeJs-Backend/.env",
             System.getProperty("user.dir") + "/.env"
         };
 
