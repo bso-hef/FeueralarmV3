@@ -203,14 +203,9 @@ exports.getTimetable = async (session, overrides = {}) => {
       }
     }
 
-    console.log(`🔎 getTimetable request:`, JSON.stringify(body, null, 2));
-
     const resTT = await postUntis(requestURL, body, session.headers, "getTimetable");
 
-    console.log(`📥 getTimetable response for element ${body.params?.options?.element?.id}:`, JSON.stringify(resTT.data, null, 2));
-
     if (resTT.data && resTT.data.result) {
-      console.log(`✅ Result has ${Array.isArray(resTT.data.result) ? resTT.data.result.length : "unknown"} items`);
       return resTT.data.result;
     }
     return null;
@@ -221,7 +216,7 @@ exports.getTimetable = async (session, overrides = {}) => {
 };
 
 /**
- * 🔧 NEUE IMPLEMENTIERUNG: Holt Stundenpläne für alle Lehrer und erstellt Posts
+ * 🔧 IMPLEMENTIERUNG: Holt Stundenpläne für alle Lehrer und erstellt Posts
  * @param {Object} teachers - Objekt mit Lehrer-IDs als Keys
  * @param {Object} classes - Objekt mit Klassen-IDs als Keys
  * @param {Object} rooms - Objekt mit Raum-IDs als Keys
@@ -248,15 +243,7 @@ exports.getPostsMultiThreaded = async (teachers, classes, rooms, day, time) => {
 
     // Für jeden Lehrer den Stundenplan abrufen
     for (const teacherId of teacherIds) {
-      // 🔧 DEBUG: Teste nur ersten Lehrer
-      if (Object.keys(teachers).indexOf(teacherId) > 0) {
-        console.log(`⏭️ Skipping teacher ${teacherId} (testing first teacher only)`);
-        continue;
-      }
-
       try {
-        console.log(`🔍 Fetching timetable for teacher ${teacherId}...`);
-
         // Timetable für diesen Lehrer abrufen
         const timetable = await exports.getTimetable(session, {
           params: {
@@ -269,19 +256,12 @@ exports.getPostsMultiThreaded = async (teachers, classes, rooms, day, time) => {
           },
         });
 
-        console.log(`📦 Timetable result for teacher ${teacherId}:`, timetable ? `${timetable.length} lessons` : "null");
-
         if (!timetable || timetable.length === 0) {
           continue;
         }
 
-        console.log(`📚 Teacher ${teacherId}: Found ${timetable.length} lessons`);
-
         // Durch alle Unterrichtsstunden dieses Lehrers gehen
         for (const lesson of timetable) {
-          // 🔧 DEBUG: Zeige alle Stunden
-          console.log(`📋 Lesson: Start=${lesson.startTime}, End=${lesson.endTime}, Time=${time}`);
-
           // Prüfe ob diese Stunde zur gewünschten Zeit läuft
           if (lesson.startTime && lesson.endTime) {
             const lessonStart = lesson.startTime;
@@ -353,7 +333,7 @@ exports.getPostsMultiThreaded = async (teachers, classes, rooms, day, time) => {
 };
 
 /**
- * 🔧 NEUE IMPLEMENTIERUNG: Verarbeitet die Posts-Liste (dedupliziert, sortiert)
+ * 🔧 IMPLEMENTIERUNG: Verarbeitet die Posts-Liste (dedupliziert, sortiert)
  * @param {Array} posts - Array von Post-Objekten
  * @returns {Array} Verarbeitete Posts
  */
