@@ -51,11 +51,13 @@ module.exports = (io) => {
 
         if (res.message === "OK") {
           console.log("✅ Alert processed successfully");
-          io.emit("alert", {
-            title: data.title,
-            content: data.content,
-            teachers: res.teachers,
-            time: data.time,
+          console.log(`📤 Sending ${res.teachers.length} posts to all clients`);
+          
+          // 🔧 FIX: Sende emitPosts statt alert, damit Frontend es empfängt!
+          io.emit("emitPosts", {
+            success: true,
+            message: "Alarm erfolgreich ausgelöst",
+            posts: res.teachers,
           });
         } else {
           console.error("❌ Alert processing failed:", res.message);
