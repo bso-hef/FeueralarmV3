@@ -12,10 +12,9 @@ const router = express.Router();
 // Alle Alarme abrufen
 router.get("/", checkAuth, AlertController.getAllAlerts);
 
+router.get("/current", checkAuth, AlertController.getCurrentAlert);
 // Einzelnen Alarm abrufen
 router.get("/:id", checkAuth, AlertController.getAlertById);
-
-router.get("/current", checkAuth, AlertController.getCurrentAlert);
 
 // ==========================================
 // ADMIN ROUTES
