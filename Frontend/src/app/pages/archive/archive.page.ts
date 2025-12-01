@@ -439,19 +439,19 @@ export class ArchivePage implements OnInit {
    */
   private mapTeacherStateToStatus(state?: number): string {
     if (state === undefined || state === null) {
-      return 'unbekannt';
+      return 'Offen'; // ← Offen statt unbekannt
     }
 
     // TeacherState Enum mapping
     switch (state) {
       case 1: // OPEN
-        return 'unbekannt';
+        return 'Offen'; // ← Offen statt unbekannt
       case 2: // PRESENT
-        return 'anwesend';
+        return 'Anwesend';
       case 3: // INCOMPLETE
-        return 'abwesend';
+        return 'Unvollständig'; // ← Unvollständig statt abwesend
       default:
-        return 'unbekannt';
+        return 'Offen';
     }
   }
 

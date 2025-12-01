@@ -75,6 +75,7 @@ export class DataService {
           return TeacherState.PRESENT;
         case 'incomplete':
           return TeacherState.INCOMPLETE;
+        case 'invalid': // ← NEU: Backend verwendet "invalid" für offene Klassen!
         case 'undefined':
         case '':
           return TeacherState.OPEN;
