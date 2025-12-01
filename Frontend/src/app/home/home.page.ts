@@ -720,6 +720,9 @@ export class HomePage implements OnInit, OnDestroy {
 
       console.log('✅ API Response:', response);
 
+      // ✅ WICHTIG: Setze isProcessing SOFORT auf false!
+      this.isProcessingAlarm = false;
+
       await this.feedbackService.showSuccessToast(
         'Alarm erfolgreich beendet und archiviert'
       );
@@ -738,12 +741,13 @@ export class HomePage implements OnInit, OnDestroy {
     } catch (error) {
       console.error('❌ === ERROR beim Archivieren ===');
       console.error('❌ Error:', error);
+      this.isProcessingAlarm = false; // ← AUCH HIER!
       await this.feedbackService.showError(
         error,
         'Fehler beim Beenden des Alarms'
       );
     } finally {
-      this.isProcessingAlarm = false;
+      this.isProcessingAlarm = false; // ← Sicherheitshalber auch hier
       console.log('🔥 === endAndArchiveAlarm() ENDE ===');
     }
   }
