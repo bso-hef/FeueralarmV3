@@ -537,6 +537,55 @@ export class RestService {
       .pipe(catchError(this.handleError.bind(this)));
   }
 
+  /**
+   * Holt den aktuellen (nicht archivierten) Alarm
+   */
+  getCurrentAlert(): Observable<any> {
+    const url = `${this.API_URL}/alerts/current`;
+    console.log('🔍 Getting current alert from:', url);
+
+    return this.http.get(url, { headers: this.getHeaders() }).pipe(
+      tap((response) => {
+        console.log('✅ Current alert response:', response);
+      }),
+      catchError((error) => {
+        console.error('❌ Error getting current alert:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Archiviert einen Alarm
+   */
+  archiveAlert(alertId: string): Observable<any> {
+    const url = `${this.API_URL}/alerts/${alertId}/archive`;
+
+    console.log('🔍 === ARCHIVE ALERT DEBUG START ===');
+    console.log('🔍 Alert ID:', alertId);
+    console.log('🔍 API URL:', this.API_URL);
+    console.log('🔍 Full URL:', url);
+    console.log('🔍 Headers:', this.getHeaders());
+    console.log('🔍 === ARCHIVE ALERT DEBUG END ===');
+
+    return this.http.put(url, {}, { headers: this.getHeaders() }).pipe(
+      tap((response) => {
+        console.log('✅ === ARCHIVE SUCCESS ===');
+        console.log('✅ Response:', response);
+        console.log('✅ === END SUCCESS ===');
+      }),
+      catchError((error) => {
+        console.error('❌ === ARCHIVE ERROR START ===');
+        console.error('❌ Full Error:', error);
+        console.error('❌ Error Status:', error.status);
+        console.error('❌ Error Message:', error.message);
+        console.error('❌ Error Body:', error.error);
+        console.error('❌ === ARCHIVE ERROR END ===');
+        return throwError(() => error);
+      })
+    );
+  }
+
   // ==========================================
   // TEST LOGIN (NUR FÜR ENTWICKLUNG)
   // ==========================================
@@ -568,46 +617,5 @@ export class RestService {
 
     console.log('✅ Test-Login erfolgreich (Offline-Login aktiviert)');
     return { success: true };
-  }
-  archiveAlert(alertId: string): Observable<any> {
-    const url = `${this.API_URL}/alerts/${alertId}/archive`;
-
-    console.log('🔍 === ARCHIVE ALERT DEBUG START ===');
-    console.log('🔍 Alert ID:', alertId);
-    console.log('🔍 API URL:', this.API_URL);
-    console.log('🔍 Full URL:', url);
-    console.log('🔍 Headers:', this.getHeaders());
-    console.log('🔍 === ARCHIVE ALERT DEBUG END ===');
-
-    return this.http.put(url, {}, { headers: this.getHeaders() }).pipe(
-      tap((response) => {
-        console.log('✅ === ARCHIVE SUCCESS ===');
-        console.log('✅ Response:', response);
-        console.log('✅ === END SUCCESS ===');
-      }),
-      catchError((error) => {
-        console.error('❌ === ARCHIVE ERROR START ===');
-        console.error('❌ Full Error:', error);
-        console.error('❌ Error Status:', error.status);
-        console.error('❌ Error Message:', error.message);
-        console.error('❌ Error Body:', error.error);
-        console.error('❌ === ARCHIVE ERROR END ===');
-        return throwError(() => error);
-      })
-    );
-  }
-  getCurrentAlert(): Observable<any> {
-    const url = `${this.API_URL}/alerts/current`;
-    console.log('🔍 Getting current alert from:', url);
-
-    return this.http.get(url, { headers: this.getHeaders() }).pipe(
-      tap((response) => {
-        console.log('✅ Current alert response:', response);
-      }),
-      catchError((error) => {
-        console.error('❌ Error getting current alert:', error);
-        return throwError(() => error);
-      })
-    );
   }
 }
