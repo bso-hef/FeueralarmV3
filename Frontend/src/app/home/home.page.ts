@@ -806,7 +806,6 @@ export class HomePage implements OnInit, OnDestroy {
 
     try {
       console.log('📄 Starte PDF-Export...');
-      await this.feedbackService.showLoading('Erstelle PDF...');
 
       const alarmData: ExportAlarmData = {
         _id: this.currentAlarmId || 'unknown',
@@ -834,11 +833,9 @@ export class HomePage implements OnInit, OnDestroy {
       this.exportService.exportAlarmToPDF(alarmData, teacherData);
 
       console.log('✅ PDF-Export erfolgreich');
-      await this.feedbackService.hideLoading();
       await this.feedbackService.showSuccessToast('PDF erfolgreich erstellt');
     } catch (error) {
       console.error('❌ Error exporting PDF:', error);
-      await this.feedbackService.hideLoading();
       await this.feedbackService.showError(error, 'Fehler beim PDF-Export');
     }
   }
@@ -885,7 +882,6 @@ export class HomePage implements OnInit, OnDestroy {
 
     try {
       console.log('📊 Starte CSV-Export...');
-      await this.feedbackService.showLoading('Erstelle CSV...');
 
       const alarmData: ExportAlarmData = {
         _id: this.currentAlarmId || 'unknown',
@@ -913,11 +909,9 @@ export class HomePage implements OnInit, OnDestroy {
       this.exportService.exportAlarmToCSV(alarmData, teacherData);
 
       console.log('✅ CSV-Export erfolgreich');
-      await this.feedbackService.hideLoading();
       await this.feedbackService.showSuccessToast('CSV erfolgreich erstellt');
     } catch (error) {
       console.error('❌ Error exporting CSV:', error);
-      await this.feedbackService.hideLoading();
       await this.feedbackService.showError(error, 'Fehler beim CSV-Export');
     }
   }
