@@ -570,43 +570,120 @@ export class HomePage implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Prüft ob noch offene Klassen existieren
+   */
+  private hasOpenClasses(): boolean {
+    const result = this.teachers.some((t) => t.state === TeacherState.OPEN);
+    console.log('🔍 hasOpenClasses():', result);
+    return result;
+  }
+
+  /**
+   * Gibt die Anzahl der offenen Klassen zurück
+   */
+  private getOpenClassesCount(): number {
+    const count = this.teachers.filter(
+      (t) => t.state === TeacherState.OPEN
+    ).length;
+    console.log('🔍 getOpenClassesCount():', count);
+    return count;
+  }
+
+  /**
+   * Gibt die Namen der offenen Klassen zurück
+   */
+  private getOpenClassesNames(): string[] {
+    const names = this.teachers
+      .filter((t) => t.state === TeacherState.OPEN)
+      .map((t) => `${t.class} (${t.classNumber})`)
+      .slice(0, 5);
+    console.log('🔍 getOpenClassesNames():', names);
+    return names;
+  }
+
   async endAndArchiveAlarm(): Promise<void> {
+    console.log('🔥 === endAndArchiveAlarm() CALLED ===');
+    console.log('🔥 currentAlarmId:', this.currentAlarmId);
+    console.log('🔥 hasActiveAlarm:', this.hasActiveAlarm);
+    console.log('🔥 teachers.length:', this.teachers.length);
+    console.log('🔥 teachers:', this.teachers);
+
     if (!this.currentAlarmId) {
+      console.log('⚠️ Kein Alarm ID - Abbruch');
       await this.feedbackService.showWarningToast(
         'Kein aktiver Alarm vorhanden'
       );
       return;
     }
 
+    // ✅ VALIDIERUNG: Prüfe auf offene Klassen
+    if (this.hasOpenClasses()) {
+      const openCount = this.getOpenClassesCount();
+      const openClasses = this.getOpenClassesNames();
+
+      console.log('⚠️ Es gibt noch offene Klassen:', openCount);
+
+      let message = `⚠️ Es ${
+        openCount === 1 ? 'ist' : 'sind'
+      } noch ${openCount} Klasse${openCount === 1 ? '' : 'n'} offen:\n\n`;
+      message += openClasses.join('\n');
+
+      if (openCount > 5) {
+        message += `\n... und ${openCount - 5} weitere`;
+      }
+
+      message +=
+        '\n\n❌ Bitte schließe alle Klassen ab (Anwesend oder Unvollständig), bevor du den Alarm beendest!';
+
+      await this.feedbackService.showWarningToast(message);
+      return;
+    }
+
+    console.log('✅ Alle Klassen geschlossen - fahre fort');
+
     const confirmed = await this.feedbackService.showConfirm(
       'Alarm beenden',
-      'Möchtest du den Alarm wirklich beenden und archivieren?',
+      'Alle Klassen sind abgeschlossen. Möchtest du den Alarm jetzt beenden und archivieren?',
       'Ja, beenden',
       'Abbrechen'
     );
 
     if (!confirmed) {
+      console.log('❌ Benutzer hat abgebrochen');
       return;
     }
 
     try {
       this.isProcessingAlarm = true;
+      console.log('📦 Starte Archivierung...');
       await this.feedbackService.showLoading('Beende Alarm...');
 
-      await this.restService.archiveAlert(this.currentAlarmId).toPromise();
+      console.log('🔗 API Call: archiveAlert(' + this.currentAlarmId + ')');
+      const response = await this.restService
+        .archiveAlert(this.currentAlarmId)
+        .toPromise();
+      console.log('✅ API Response:', response);
 
       await this.feedbackService.hideLoading();
       await this.feedbackService.showSuccessToast(
         'Alarm erfolgreich beendet und archiviert'
       );
 
+      // ✅ UI zurücksetzen
+      console.log('🔄 Setze UI zurück...');
       this.teachers = [];
       this.filteredTeachers = [];
       this.hasActiveAlarm = false;
       this.currentAlarmId = null;
       this.updateStats();
+
+      console.log('✅ UI zurückgesetzt');
+      console.log('🔥 teachers.length:', this.teachers.length);
+      console.log('🔥 hasActiveAlarm:', this.hasActiveAlarm);
     } catch (error) {
-      console.error('❌ Error ending alarm:', error);
+      console.error('❌ === ERROR beim Archivieren ===');
+      console.error('❌ Error:', error);
       await this.feedbackService.hideLoading();
       await this.feedbackService.showError(
         error,
@@ -614,11 +691,18 @@ export class HomePage implements OnInit, OnDestroy {
       );
     } finally {
       this.isProcessingAlarm = false;
+      console.log('🔥 === endAndArchiveAlarm() ENDE ===');
     }
   }
 
   async exportCurrentAlarmPDF(): Promise<void> {
+    console.log('📄 === exportCurrentAlarmPDF() CALLED ===');
+    console.log('📄 hasActiveAlarm:', this.hasActiveAlarm);
+    console.log('📄 teachers.length:', this.teachers.length);
+    console.log('📄 currentAlarmId:', this.currentAlarmId);
+
     if (!this.hasActiveAlarm || this.teachers.length === 0) {
+      console.log('⚠️ Kein aktiver Alarm - Abbruch');
       await this.feedbackService.showWarningToast(
         'Kein aktiver Alarm vorhanden'
       );
@@ -626,6 +710,7 @@ export class HomePage implements OnInit, OnDestroy {
     }
 
     try {
+      console.log('📄 Starte PDF-Export...');
       await this.feedbackService.showLoading('Erstelle PDF...');
 
       const alarmData: ExportAlarmData = {
@@ -647,8 +732,13 @@ export class HomePage implements OnInit, OnDestroy {
         raum: t.room?.join(', ') || '-',
       }));
 
+      console.log('📄 AlarmData:', alarmData);
+      console.log('📄 TeacherData:', teacherData);
+      console.log('📄 Rufe exportService.exportAlarmToPDF() auf...');
+
       this.exportService.exportAlarmToPDF(alarmData, teacherData);
 
+      console.log('✅ PDF-Export erfolgreich');
       await this.feedbackService.hideLoading();
       await this.feedbackService.showSuccessToast('PDF erfolgreich erstellt');
     } catch (error) {
@@ -659,7 +749,13 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async exportCurrentAlarmCSV(): Promise<void> {
+    console.log('📊 === exportCurrentAlarmCSV() CALLED ===');
+    console.log('📊 hasActiveAlarm:', this.hasActiveAlarm);
+    console.log('📊 teachers.length:', this.teachers.length);
+    console.log('📊 currentAlarmId:', this.currentAlarmId);
+
     if (!this.hasActiveAlarm || this.teachers.length === 0) {
+      console.log('⚠️ Kein aktiver Alarm - Abbruch');
       await this.feedbackService.showWarningToast(
         'Kein aktiver Alarm vorhanden'
       );
@@ -667,6 +763,7 @@ export class HomePage implements OnInit, OnDestroy {
     }
 
     try {
+      console.log('📊 Starte CSV-Export...');
       await this.feedbackService.showLoading('Erstelle CSV...');
 
       const alarmData: ExportAlarmData = {
@@ -688,8 +785,13 @@ export class HomePage implements OnInit, OnDestroy {
         raum: t.room?.join(', ') || '-',
       }));
 
+      console.log('📊 AlarmData:', alarmData);
+      console.log('📊 TeacherData:', teacherData);
+      console.log('📊 Rufe exportService.exportAlarmToCSV() auf...');
+
       this.exportService.exportAlarmToCSV(alarmData, teacherData);
 
+      console.log('✅ CSV-Export erfolgreich');
       await this.feedbackService.hideLoading();
       await this.feedbackService.showSuccessToast('CSV erfolgreich erstellt');
     } catch (error) {
@@ -736,7 +838,6 @@ export class HomePage implements OnInit, OnDestroy {
         state: TeacherState.OPEN,
         comment: '',
       },
-      // ... weitere Mock-Daten ...
     ];
   }
 
