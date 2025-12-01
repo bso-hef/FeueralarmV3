@@ -67,13 +67,6 @@ export class SocketService {
     socketAny.on('connect', async () => {
       console.log('✅ Socket connected');
       this.isConnected = true;
-
-      // *** NEU: Sync nach Reconnect ***
-      try {
-        await this.syncService.syncOfflineChanges();
-      } catch (error) {
-        console.error('❌ Sync fehlgeschlagen:', error);
-      }
     });
 
     socketAny.on('disconnect', (reason: string) => {
@@ -171,13 +164,6 @@ export class SocketService {
     status?: string,
     comment?: string
   ): Promise<void> {
-    // *** NEU: Offline-Check ***
-    if (!this.syncService.isOnline()) {
-      console.log('📴 Offline - speichere in Queue');
-      await this.syncService.queueUpdate(id, status, comment);
-      return;
-    }
-
     // Online: Normal senden
     console.log('📤 Updating post:', id, status, comment);
     const payload: any = { id };
@@ -188,13 +174,6 @@ export class SocketService {
   }
 
   async updateComment(id: string, comment: string): Promise<void> {
-    // *** NEU: Offline-Check ***
-    if (!this.syncService.isOnline()) {
-      console.log('📴 Offline - speichere Kommentar in Queue');
-      await this.syncService.queueComment(id, comment);
-      return;
-    }
-
     // Online: Normal senden
     console.log('📤 Updating comment:', id, comment);
     this.socket.emit('updatePost', {
