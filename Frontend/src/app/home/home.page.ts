@@ -1,4 +1,11 @@
-import { Component, OnInit, OnDestroy, inject, Injector } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  Injector,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -153,7 +160,8 @@ export class HomePage implements OnInit, OnDestroy {
     private modalCtrl: ModalController,
     private router: Router,
     private syncService: SyncService,
-    private exportService: ExportService
+    private exportService: ExportService,
+    private cdr: ChangeDetectorRef
   ) {
     // Socket Service optional injizieren
     try {
@@ -734,6 +742,9 @@ export class HomePage implements OnInit, OnDestroy {
       this.hasActiveAlarm = false;
       this.currentAlarmId = null;
       this.updateStats();
+
+      // ✅ Force Angular Change Detection
+      this.cdr.detectChanges();
 
       console.log('✅ UI zurückgesetzt');
       console.log('🔥 teachers.length:', this.teachers.length);
