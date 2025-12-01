@@ -778,6 +778,32 @@ export class HomePage implements OnInit, OnDestroy {
       return;
     }
 
+    // ✅ VALIDIERUNG: Prüfe ob alle Klassen abgeschlossen sind
+    if (this.hasOpenClasses()) {
+      const openCount = this.getOpenClassesCount();
+      const openClasses = this.getOpenClassesNames();
+
+      let message = `⚠️ Es ${
+        openCount === 1 ? 'ist' : 'sind'
+      } noch ${openCount} Klasse${openCount === 1 ? '' : 'n'} offen:\n\n`;
+      message += openClasses.join('\n');
+
+      if (openCount > 5) {
+        message += `\n... und ${openCount - 5} weitere`;
+      }
+
+      message +=
+        '\n\n❌ Bitte schließe alle Klassen ab (Anwesend oder Unvollständig), bevor du den Export erstellst!';
+
+      await this.feedbackService.showConfirm(
+        '⚠️ Export nicht möglich',
+        message,
+        'OK',
+        ''
+      );
+      return;
+    }
+
     try {
       console.log('📄 Starte PDF-Export...');
       await this.feedbackService.showLoading('Erstelle PDF...');
@@ -827,6 +853,32 @@ export class HomePage implements OnInit, OnDestroy {
       console.log('⚠️ Kein aktiver Alarm - Abbruch');
       await this.feedbackService.showWarningToast(
         'Kein aktiver Alarm vorhanden'
+      );
+      return;
+    }
+
+    // ✅ VALIDIERUNG: Prüfe ob alle Klassen abgeschlossen sind
+    if (this.hasOpenClasses()) {
+      const openCount = this.getOpenClassesCount();
+      const openClasses = this.getOpenClassesNames();
+
+      let message = `⚠️ Es ${
+        openCount === 1 ? 'ist' : 'sind'
+      } noch ${openCount} Klasse${openCount === 1 ? '' : 'n'} offen:\n\n`;
+      message += openClasses.join('\n');
+
+      if (openCount > 5) {
+        message += `\n... und ${openCount - 5} weitere`;
+      }
+
+      message +=
+        '\n\n❌ Bitte schließe alle Klassen ab (Anwesend oder Unvollständig), bevor du den Export erstellst!';
+
+      await this.feedbackService.showConfirm(
+        '⚠️ Export nicht möglich',
+        message,
+        'OK',
+        ''
       );
       return;
     }
