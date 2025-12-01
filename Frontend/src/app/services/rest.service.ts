@@ -571,14 +571,27 @@ export class RestService {
   }
   archiveAlert(alertId: string): Observable<any> {
     const url = `${this.API_URL}/alerts/${alertId}/archive`;
-    console.log('📦 Archiving alert:', alertId);
+
+    console.log('🔍 === ARCHIVE ALERT DEBUG START ===');
+    console.log('🔍 Alert ID:', alertId);
+    console.log('🔍 API URL:', this.API_URL);
+    console.log('🔍 Full URL:', url);
+    console.log('🔍 Headers:', this.getHeaders());
+    console.log('🔍 === ARCHIVE ALERT DEBUG END ===');
 
     return this.http.put(url, {}, { headers: this.getHeaders() }).pipe(
       tap((response) => {
-        console.log('✅ Alert archived successfully:', response);
+        console.log('✅ === ARCHIVE SUCCESS ===');
+        console.log('✅ Response:', response);
+        console.log('✅ === END SUCCESS ===');
       }),
       catchError((error) => {
-        console.error('❌ Error archiving alert:', error);
+        console.error('❌ === ARCHIVE ERROR START ===');
+        console.error('❌ Full Error:', error);
+        console.error('❌ Error Status:', error.status);
+        console.error('❌ Error Message:', error.message);
+        console.error('❌ Error Body:', error.error);
+        console.error('❌ === ARCHIVE ERROR END ===');
         return throwError(() => error);
       })
     );
