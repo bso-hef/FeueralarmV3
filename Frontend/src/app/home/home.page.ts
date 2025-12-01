@@ -567,31 +567,27 @@ export class HomePage implements OnInit, OnDestroy {
     this.hasActiveAlarm = this.teachers.length > 0;
 
     if (this.hasActiveAlarm && this.teachers.length > 0) {
-      const firstTeacher = this.teachers[0] as any;
-      console.log('🔍 First teacher object:', firstTeacher);
-      console.log('🔍 First teacher keys:', Object.keys(firstTeacher));
-      console.log('🔍 firstTeacher.alert:', firstTeacher.alert);
-      console.log('🔍 firstTeacher._id:', firstTeacher._id);
-      console.log('🔍 firstTeacher.id:', firstTeacher.id);
-
-      // Versuche zuerst aus Teacher-Objekt zu lesen
-      let alertId = firstTeacher.alert || firstTeacher._id || firstTeacher.id;
-
-      // Falls keine ID gefunden, hole aktuellen Alarm aus API
-      if (!alertId) {
-        console.log('⚠️ Keine Alert-ID in Teacher-Daten, hole von API...');
-        try {
-          const response = await this.restService.getCurrentAlert().toPromise();
-          if (response && response.alert && response.alert._id) {
-            alertId = response.alert._id;
-            console.log('✅ Alert-ID von API erhalten:', alertId);
-          }
-        } catch (error) {
-          console.error('❌ Fehler beim Holen der Alert-ID:', error);
+      // Hole IMMER die aktuelle Alarm-ID von der API
+      console.log('🔍 Hole aktuelle Alarm-ID von API...');
+      try {
+        const response = await this.restService.getCurrentAlert().toPromise();
+        if (response && response.alert && response.alert._id) {
+          this.currentAlarmId = response.alert._id;
+          console.log('✅ Alert-ID von API erhalten:', this.currentAlarmId);
+        } else {
+          console.log('⚠️ Keine aktuelle Alarm von API - verwende Fallback');
+          const firstTeacher = this.teachers[0] as any;
+          this.currentAlarmId =
+            firstTeacher.alert || firstTeacher._id || firstTeacher.id;
         }
+      } catch (error) {
+        console.error('❌ Fehler beim Holen der Alert-ID:', error);
+        // Fallback: Verwende ID vom ersten Teacher
+        const firstTeacher = this.teachers[0] as any;
+        this.currentAlarmId =
+          firstTeacher.alert || firstTeacher._id || firstTeacher.id;
       }
 
-      this.currentAlarmId = alertId;
       console.log('🔍 Final currentAlarmId:', this.currentAlarmId);
 
       if (this.currentAlarmId) {
