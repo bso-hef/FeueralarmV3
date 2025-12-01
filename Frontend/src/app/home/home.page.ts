@@ -699,7 +699,7 @@ export class HomePage implements OnInit, OnDestroy {
     try {
       this.isProcessingAlarm = true;
       console.log('📦 Starte Archivierung...');
-      // await this.feedbackService.showLoading('Beende Alarm...'); // ← TEMPORÄR AUSKOMMENTIERT
+      await this.feedbackService.showLoading('Beende Alarm...');
 
       console.log('🔗 API Call: archiveAlert(' + this.currentAlarmId + ')');
       console.log('🔗 Calling restService.archiveAlert()...');
@@ -722,7 +722,7 @@ export class HomePage implements OnInit, OnDestroy {
 
       console.log('✅ API Response:', response);
 
-      // await this.feedbackService.hideLoading(); // ← TEMPORÄR AUSKOMMENTIERT
+      await this.feedbackService.hideLoading();
       await this.feedbackService.showSuccessToast(
         'Alarm erfolgreich beendet und archiviert'
       );
@@ -741,7 +741,7 @@ export class HomePage implements OnInit, OnDestroy {
     } catch (error) {
       console.error('❌ === ERROR beim Archivieren ===');
       console.error('❌ Error:', error);
-      // await this.feedbackService.hideLoading(); // ← TEMPORÄR AUSKOMMENTIERT
+      await this.feedbackService.hideLoading();
       await this.feedbackService.showError(
         error,
         'Fehler beim Beenden des Alarms'
