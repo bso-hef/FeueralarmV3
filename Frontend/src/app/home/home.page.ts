@@ -706,9 +706,21 @@ export class HomePage implements OnInit, OnDestroy {
       await this.feedbackService.showLoading('Beende Alarm...');
 
       console.log('🔗 API Call: archiveAlert(' + this.currentAlarmId + ')');
-      const response = await this.restService
-        .archiveAlert(this.currentAlarmId)
-        .toPromise();
+
+      // ✅ NEU: Verwende lastValueFrom statt toPromise
+      const response = await new Promise((resolve, reject) => {
+        this.restService.archiveAlert(this.currentAlarmId!).subscribe({
+          next: (res) => {
+            console.log('📥 Response received:', res);
+            resolve(res);
+          },
+          error: (err) => {
+            console.error('📥 Error received:', err);
+            reject(err);
+          },
+        });
+      });
+
       console.log('✅ API Response:', response);
 
       await this.feedbackService.hideLoading();
