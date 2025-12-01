@@ -39,6 +39,10 @@ exports.getAllAlerts = async (req, res) => {
     });
   }
 };
+
+// ==========================================
+// AKTUELLEN ALARM ABRUFEN
+// ==========================================
 exports.getCurrentAlert = async (req, res) => {
   try {
     const alert = await Alert.findOne({ archived: false }).sort({ created: -1 }).lean();
@@ -135,13 +139,40 @@ exports.deleteAlert = async (req, res) => {
 };
 
 // ==========================================
-// ALARM ARCHIVIEREN
+// ALARM ARCHIVIEREN (MIT STATS!)
 // ==========================================
 exports.archiveAlert = async (req, res) => {
   try {
     const alertId = req.params.id;
+    const { stats } = req.body; // ← NEU: Stats aus Request Body
 
-    const alert = await Alert.findByIdAndUpdate(alertId, { archived: true, updated: new Date() }, { new: true });
+    console.log("📊 Archiving alert with stats:", stats);
+
+    // Update-Daten vorbereiten
+    const updateData = {
+      archived: true,
+      updated: new Date(),
+    };
+
+    // ✅ Füge Stats hinzu wenn vorhanden
+    if (stats) {
+      updateData.stats = stats;
+      console.log("✅ Stats werden gespeichert:", stats);
+    } else {
+      console.log("⚠️ Keine Stats mitgesendet, berechne sie aus Posts...");
+
+      // Fallback: Berechne Stats aus Posts wenn nicht mitgesendet
+      const posts = await Post.find({ alert: alertId });
+      updateData.stats = {
+        total: posts.length,
+        complete: posts.filter((p) => p.status === "complete" || p.status === 2).length,
+        incomplete: posts.filter((p) => p.status === "incomplete" || p.status === 3).length,
+        undefined: posts.filter((p) => !p.status || p.status === "undefined" || p.status === 1).length,
+      };
+      console.log("✅ Stats berechnet:", updateData.stats);
+    }
+
+    const alert = await Alert.findByIdAndUpdate(alertId, updateData, { new: true });
 
     if (!alert) {
       return res.status(404).json({
@@ -149,6 +180,8 @@ exports.archiveAlert = async (req, res) => {
         message: "Alarm nicht gefunden",
       });
     }
+
+    console.log("✅ Alert archived successfully with stats:", alert.stats);
 
     // UAP 9.3.1: Audit-Logging für Archivierung
     if (req.userData) {
@@ -183,9 +216,9 @@ exports.updateAlertStats = async (alertId) => {
 
     const stats = {
       total: posts.length,
-      complete: posts.filter((p) => p.status === "complete").length,
-      incomplete: posts.filter((p) => p.status === "incomplete").length,
-      undefined: posts.filter((p) => !p.status || p.status === "undefined").length,
+      complete: posts.filter((p) => p.status === "complete" || p.status === 2).length,
+      incomplete: posts.filter((p) => p.status === "incomplete" || p.status === 3).length,
+      undefined: posts.filter((p) => !p.status || p.status === "undefined" || p.status === 1).length,
     };
 
     await Alert.findByIdAndUpdate(alertId, { stats, updated: new Date() });

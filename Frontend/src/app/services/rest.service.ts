@@ -556,19 +556,23 @@ export class RestService {
   }
 
   /**
-   * Archiviert einen Alarm
+   * Archiviert einen Alarm MIT Stats
    */
-  archiveAlert(alertId: string): Observable<any> {
+  archiveAlert(alertId: string, stats?: any): Observable<any> {
     const url = `${this.API_URL}/alerts/${alertId}/archive`;
 
     console.log('🔍 === ARCHIVE ALERT DEBUG START ===');
     console.log('🔍 Alert ID:', alertId);
+    console.log('🔍 Stats:', stats);
     console.log('🔍 API URL:', this.API_URL);
     console.log('🔍 Full URL:', url);
     console.log('🔍 Headers:', this.getHeaders());
     console.log('🔍 === ARCHIVE ALERT DEBUG END ===');
 
-    return this.http.put(url, {}, { headers: this.getHeaders() }).pipe(
+    // Sende Stats im Body mit
+    const body = stats ? { stats } : {};
+
+    return this.http.put(url, body, { headers: this.getHeaders() }).pipe(
       tap((response) => {
         console.log('✅ === ARCHIVE SUCCESS ===');
         console.log('✅ Response:', response);

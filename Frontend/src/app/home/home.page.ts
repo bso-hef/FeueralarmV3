@@ -711,9 +711,23 @@ export class HomePage implements OnInit, OnDestroy {
       console.log('🔗 API Call: archiveAlert(' + this.currentAlarmId + ')');
       console.log('🔗 Calling restService.archiveAlert()...');
 
+      // ✅ Berechne Stats vor dem Archivieren
+      const stats = {
+        total: this.teachers.length,
+        complete: this.teachers.filter((t) => t.state === TeacherState.PRESENT)
+          .length,
+        incomplete: this.teachers.filter(
+          (t) => t.state === TeacherState.INCOMPLETE
+        ).length,
+        undefined: this.teachers.filter((t) => t.state === TeacherState.OPEN)
+          .length,
+      };
+
+      console.log('📊 Stats zum Speichern:', stats);
+
       const response = await new Promise((resolve, reject) => {
         console.log('🔗 Inside Promise - subscribing...');
-        this.restService.archiveAlert(this.currentAlarmId!).subscribe({
+        this.restService.archiveAlert(this.currentAlarmId!, stats).subscribe({
           next: (res) => {
             console.log('📥 Response received:', res);
             resolve(res);
