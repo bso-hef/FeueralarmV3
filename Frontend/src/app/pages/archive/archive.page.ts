@@ -30,14 +30,17 @@ import {
   checkmarkCircle,
   closeCircle,
   chevronForwardOutline,
-  documentTextOutline, // ← NEU für PDF
-  downloadOutline, // ← NEU für CSV
+  documentTextOutline,
+  downloadOutline,
 } from 'ionicons/icons';
 
 import { AlarmService, AlarmData } from '../../services/alarm.service';
 import { FeedbackService } from '../../services/feedback.service';
 import { DataService } from '../../services/data.service';
-import { ExportService } from '../../services/export.service'; // ← NEU
+import {
+  ExportService,
+  ExportTeacherData,
+} from '../../services/export.service';
 
 @Component({
   selector: 'app-archive',
@@ -84,7 +87,7 @@ export class ArchivePage implements OnInit {
     private feedbackService: FeedbackService,
     private dataService: DataService,
     private router: Router,
-    private exportService: ExportService // ← NEU
+    private exportService: ExportService
   ) {
     addIcons({
       arrowBack,
@@ -97,8 +100,8 @@ export class ArchivePage implements OnInit {
       checkmarkCircle,
       closeCircle,
       chevronForwardOutline,
-      documentTextOutline, // ← NEU
-      downloadOutline, // ← NEU
+      documentTextOutline,
+      downloadOutline,
     });
   }
 
@@ -284,26 +287,44 @@ export class ArchivePage implements OnInit {
   }
 
   // ==========================================
-  // EXPORT FUNCTIONS (NEU!)
+  // EXPORT FUNCTIONS (ÜBERARBEITET - OHNE showLoading!)
   // ==========================================
 
   async exportAlarmPDF(alarm: AlarmData) {
+    console.log('📄 === exportAlarmPDF() CALLED ===');
+    console.log('📄 Alarm:', alarm);
+    console.log('📄 Alarm ID:', alarm._id);
+
     try {
-      await this.feedbackService.showLoading('PDF wird erstellt...');
+      console.log('📄 Starte PDF-Export...');
 
       // Lade vollständige Alarm-Daten
-      const response = await this.alarmService
-        .getAlarmById(alarm._id)
-        .toPromise();
+      console.log('📄 Lade vollständige Alarm-Daten...');
+
+      const response = await new Promise<any>((resolve, reject) => {
+        this.alarmService.getAlarmById(alarm._id).subscribe({
+          next: (res) => {
+            console.log('✅ Alarm-Daten geladen:', res);
+            resolve(res);
+          },
+          error: (err) => {
+            console.error('❌ Fehler beim Laden:', err);
+            reject(err);
+          },
+        });
+      });
 
       if (!response || !response.posts) {
         throw new Error('Keine Daten verfügbar');
       }
 
+      console.log('📄 Posts:', response.posts.length);
+
       const teachers = this.dataService.parseTeachersFromAPI(response.posts);
+      console.log('📄 Teachers parsed:', teachers.length);
 
       // Konvertiere Teacher[] zu ExportTeacherData[]
-      const exportData = teachers.map((t) => ({
+      const exportData: ExportTeacherData[] = teachers.map((t) => ({
         name: t.names && t.names.length > 0 ? t.names.join(', ') : 'Unbekannt',
         klasse: t.class || t.classNumber || '',
         status: this.mapTeacherStateToStatus(t.state),
@@ -311,36 +332,57 @@ export class ArchivePage implements OnInit {
         raum: t.room && t.room.length > 0 ? t.room.join(', ') : '',
       }));
 
+      console.log('📄 ExportData:', exportData.length, 'Einträge');
+
       // Exportiere PDF
+      console.log('📄 Rufe exportService.exportAlarmToPDF() auf...');
       this.exportService.exportAlarmToPDF(alarm, exportData);
 
-      await this.feedbackService.hideLoading();
+      console.log('✅ PDF-Export erfolgreich!');
       await this.feedbackService.showSuccessToast(
         'PDF erfolgreich exportiert! 📄'
       );
     } catch (error) {
-      await this.feedbackService.hideLoading();
+      console.error('❌ PDF-Export fehlgeschlagen:', error);
       await this.feedbackService.showError(error, 'PDF-Export fehlgeschlagen');
     }
   }
 
   async exportAlarmCSV(alarm: AlarmData) {
+    console.log('📊 === exportAlarmCSV() CALLED ===');
+    console.log('📊 Alarm:', alarm);
+    console.log('📊 Alarm ID:', alarm._id);
+
     try {
-      await this.feedbackService.showLoading('CSV wird erstellt...');
+      console.log('📊 Starte CSV-Export...');
 
       // Lade vollständige Alarm-Daten
-      const response = await this.alarmService
-        .getAlarmById(alarm._id)
-        .toPromise();
+      console.log('📊 Lade vollständige Alarm-Daten...');
+
+      const response = await new Promise<any>((resolve, reject) => {
+        this.alarmService.getAlarmById(alarm._id).subscribe({
+          next: (res) => {
+            console.log('✅ Alarm-Daten geladen:', res);
+            resolve(res);
+          },
+          error: (err) => {
+            console.error('❌ Fehler beim Laden:', err);
+            reject(err);
+          },
+        });
+      });
 
       if (!response || !response.posts) {
         throw new Error('Keine Daten verfügbar');
       }
 
+      console.log('📊 Posts:', response.posts.length);
+
       const teachers = this.dataService.parseTeachersFromAPI(response.posts);
+      console.log('📊 Teachers parsed:', teachers.length);
 
       // Konvertiere Teacher[] zu ExportTeacherData[]
-      const exportData = teachers.map((t) => ({
+      const exportData: ExportTeacherData[] = teachers.map((t) => ({
         name: t.names && t.names.length > 0 ? t.names.join(', ') : 'Unbekannt',
         klasse: t.class || t.classNumber || '',
         status: this.mapTeacherStateToStatus(t.state),
@@ -348,39 +390,42 @@ export class ArchivePage implements OnInit {
         raum: t.room && t.room.length > 0 ? t.room.join(', ') : '',
       }));
 
+      console.log('📊 ExportData:', exportData.length, 'Einträge');
+
       // Exportiere CSV
+      console.log('📊 Rufe exportService.exportAlarmToCSV() auf...');
       this.exportService.exportAlarmToCSV(alarm, exportData);
 
-      await this.feedbackService.hideLoading();
+      console.log('✅ CSV-Export erfolgreich!');
       await this.feedbackService.showSuccessToast(
         'CSV erfolgreich exportiert! 📊'
       );
     } catch (error) {
-      await this.feedbackService.hideLoading();
+      console.error('❌ CSV-Export fehlgeschlagen:', error);
       await this.feedbackService.showError(error, 'CSV-Export fehlgeschlagen');
     }
   }
 
   async exportAllAlarmsCSV() {
-    try {
-      await this.feedbackService.showLoading('CSV-Übersicht wird erstellt...');
+    console.log('📊 === exportAllAlarmsCSV() CALLED ===');
 
+    try {
       if (this.alarms.length === 0) {
-        await this.feedbackService.hideLoading();
         await this.feedbackService.showWarningToast(
           'Keine Alarme zum Exportieren vorhanden'
         );
         return;
       }
 
+      console.log('📊 Exportiere', this.alarms.length, 'Alarme...');
       this.exportService.exportAllAlarmsToCSV(this.alarms);
 
-      await this.feedbackService.hideLoading();
+      console.log('✅ CSV-Übersicht exportiert!');
       await this.feedbackService.showSuccessToast(
         'CSV-Übersicht exportiert! 📊'
       );
     } catch (error) {
-      await this.feedbackService.hideLoading();
+      console.error('❌ CSV-Export fehlgeschlagen:', error);
       await this.feedbackService.showError(error, 'CSV-Export fehlgeschlagen');
     }
   }
