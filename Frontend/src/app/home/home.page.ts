@@ -260,7 +260,9 @@ export class HomePage implements OnInit, OnDestroy {
         this.isLoading = false;
 
         // Check for active alarm
-        this.checkForActiveAlarm();
+        this.checkForActiveAlarm().catch((err) =>
+          console.error('Error checking alarm:', err)
+        );
       }
     });
 
@@ -296,7 +298,7 @@ export class HomePage implements OnInit, OnDestroy {
       }
 
       // Check for active alarm
-      this.checkForActiveAlarm();
+      await this.checkForActiveAlarm();
 
       await this.feedbackService.hideLoading();
     } catch (error) {
@@ -311,7 +313,7 @@ export class HomePage implements OnInit, OnDestroy {
       this.isLoading = false;
 
       // Check for active alarm
-      this.checkForActiveAlarm();
+      await this.checkForActiveAlarm();
     }
   }
 
@@ -558,16 +560,50 @@ export class HomePage implements OnInit, OnDestroy {
   // ALARM MANAGEMENT
   // ==========================================
 
-  private checkForActiveAlarm(): void {
+  private async checkForActiveAlarm(): Promise<void> {
+    console.log('🔍 === checkForActiveAlarm() START ===');
+    console.log('🔍 teachers.length:', this.teachers.length);
+
     this.hasActiveAlarm = this.teachers.length > 0;
 
     if (this.hasActiveAlarm && this.teachers.length > 0) {
       const firstTeacher = this.teachers[0] as any;
-      this.currentAlarmId = firstTeacher.alert || firstTeacher._id;
-      console.log('🚨 Active alarm detected:', this.currentAlarmId);
+      console.log('🔍 First teacher object:', firstTeacher);
+      console.log('🔍 First teacher keys:', Object.keys(firstTeacher));
+      console.log('🔍 firstTeacher.alert:', firstTeacher.alert);
+      console.log('🔍 firstTeacher._id:', firstTeacher._id);
+      console.log('🔍 firstTeacher.id:', firstTeacher.id);
+
+      // Versuche zuerst aus Teacher-Objekt zu lesen
+      let alertId = firstTeacher.alert || firstTeacher._id || firstTeacher.id;
+
+      // Falls keine ID gefunden, hole aktuellen Alarm aus API
+      if (!alertId) {
+        console.log('⚠️ Keine Alert-ID in Teacher-Daten, hole von API...');
+        try {
+          const response = await this.restService.getCurrentAlert().toPromise();
+          if (response && response.alert && response.alert._id) {
+            alertId = response.alert._id;
+            console.log('✅ Alert-ID von API erhalten:', alertId);
+          }
+        } catch (error) {
+          console.error('❌ Fehler beim Holen der Alert-ID:', error);
+        }
+      }
+
+      this.currentAlarmId = alertId;
+      console.log('🔍 Final currentAlarmId:', this.currentAlarmId);
+
+      if (this.currentAlarmId) {
+        console.log('🚨 Active alarm detected:', this.currentAlarmId);
+      } else {
+        console.log('⚠️ Active alarm but NO ID found!');
+      }
     } else {
       this.currentAlarmId = null;
+      console.log('🔍 No active alarm');
     }
+    console.log('🔍 === checkForActiveAlarm() END ===');
   }
 
   /**

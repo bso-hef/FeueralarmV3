@@ -596,4 +596,18 @@ export class RestService {
       })
     );
   }
+  getCurrentAlert(): Observable<any> {
+    const url = `${this.API_URL}/alerts/current`;
+    console.log('🔍 Getting current alert from:', url);
+
+    return this.http.get(url, { headers: this.getHeaders() }).pipe(
+      tap((response) => {
+        console.log('✅ Current alert response:', response);
+      }),
+      catchError((error) => {
+        console.error('❌ Error getting current alert:', error);
+        return throwError(() => error);
+      })
+    );
+  }
 }
