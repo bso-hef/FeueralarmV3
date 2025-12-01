@@ -20,6 +20,7 @@ module.exports = (io) => {
 
       // User-ID und Email im Socket speichern
       socket.userId = decoded.userId;
+      socket.username = decoded.username || decoded.email || "unknown";
       socket.email = decoded.email || decoded.username || "unknown";
       socket.role = decoded.role;
 
@@ -42,7 +43,7 @@ module.exports = (io) => {
       const release = await untisLock.acquire();
 
       try {
-        // 🔧 FIX: Füge userId und email hinzu (statt token)
+        // Füge userId und email hinzu
         data.userId = socket.userId;
         data.email = socket.email;
         data.role = socket.role;
@@ -52,8 +53,7 @@ module.exports = (io) => {
         if (res.message === "OK") {
           console.log("✅ Alert processed successfully");
           console.log(`📤 Sending ${res.teachers.length} posts to all clients`);
-          
-          // 🔧 FIX: Sende emitPosts statt alert, damit Frontend es empfängt!
+
           io.emit("emitPosts", {
             success: true,
             message: "Alarm erfolgreich ausgelöst",
@@ -67,8 +67,132 @@ module.exports = (io) => {
         console.error("❌ Error processing alert:", error);
         socket.emit("error", { message: "Internal server error" });
       } finally {
-        // Mutex release - IMMER ausführen
         release();
+      }
+    });
+
+    // ==========================================
+    // UPDATE POST (NEU!)
+    // ==========================================
+    socket.on("updatePost", async (data) => {
+      console.log("📝 === updatePost received ===");
+      console.log("📝 From:", socket.email);
+      console.log("📝 Data:", data);
+
+      try {
+        // Füge User-Informationen hinzu
+        const updateData = {
+          id: data.id,
+          status: data.status,
+          comment: data.comment,
+          userId: socket.userId,
+          username: socket.username,
+        };
+
+        console.log("📝 Calling PostController.updatePost with:", updateData);
+
+        let res = await PostController.updatePost(updateData);
+
+        console.log("📝 UpdatePost result:", res);
+
+        if (res.success) {
+          console.log("✅ Post updated successfully");
+          console.log(`📤 Broadcasting update to all clients`);
+
+          // Sende Update an ALLE Clients (inkl. Sender)
+          io.emit("emitUpdate", {
+            success: true,
+            ...res.posts[0], // Der aktualisierte Post
+          });
+
+          // Bestätigung an Sender
+          socket.emit("updateSuccess", {
+            success: true,
+            message: "Post erfolgreich aktualisiert",
+          });
+        } else {
+          console.error("❌ Post update failed:", res.msg);
+          socket.emit("updateError", {
+            success: false,
+            message: res.msg,
+          });
+        }
+      } catch (error) {
+        console.error("❌ Error updating post:", error);
+        socket.emit("updateError", {
+          success: false,
+          message: "Internal server error",
+        });
+      }
+    });
+
+    // UPDATE COMMENT (NEU!)
+    socket.on("updateComment", async (data) => {
+      console.log("💬 === updateComment received ===");
+      console.log("💬 From:", socket.email);
+      console.log("💬 Data:", data);
+
+      try {
+        const updateData = {
+          id: data.id,
+          comment: data.comment,
+          userId: socket.userId,
+          username: socket.username,
+        };
+
+        console.log("💬 Calling PostController.updatePost with:", updateData);
+
+        let res = await PostController.updatePost(updateData);
+
+        if (res.success) {
+          console.log("✅ Comment updated successfully");
+
+          io.emit("emitUpdate", {
+            success: true,
+            ...res.posts[0],
+          });
+
+          socket.emit("updateSuccess", {
+            success: true,
+            message: "Kommentar erfolgreich aktualisiert",
+          });
+        } else {
+          console.error("❌ Comment update failed:", res.msg);
+          socket.emit("updateError", {
+            success: false,
+            message: res.msg,
+          });
+        }
+      } catch (error) {
+        console.error("❌ Error updating comment:", error);
+        socket.emit("updateError", {
+          success: false,
+          message: "Internal server error",
+        });
+      }
+    });
+
+    // GET POSTS (NEU!)
+    socket.on("getPosts", async () => {
+      console.log("📋 getPosts received from:", socket.email);
+
+      try {
+        let res = await PostController.getPosts();
+
+        if (res.success) {
+          console.log(`✅ Sending ${res.posts.length} posts to ${socket.email}`);
+          socket.emit("emitPosts", {
+            success: true,
+            message: "Posts erfolgreich geladen",
+            posts: res.posts,
+          });
+        } else {
+          console.error("❌ getPosts failed:", res.msg);
+          socket.emit("error", { message: res.msg });
+        }
+      } catch (error) {
+        console.error("❌ Error getting posts:", error);
+        socket.emit("error", { message: "Internal server error" });
       }
     });
 
