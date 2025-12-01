@@ -731,10 +731,6 @@ export class HomePage implements OnInit, OnDestroy {
       // ✅ WICHTIG: Setze isProcessing SOFORT auf false!
       this.isProcessingAlarm = false;
 
-      await this.feedbackService.showSuccessToast(
-        'Alarm erfolgreich beendet und archiviert'
-      );
-
       // ✅ UI zurücksetzen
       console.log('🔄 Setze UI zurück...');
       this.teachers = [];
@@ -749,6 +745,11 @@ export class HomePage implements OnInit, OnDestroy {
       console.log('✅ UI zurückgesetzt');
       console.log('🔥 teachers.length:', this.teachers.length);
       console.log('🔥 hasActiveAlarm:', this.hasActiveAlarm);
+
+      // Toast NACH dem UI-Reset (falls es blockiert, ist UI schon zurückgesetzt)
+      await this.feedbackService.showSuccessToast(
+        'Alarm erfolgreich beendet und archiviert'
+      );
     } catch (error) {
       console.error('❌ === ERROR beim Archivieren ===');
       console.error('❌ Error:', error);
