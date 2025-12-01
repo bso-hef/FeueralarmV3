@@ -15,6 +15,8 @@ router.get("/", checkAuth, AlertController.getAllAlerts);
 // Einzelnen Alarm abrufen
 router.get("/:id", checkAuth, AlertController.getAlertById);
 
+router.get("/current", checkAuth, AlertController.getCurrentAlert);
+
 // ==========================================
 // ADMIN ROUTES
 // ==========================================

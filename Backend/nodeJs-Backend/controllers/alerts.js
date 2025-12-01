@@ -39,6 +39,30 @@ exports.getAllAlerts = async (req, res) => {
     });
   }
 };
+exports.getCurrentAlert = async (req, res) => {
+  try {
+    const alert = await Alert.findOne({ archived: false }).sort({ created: -1 }).lean();
+
+    if (!alert) {
+      return res.status(404).json({
+        success: false,
+        message: "Kein aktiver Alarm gefunden",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Aktueller Alarm gefunden",
+      alert,
+    });
+  } catch (error) {
+    console.error("❌ Fehler:", error);
+    res.status(500).json({
+      success: false,
+      message: "Serverfehler",
+    });
+  }
+};
 
 // ==========================================
 // EINZELNEN ALARM ABRUFEN
