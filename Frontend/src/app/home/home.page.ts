@@ -672,7 +672,17 @@ export class HomePage implements OnInit, OnDestroy {
       message +=
         '\n\n❌ Bitte schließe alle Klassen ab (Anwesend oder Unvollständig), bevor du den Alarm beendest!';
 
-      await this.feedbackService.showWarningToast(message);
+      console.log('🚨 Zeige Alert mit Message:', message);
+
+      // Zeige Alert mit nur OK Button
+      await this.feedbackService.showConfirm(
+        '⚠️ Alarm kann nicht beendet werden',
+        message,
+        'OK',
+        '' // Leerer String = kein Cancel-Button
+      );
+
+      console.log('🚨 Alert wurde geschlossen');
       return;
     }
 
