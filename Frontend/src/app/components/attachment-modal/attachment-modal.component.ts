@@ -369,12 +369,22 @@ export class AttachmentModalComponent implements OnInit {
         teacherId: this.teacher.id,
         dataLength: base64Data.length,
       });
+      console.log('📤 Checking services...');
+      console.log('📤 feedbackService:', !!this.feedbackService);
+      console.log('📤 photoService:', !!this.photoService);
+      console.log('📤 teacher:', this.teacher);
 
+      console.log('📤 Showing loading...');
       await this.feedbackService.showLoading('Datei wird hochgeladen...');
+      console.log('📤 Loading shown');
 
       this.isUploading = true;
 
       console.log('📤 Calling photoService.uploadFile...');
+      console.log(
+        '📤 URL will be:',
+        `${this.photoService['API_URL']}/teachers/${this.teacher.id}/files`
+      );
 
       let response;
       try {
