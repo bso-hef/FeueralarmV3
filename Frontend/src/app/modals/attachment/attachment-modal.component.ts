@@ -194,32 +194,40 @@ export class AttachmentModalComponent implements OnInit {
 
   async selectPhoto() {
     try {
+      console.log('📸 1. Opening gallery...');
       await this.feedbackService.showLoading('Galerie wird geöffnet...');
 
       const photoData = await this.photoService.selectPhoto();
+      console.log('📸 2. Photo selected, data length:', photoData?.length || 0);
 
       await this.feedbackService.hideLoading();
 
       if (!photoData) {
+        console.log('❌ 3. No photo data');
         await this.feedbackService.showWarningToast('Kein Foto ausgewählt');
         return;
       }
 
-      // ✅ NEU: Bestätigung vor Upload
+      console.log('📸 4. Showing confirmation dialog...');
       const confirmed = await this.feedbackService.showConfirm(
         'Foto hochladen',
         'Möchtest du dieses Foto wirklich hochladen?',
         'Hochladen',
         'Abbrechen'
       );
+      console.log('📸 5. Confirmation result:', confirmed);
 
       if (!confirmed) {
+        console.log('❌ 6. Upload cancelled');
         await this.feedbackService.showWarningToast('Upload abgebrochen');
         return;
       }
 
+      console.log('📸 7. Starting upload...');
       await this.uploadPhoto(photoData);
+      console.log('✅ 8. Upload completed');
     } catch (error) {
+      console.error('❌ Error in selectPhoto:', error);
       await this.feedbackService.hideLoading();
       await this.feedbackService.showError(error, 'Fehler beim Auswählen');
     }
@@ -305,26 +313,35 @@ export class AttachmentModalComponent implements OnInit {
 
   async uploadPhoto(base64Data: string) {
     try {
+      console.log('📤 uploadPhoto called with teacher.id:', this.teacher.id);
+      console.log('📤 Base64 data length:', base64Data.length);
+
       await this.feedbackService.showLoading('Foto wird hochgeladen...');
 
       this.isUploading = true;
 
+      console.log('📤 Calling photoService.uploadPhoto...');
       const response = await this.photoService
         .uploadPhoto(this.teacher.id, base64Data)
         .toPromise();
+
+      console.log('📤 Upload response:', response);
 
       await this.feedbackService.hideLoading();
       this.isUploading = false;
 
       if (response && response.success) {
+        console.log('✅ Upload successful!');
         await this.feedbackService.showSuccessToast(
           'Foto erfolgreich hochgeladen!'
         );
         await this.loadAttachments();
       } else {
+        console.error('❌ Upload failed:', response);
         throw new Error(response?.error || 'Upload fehlgeschlagen');
       }
     } catch (error) {
+      console.error('❌ Error in uploadPhoto:', error);
       await this.feedbackService.hideLoading();
       this.isUploading = false;
       await this.feedbackService.showError(error, 'Upload fehlgeschlagen');
