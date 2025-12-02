@@ -56,10 +56,10 @@
       <ion-label>
         <h3>{{ attachment.filename }}</h3>
         <p *ngIf="attachment.size">
-          {{ photoService.formatFileSize(attachment.size) }}
+          {{ formatFileSize(attachment.size) }}
         </p>
         <p class="upload-date">
-          {{ photoService.formatDate(attachment.uploadedAt) }}
+          {{ formatDate(attachment.uploadedAt) }}
         </p>
       </ion-label>
 
@@ -68,7 +68,7 @@
         slot="end"
         fill="clear"
         color="primary"
-        (click)="openAttachment(attachment.url)"
+        (click)="openAttachment(attachment)"
       >
         <ion-icon slot="icon-only" name="eye-outline"></ion-icon>
       </ion-button>

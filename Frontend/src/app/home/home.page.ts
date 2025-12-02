@@ -56,6 +56,7 @@ import {
   cloudOffline,
   syncOutline,
   documentTextOutline,
+  camera,
 } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
@@ -72,6 +73,7 @@ import { FeedbackService } from '../services/feedback.service';
 import { SettingsService } from '../services/settings.service';
 import { SettingsModal } from '../modals/settings/settings.modal';
 import { InformationModal } from '../modals/information/information.modal';
+import { AttachmentModalComponent } from '../modals/attachment/attachment-modal.component';
 
 @Component({
   selector: 'app-home',
@@ -195,6 +197,7 @@ export class HomePage implements OnInit, OnDestroy {
       cloudOffline,
       syncOutline,
       documentTextOutline,
+      camera,
     });
   }
 
@@ -1031,6 +1034,23 @@ export class HomePage implements OnInit, OnDestroy {
       component: InformationModal,
       componentProps: {
         stats: this.stats,
+      },
+    });
+
+    await modal.present();
+  }
+
+  // ==========================================
+  // ATTACHMENTS
+  // ==========================================
+
+  async openAttachments(teacher: Teacher): Promise<void> {
+    console.log('📸 Opening attachments for:', teacher.class);
+
+    const modal = await this.modalCtrl.create({
+      component: AttachmentModalComponent,
+      componentProps: {
+        teacher: teacher,
       },
     });
 
