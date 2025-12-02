@@ -375,11 +375,20 @@ export class AttachmentModalComponent implements OnInit {
       this.isUploading = true;
 
       console.log('📤 Calling photoService.uploadFile...');
-      const response = await this.photoService
-        .uploadFile(this.teacher.id, base64Data, filename)
-        .toPromise();
 
-      console.log('📤 Upload response:', response);
+      let response;
+      try {
+        response = await this.photoService
+          .uploadFile(this.teacher.id, base64Data, filename)
+          .toPromise();
+        console.log('📤 Upload response received:', response);
+      } catch (httpError: any) {
+        console.error('❌ HTTP Error during upload:', httpError);
+        console.error('❌ Error status:', httpError.status);
+        console.error('❌ Error message:', httpError.message);
+        console.error('❌ Error body:', httpError.error);
+        throw httpError;
+      }
 
       await this.feedbackService.hideLoading();
       this.isUploading = false;
@@ -394,8 +403,9 @@ export class AttachmentModalComponent implements OnInit {
         console.error('❌ File upload failed:', response);
         throw new Error(response?.error || 'Upload fehlgeschlagen');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error in uploadFile:', error);
+      console.error('❌ Error stack:', error.stack);
       await this.feedbackService.hideLoading();
       this.isUploading = false;
       await this.feedbackService.showError(error, 'Upload fehlgeschlagen');
