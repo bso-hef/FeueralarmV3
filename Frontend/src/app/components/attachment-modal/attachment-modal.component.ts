@@ -235,13 +235,22 @@ export class AttachmentModalComponent implements OnInit {
 
   async selectFile() {
     try {
+      console.log('📄 1. Opening file picker...');
       const fileData = await this.photoService.selectFile();
+      console.log(
+        '📄 2. File data received:',
+        fileData
+          ? `${fileData.filename} (${fileData.data.length} chars)`
+          : 'null'
+      );
 
       if (!fileData) {
+        console.log('❌ 3. No file data');
         await this.feedbackService.showWarningToast('Keine Datei ausgewählt');
         return;
       }
 
+      console.log('📄 4. Showing confirmation dialog...');
       // ✅ NEU: Bestätigung vor Upload
       const confirmed = await this.feedbackService.showConfirm(
         'Datei hochladen',
@@ -249,14 +258,19 @@ export class AttachmentModalComponent implements OnInit {
         'Hochladen',
         'Abbrechen'
       );
+      console.log('📄 5. Confirmation result:', confirmed);
 
       if (!confirmed) {
+        console.log('❌ 6. Upload cancelled');
         await this.feedbackService.showWarningToast('Upload abgebrochen');
         return;
       }
 
+      console.log('📄 7. Starting upload...');
       await this.uploadFile(fileData.data, fileData.filename);
+      console.log('✅ 8. Upload completed');
     } catch (error) {
+      console.error('❌ Error in selectFile:', error);
       await this.feedbackService.showError(error, 'Fehler beim Hochladen');
     }
   }
@@ -350,26 +364,38 @@ export class AttachmentModalComponent implements OnInit {
 
   async uploadFile(base64Data: string, filename: string) {
     try {
+      console.log('📤 uploadFile called:', {
+        filename,
+        teacherId: this.teacher.id,
+        dataLength: base64Data.length,
+      });
+
       await this.feedbackService.showLoading('Datei wird hochgeladen...');
 
       this.isUploading = true;
 
+      console.log('📤 Calling photoService.uploadFile...');
       const response = await this.photoService
         .uploadFile(this.teacher.id, base64Data, filename)
         .toPromise();
+
+      console.log('📤 Upload response:', response);
 
       await this.feedbackService.hideLoading();
       this.isUploading = false;
 
       if (response && response.success) {
+        console.log('✅ File upload successful!');
         await this.feedbackService.showSuccessToast(
           'Datei erfolgreich hochgeladen!'
         );
         await this.loadAttachments();
       } else {
+        console.error('❌ File upload failed:', response);
         throw new Error(response?.error || 'Upload fehlgeschlagen');
       }
     } catch (error) {
+      console.error('❌ Error in uploadFile:', error);
       await this.feedbackService.hideLoading();
       this.isUploading = false;
       await this.feedbackService.showError(error, 'Upload fehlgeschlagen');
