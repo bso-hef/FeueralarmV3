@@ -65,10 +65,6 @@ export class AttachmentModalComponent implements OnInit {
   isLoading = false;
   isUploading = false;
 
-  // Für Notizen
-  noteText = '';
-  noteTitle = '';
-
   constructor(
     private modalCtrl: ModalController,
     private actionSheetCtrl: ActionSheetController,
@@ -176,6 +172,19 @@ export class AttachmentModalComponent implements OnInit {
         return;
       }
 
+      // ✅ NEU: Bestätigung vor Upload
+      const confirmed = await this.feedbackService.showConfirm(
+        'Foto hochladen',
+        'Möchtest du dieses Foto wirklich hochladen?',
+        'Hochladen',
+        'Abbrechen'
+      );
+
+      if (!confirmed) {
+        await this.feedbackService.showWarningToast('Upload abgebrochen');
+        return;
+      }
+
       await this.uploadPhoto(photoData);
     } catch (error) {
       await this.feedbackService.hideLoading();
@@ -196,6 +205,19 @@ export class AttachmentModalComponent implements OnInit {
         return;
       }
 
+      // ✅ NEU: Bestätigung vor Upload
+      const confirmed = await this.feedbackService.showConfirm(
+        'Foto hochladen',
+        'Möchtest du dieses Foto wirklich hochladen?',
+        'Hochladen',
+        'Abbrechen'
+      );
+
+      if (!confirmed) {
+        await this.feedbackService.showWarningToast('Upload abgebrochen');
+        return;
+      }
+
       await this.uploadPhoto(photoData);
     } catch (error) {
       await this.feedbackService.hideLoading();
@@ -209,6 +231,19 @@ export class AttachmentModalComponent implements OnInit {
 
       if (!fileData) {
         await this.feedbackService.showWarningToast('Keine Datei ausgewählt');
+        return;
+      }
+
+      // ✅ NEU: Bestätigung vor Upload
+      const confirmed = await this.feedbackService.showConfirm(
+        'Datei hochladen',
+        `Möchtest du "${fileData.filename}" wirklich hochladen?`,
+        'Hochladen',
+        'Abbrechen'
+      );
+
+      if (!confirmed) {
+        await this.feedbackService.showWarningToast('Upload abgebrochen');
         return;
       }
 
