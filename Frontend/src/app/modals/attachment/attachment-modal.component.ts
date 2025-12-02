@@ -374,16 +374,17 @@ export class AttachmentModalComponent implements OnInit {
       console.log('📤 photoService:', !!this.photoService);
       console.log('📤 teacher:', this.teacher);
 
-      console.log('📤 Showing loading...');
-      await this.feedbackService.showLoading('Datei wird hochgeladen...');
-      console.log('📤 Loading shown');
+      // ⚠️ TEMPORÄR DEAKTIVIERT - showLoading hängt
+      // console.log('📤 Showing loading...');
+      // await this.feedbackService.showLoading('Datei wird hochgeladen...');
+      // console.log('📤 Loading shown');
 
       this.isUploading = true;
 
       console.log('📤 Calling photoService.uploadFile...');
       console.log(
         '📤 URL will be:',
-        `${this.photoService['API_URL']}/teachers/${this.teacher.id}/files`
+        `https://18.193.97.54/api/teachers/${this.teacher.id}/files`
       );
 
       let response;
@@ -400,7 +401,7 @@ export class AttachmentModalComponent implements OnInit {
         throw httpError;
       }
 
-      await this.feedbackService.hideLoading();
+      // await this.feedbackService.hideLoading();
       this.isUploading = false;
 
       if (response && response.success) {
@@ -416,7 +417,7 @@ export class AttachmentModalComponent implements OnInit {
     } catch (error: any) {
       console.error('❌ Error in uploadFile:', error);
       console.error('❌ Error stack:', error.stack);
-      await this.feedbackService.hideLoading();
+      // await this.feedbackService.hideLoading();
       this.isUploading = false;
       await this.feedbackService.showError(error, 'Upload fehlgeschlagen');
     }
