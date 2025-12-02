@@ -1,6 +1,7 @@
 const express = require("express");
 const auditService = require("../service/audit.service");
 const checkAuth = require("../middleware/check-auth");
+const { checkAdminOrVerwaltung } = require("../middleware/check-role");
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ const router = express.Router();
  * - limit: Number (default: 100, max: 1000)
  * - skip: Number (default: 0)
  */
-router.get("/", checkAuth, async (req, res) => {
+router.get("/", checkAuth, checkAdminOrVerwaltung, async (req, res) => {
   try {
     const { startDate, endDate, entityType, action, userId, limit, skip } = req.query;
 
