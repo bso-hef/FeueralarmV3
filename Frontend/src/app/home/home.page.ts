@@ -261,6 +261,16 @@ export class HomePage implements OnInit, OnDestroy {
       this.socketService.disconnect();
     }
   }
+  async ionViewWillEnter() {
+    console.log('🔄 ionViewWillEnter - Checking for active alarm...');
+
+    await this.checkForActiveAlarm();
+
+    if (this.hasActiveAlarm && this.teachers.length === 0) {
+      console.log('🔍 Active alarm detected but no data - loading...');
+      await this.loadData();
+    }
+  }
 
   // ==========================================
   // DATA LOADING
@@ -290,6 +300,44 @@ export class HomePage implements OnInit, OnDestroy {
         this.handleTeacherUpdate(update);
       }
     });
+
+    const alarmStartedSub = this.socketService.alarmStarted$.subscribe(
+      (data) => {
+        if (data) {
+          console.log('🚨 Alarm gestartet Event empfangen:', data);
+          this.loadData();
+        }
+      }
+    );
+
+    const alarmUpdatedSub = this.socketService.alarmUpdated$.subscribe(
+      (data) => {
+        if (data) {
+          console.log('🔄 Alarm aktualisiert Event empfangen:', data);
+        }
+      }
+    );
+
+    const alarmEndedSub = this.socketService.alarmEnded$.subscribe((data) => {
+      if (data) {
+        console.log('🔚 Alarm beendet Event empfangen:', data);
+        this.teachers = [];
+        this.filteredTeachers = [];
+        this.hasActiveAlarm = false;
+        this.currentAlarmId = null;
+        this.updateStats();
+        this.cdr.detectChanges();
+      }
+    });
+
+    // ÄNDERE subscriptions.push Zeile:
+    this.subscriptions.push(
+      postsSub,
+      updateSub,
+      alarmStartedSub,
+      alarmUpdatedSub,
+      alarmEndedSub
+    );
 
     this.subscriptions.push(postsSub, updateSub);
   }

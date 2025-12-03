@@ -17,6 +17,11 @@ export class SocketService {
   private updateSubject = new BehaviorSubject<any>(null);
   private archiveSubject = new BehaviorSubject<Archive[]>([]);
 
+  // ✅ NEU: Alarm Events
+  private alarmStartedSubject = new BehaviorSubject<any>(null);
+  private alarmUpdatedSubject = new BehaviorSubject<any>(null);
+  private alarmEndedSubject = new BehaviorSubject<any>(null);
+
   private socketId = '';
   private lastChangeSocketId = '';
   private isConnected = false;
@@ -35,21 +40,16 @@ export class SocketService {
   async connect(): Promise<void> {
     console.log('🔌 Connecting to socket server...');
 
-    // 🔧 FIX: Token ZUERST holen und setzen (VOR connect!)
     const token = this.restService.getToken();
 
     if (token) {
-      // Token in Socket-Auth setzen BEVOR connect() aufgerufen wird
       (this.socket.ioSocket as any).auth = { token };
       console.log('🔐 Token set for socket authentication');
     } else {
       console.warn('⚠️ No token available for socket authentication!');
     }
 
-    // DANN verbinden
     this.socket.connect();
-
-    // Setup event listeners
     this.setupSocketListeners();
   }
 
@@ -60,10 +60,8 @@ export class SocketService {
   }
 
   private setupSocketListeners(): void {
-    // Type casting to fix ngx-socket-io types issue
     const socketAny = this.socket as any;
 
-    // Connection events
     socketAny.on('connect', async () => {
       console.log('✅ Socket connected');
       this.isConnected = true;
@@ -73,7 +71,6 @@ export class SocketService {
       console.log('❌ Socket disconnected:', reason);
       this.isConnected = false;
 
-      // Auto-reconnect if not manual disconnect
       if (reason !== 'io client disconnect') {
         setTimeout(() => {
           if (!this.isConnected) {
@@ -92,13 +89,11 @@ export class SocketService {
       console.error('❌ Socket connection error:', error);
     });
 
-    // Socket ID
     socketAny.on('emitSocketId', (data: any) => {
       this.socketId = data.msg;
       console.log('🆔 Socket ID:', this.socketId);
     });
 
-    // Authentication
     socketAny.on('authenticated', () => {
       console.log('✅ Socket authenticated');
     });
@@ -107,7 +102,6 @@ export class SocketService {
       console.error('❌ Socket unauthorized:', error);
     });
 
-    // Data events
     socketAny.on('emitPosts', (data: any) => {
       console.log('📦 Posts received:', data);
       this.isFetched = true;
@@ -132,6 +126,22 @@ export class SocketService {
     socketAny.on('emitError', (error: any) => {
       console.error('❌ Server error:', error);
     });
+
+    // ✅ NEU: Alarm Events
+    socketAny.on('alarmStarted', (data: any) => {
+      console.log('🚨 alarmStarted event received:', data);
+      this.alarmStartedSubject.next(data);
+    });
+
+    socketAny.on('alarmUpdated', (data: any) => {
+      console.log('🔄 alarmUpdated event received:', data);
+      this.alarmUpdatedSubject.next(data);
+    });
+
+    socketAny.on('alarmEnded', (data: any) => {
+      console.log('🔚 alarmEnded event received:', data);
+      this.alarmEndedSubject.next(data);
+    });
   }
 
   // ==========================================
@@ -150,13 +160,26 @@ export class SocketService {
     return this.archiveSubject.asObservable();
   }
 
+  // ✅ NEU: Alarm Observables
+  get alarmStarted$(): Observable<any> {
+    return this.alarmStartedSubject.asObservable();
+  }
+
+  get alarmUpdated$(): Observable<any> {
+    return this.alarmUpdatedSubject.asObservable();
+  }
+
+  get alarmEnded$(): Observable<any> {
+    return this.alarmEndedSubject.asObservable();
+  }
+
   // ==========================================
   // API METHODS
   // ==========================================
 
   getPosts(alertId?: string): void {
     console.log('📤 Fetching posts...', alertId || 'latest');
-    this.socket.emit('fetchPosts', { alertId: alertId || null });
+    this.socket.emit('getPosts', { alertId: alertId || null });
   }
 
   async updatePost(
@@ -164,7 +187,6 @@ export class SocketService {
     status?: string,
     comment?: string
   ): Promise<void> {
-    // Online: Normal senden
     console.log('📤 Updating post:', id, status, comment);
     const payload: any = { id };
     if (status) payload.status = status;
@@ -174,9 +196,8 @@ export class SocketService {
   }
 
   async updateComment(id: string, comment: string): Promise<void> {
-    // Online: Normal senden
     console.log('📤 Updating comment:', id, comment);
-    this.socket.emit('updatePost', {
+    this.socket.emit('updateComment', {
       id,
       comment: comment || ' ',
     });
@@ -189,8 +210,13 @@ export class SocketService {
 
   triggerAlert(time: string, day: string): void {
     console.log('🚨 Triggering alarm:', time, day);
-    // Token wird nicht mehr hier mitgeschickt - ist bereits in socket.auth!
     this.socket.emit('alert', { time, day });
+  }
+
+  // ✅ NEU: Alarm beenden
+  endAlarm(): void {
+    console.log('🔚 Ending alarm...');
+    this.socket.emit('endAlarm', {});
   }
 
   // ==========================================
