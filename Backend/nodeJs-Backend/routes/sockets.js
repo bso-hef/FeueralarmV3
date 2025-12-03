@@ -35,7 +35,9 @@ module.exports = (io) => {
   io.on("connection", (socket) => {
     console.log(`🔌 Client connected: ${socket.id} (User: ${socket.email})`);
 
-    // Alert Event mit Mutex für Thread-Safety
+    // ==========================================
+    // ALERT EVENT - Alarm auslösen
+    // ==========================================
     socket.on("alert", async (data) => {
       console.log("🚨 Alert received from:", socket.email);
 
@@ -54,11 +56,22 @@ module.exports = (io) => {
           console.log("✅ Alert processed successfully");
           console.log(`📤 Sending ${res.teachers.length} posts to all clients`);
 
+          // ✅ NEU: Sende "alarmStarted" Event an ALLE Clients
+          io.emit("alarmStarted", {
+            success: true,
+            message: "Neuer Alarm wurde ausgelöst",
+            triggeredBy: socket.email,
+            timestamp: new Date().toISOString(),
+          });
+
+          // Sende Posts an alle Clients
           io.emit("emitPosts", {
             success: true,
             message: "Alarm erfolgreich ausgelöst",
             posts: res.teachers,
           });
+
+          console.log("📡 Broadcast 'alarmStarted' sent to all clients");
         } else {
           console.error("❌ Alert processing failed:", res.message);
           socket.emit("error", { message: res.message });
@@ -72,7 +85,7 @@ module.exports = (io) => {
     });
 
     // ==========================================
-    // UPDATE POST (NEU!)
+    // UPDATE POST - Status ändern
     // ==========================================
     socket.on("updatePost", async (data) => {
       console.log("📝 === updatePost received ===");
@@ -99,10 +112,18 @@ module.exports = (io) => {
           console.log("✅ Post updated successfully");
           console.log(`📤 Broadcasting update to all clients`);
 
-          // Sende Update an ALLE Clients (inkl. Sender)
+          // ✅ Sende Update an ALLE Clients (inkl. Sender)
           io.emit("emitUpdate", {
             success: true,
             ...res.posts[0], // Der aktualisierte Post
+          });
+
+          // ✅ NEU: Sende "alarmUpdated" Event für Real-time Sync
+          io.emit("alarmUpdated", {
+            success: true,
+            postId: data.id,
+            updatedBy: socket.email,
+            timestamp: new Date().toISOString(),
           });
 
           // Bestätigung an Sender
@@ -110,6 +131,8 @@ module.exports = (io) => {
             success: true,
             message: "Post erfolgreich aktualisiert",
           });
+
+          console.log("📡 Broadcast 'alarmUpdated' sent to all clients");
         } else {
           console.error("❌ Post update failed:", res.msg);
           socket.emit("updateError", {
@@ -126,7 +149,9 @@ module.exports = (io) => {
       }
     });
 
-    // UPDATE COMMENT (NEU!)
+    // ==========================================
+    // UPDATE COMMENT - Kommentar ändern
+    // ==========================================
     socket.on("updateComment", async (data) => {
       console.log("💬 === updateComment received ===");
       console.log("💬 From:", socket.email);
@@ -147,15 +172,27 @@ module.exports = (io) => {
         if (res.success) {
           console.log("✅ Comment updated successfully");
 
+          // Sende Update an ALLE Clients
           io.emit("emitUpdate", {
             success: true,
             ...res.posts[0],
+          });
+
+          // ✅ NEU: Sende "alarmUpdated" Event
+          io.emit("alarmUpdated", {
+            success: true,
+            postId: data.id,
+            updatedBy: socket.email,
+            type: "comment",
+            timestamp: new Date().toISOString(),
           });
 
           socket.emit("updateSuccess", {
             success: true,
             message: "Kommentar erfolgreich aktualisiert",
           });
+
+          console.log("📡 Broadcast 'alarmUpdated' (comment) sent to all clients");
         } else {
           console.error("❌ Comment update failed:", res.msg);
           socket.emit("updateError", {
@@ -172,7 +209,9 @@ module.exports = (io) => {
       }
     });
 
-    // GET POSTS (NEU!)
+    // ==========================================
+    // GET POSTS - Aktuelle Posts abrufen
+    // ==========================================
     socket.on("getPosts", async () => {
       console.log("📋 getPosts received from:", socket.email);
 
@@ -193,6 +232,27 @@ module.exports = (io) => {
       } catch (error) {
         console.error("❌ Error getting posts:", error);
         socket.emit("error", { message: "Internal server error" });
+      }
+    });
+
+    // ==========================================
+    // ALARM BEENDEN EVENT (Optional - für später)
+    // ==========================================
+    socket.on("endAlarm", async (data) => {
+      console.log("🔚 endAlarm received from:", socket.email);
+
+      try {
+        // Sende "alarmEnded" Event an alle Clients
+        io.emit("alarmEnded", {
+          success: true,
+          message: "Alarm wurde beendet",
+          endedBy: socket.email,
+          timestamp: new Date().toISOString(),
+        });
+
+        console.log("📡 Broadcast 'alarmEnded' sent to all clients");
+      } catch (error) {
+        console.error("❌ Error ending alarm:", error);
       }
     });
 
