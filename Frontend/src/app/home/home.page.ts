@@ -295,63 +295,44 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   private async loadData(): Promise<void> {
-    console.log('📦 === loadData() START ===');
-    console.log('🔍 socketService exists:', !!this.socketService);
-    console.log('🔍 socketService value:', this.socketService);
-
     try {
       await this.feedbackService.showLoading('Lade Daten...');
 
       if (this.socketService) {
-        console.log('🔌 Loading with SocketService...');
-
-        // Starte Socket-Request
+        // Mit Socket
         this.socketService.getPosts();
-        console.log('📤 getPosts() called');
+        await this.delay(2000);
 
-        // Warte auf Daten über posts$ Observable
-        console.log('⏳ Waiting for socket data...');
-
-        // Warte max 5 Sekunden auf Daten
-        const dataReceived = await this.waitForSocketData(5000);
-
-        if (!dataReceived) {
-          console.warn('⚠️ Socket data timeout - falling back to mock data');
-          throw new Error('Socket timeout');
+        if (!this.socketService.hasFetchedData()) {
+          throw new Error('Daten konnten nicht geladen werden');
         }
-
-        console.log('✅ Socket data received!');
-        console.log('📊 teachers.length:', this.teachers.length);
       } else {
-        console.log('📦 No SocketService - using mock data');
+        // Ohne Socket - Mock Daten
+        console.log('📦 Lade Mock-Daten (kein Socket verfügbar)');
         this.teachers = this.getMockTeachers();
         this.applyFilters();
         this.updateStats();
         this.isLoading = false;
       }
 
-      // ✅ WICHTIG: checkForActiveAlarm() NACH dem Laden der Daten!
-      console.log('🔍 Checking for active alarm...');
+      // Check for active alarm
       await this.checkForActiveAlarm();
-      console.log('✅ Active alarm check completed');
 
       await this.feedbackService.hideLoading();
     } catch (error) {
-      console.error('❌ Error loading data:', error);
+      console.error('Error loading data:', error);
       await this.feedbackService.hideLoading();
 
       // Fallback zu Mock-Daten
-      console.log('📦 Fallback to mock data');
+      console.log('📦 Fallback zu Mock-Daten');
       this.teachers = this.getMockTeachers();
       this.applyFilters();
       this.updateStats();
       this.isLoading = false;
 
-      // Check for active alarm auch im Fallback
+      // Check for active alarm
       await this.checkForActiveAlarm();
     }
-
-    console.log('📦 === loadData() END ===');
   }
 
   /**
