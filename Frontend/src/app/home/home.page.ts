@@ -166,11 +166,14 @@ export class HomePage implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {
     // Socket Service optional injizieren
+    console.log('🏠 HomePage constructor START');
+
+    // Socket Service optional injizieren
     try {
       const injector = inject(Injector);
       this.socketService = injector.get(SocketService, null) ?? undefined;
       if (this.socketService) {
-        console.log('✅ SocketService verfügbar');
+        console.log('✅ SocketService verfügbar in Constructor');
       } else {
         console.warn('⚠️ SocketService nicht verfügbar - läuft ohne Socket');
       }
@@ -202,8 +205,12 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    console.log('🏠 ngOnInit START');
+    console.log('🔍 socketService exists:', !!this.socketService);
+
     // Check if user is admin or verwaltung
     const role = this.restService.getRoleValue();
+    console.log('🔍 User role:', role);
     this.isAdmin = role === 'admin';
     this.canAccessDashboard = role === 'admin' || role === 'verwaltung';
 
@@ -289,6 +296,8 @@ export class HomePage implements OnInit, OnDestroy {
 
   private async loadData(): Promise<void> {
     console.log('📦 === loadData() START ===');
+    console.log('🔍 socketService exists:', !!this.socketService);
+    console.log('🔍 socketService value:', this.socketService);
 
     try {
       await this.feedbackService.showLoading('Lade Daten...');
@@ -348,7 +357,12 @@ export class HomePage implements OnInit, OnDestroy {
   /**
    * Wartet darauf dass Socket-Daten über posts$ empfangen werden
    */
+  /**
+   * Wartet darauf dass Socket-Daten über posts$ empfangen werden
+   */
   private waitForSocketData(timeoutMs: number): Promise<boolean> {
+    console.log('⏳ waitForSocketData START - timeout:', timeoutMs, 'ms');
+
     return new Promise((resolve) => {
       let resolved = false;
 
@@ -356,12 +370,15 @@ export class HomePage implements OnInit, OnDestroy {
       const timeout = setTimeout(() => {
         if (!resolved) {
           resolved = true;
+          console.log('⏰ Socket timeout reached');
           resolve(false);
         }
       }, timeoutMs);
 
       // Warte auf posts$
       const sub = this.socketService!.posts$.subscribe((data) => {
+        console.log('📥 posts$ event in waitForSocketData:', data);
+
         if (data && data.posts && data.posts.length > 0 && !resolved) {
           resolved = true;
           clearTimeout(timeout);
