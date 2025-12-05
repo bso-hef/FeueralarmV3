@@ -216,7 +216,8 @@ module.exports = (io) => {
       console.log("📋 getPosts received from:", socket.email);
 
       try {
-        let res = await PostController.getPosts();
+        const alertId = await PostController.getAlertId({});
+        let res = await PostController.fetchPosts(null);
 
         if (res.success) {
           console.log(`✅ Sending ${res.posts.length} posts to ${socket.email}`);
