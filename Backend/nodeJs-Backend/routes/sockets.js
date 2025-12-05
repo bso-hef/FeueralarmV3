@@ -212,8 +212,8 @@ module.exports = (io) => {
     // ==========================================
     // GET POSTS - Aktuelle Posts abrufen
     // ==========================================
-    socket.on("fetchPosts", async () => {
-      console.log("📋 fetchPosts received from:", socket.email);
+    socket.on("getPosts", async () => {
+      console.log("📋 getPosts received from:", socket.email);
 
       try {
         let res = await PostController.getPosts();
