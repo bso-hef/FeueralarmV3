@@ -216,8 +216,24 @@ module.exports = (io) => {
       console.log("📋 getPosts received from:", socket.email);
 
       try {
-        const alertId = await PostController.getAlertId({});
-        let res = await PostController.fetchPosts(null);
+        // ✅ FIX: Hole nur NICHT-ARCHIVIERTE Alarme
+        const Alert = require("../models/alert");
+        const activeAlert = await Alert.findOne({ archived: { $ne: true } }).sort({ created: -1 });
+
+        if (!activeAlert) {
+          console.log("⚠️ No active alarm found");
+          socket.emit("emitPosts", {
+            success: true,
+            message: "Kein aktiver Alarm",
+            posts: [],
+          });
+          return;
+        }
+
+        console.log("✅ Active alarm found:", activeAlert._id);
+
+        // Hole Posts für den aktiven Alarm
+        let res = await PostController.fetchPosts(activeAlert._id);
 
         if (res.success) {
           console.log(`✅ Sending ${res.posts.length} posts to ${socket.email}`);
@@ -227,7 +243,7 @@ module.exports = (io) => {
             posts: res.posts,
           });
         } else {
-          console.error("❌ getPosts failed:", res.msg);
+          console.error("❌ fetchPosts failed:", res.msg);
           socket.emit("error", { message: res.msg });
         }
       } catch (error) {
@@ -235,7 +251,6 @@ module.exports = (io) => {
         socket.emit("error", { message: "Internal server error" });
       }
     });
-
     // ==========================================
     // ALARM BEENDEN EVENT (Optional - für später)
     // ==========================================
