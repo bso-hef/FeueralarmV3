@@ -195,7 +195,12 @@ exports.updatePost = async (data) => {
     post.status = status || post.status;
     post.comment = comment || post.comment;
 
+    console.log("📝 About to update post with _id:", post._id);
+    console.log("📝 New status:", status);
+    console.log("📝 post object:", post);
+
     try {
+      console.log("📝 === INSIDE TRY BLOCK ===");
       let result = await Post.updateOne({ _id: post._id }, post);
       console.log("📝 MongoDB updateOne result:", result);
       console.log("📝 result.n:", result.n);
@@ -251,6 +256,9 @@ exports.updatePost = async (data) => {
           posts: [],
         };
     } catch (err) {
+      console.error("📝 === ERROR IN TRY BLOCK ===");
+      console.error("📝 Error message:", err.message);
+      console.error("📝 Error stack:", err.stack);
       return {
         success: false,
         msg: err.message,
