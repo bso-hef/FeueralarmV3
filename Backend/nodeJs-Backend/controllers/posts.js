@@ -197,6 +197,10 @@ exports.updatePost = async (data) => {
 
     try {
       let result = await Post.updateOne({ _id: post._id }, post);
+      console.log("📝 MongoDB updateOne result:", result);
+      console.log("📝 result.n:", result.n);
+      console.log("📝 result.nModified:", result.nModified);
+      console.log("📝 result.ok:", result.ok);
 
       if (result.n > 0) {
         result = await Alert.updateOne({ _id: post.alert }, { updated: time });
