@@ -172,17 +172,20 @@ exports.updatePost = async (data) => {
     console.log("📝 Post found:", post ? "YES" : "NO");
     console.log("📝 Post:", post);
 
-    let lastAlertId = await this.getAlertId();
+    const Alert = require("../models/alert");
+    const postAlert = await Alert.findById(post.alert);
+    console.log("📝 postAlert:", postAlert);
+    console.log("📝 postAlert.archived:", postAlert?.archived);
 
-    console.log("📝 lastAlertId:", lastAlertId);
-    console.log("📝 post.alert:", post?.alert);
-
-    if (!post.alert.equals(lastAlertId))
+    if (!postAlert || postAlert.archived === true) {
+      console.log("❌ Alert is archived!");
       return {
         success: false,
         msg: "Diese Klasse ist bereits archiviert.",
         posts: [],
       };
+    }
+    console.log("✅ Alert is NOT archived - proceeding with update");
 
     // UAP 9.3.1: Alte Werte für Audit-Log speichern
     const oldStatus = post.status;
