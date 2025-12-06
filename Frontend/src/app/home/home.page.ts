@@ -425,25 +425,30 @@ export class HomePage implements OnInit, OnDestroy {
 
   private handleTeacherUpdate(update: any): void {
     console.log('👉 handleTeacherUpdate CALLED with:', update);
-    console.log('👉 update._id:', update._id);
 
-    const teacher = this.teachers.find((t) => t.id === update._id);
+    // ✅ FIX: Mongoose sendet _doc Object
+    const updateData = update._doc || update;
+    console.log('👉 updateData:', updateData);
+    console.log('👉 updateData._id:', updateData._id);
+
+    const teacher = this.teachers.find((t) => t.id === updateData._id);
     console.log('👉 Found teacher:', teacher ? 'YES' : 'NO');
 
     if (teacher) {
       console.log('👉 Old state:', teacher.state);
       console.log('👉 Old comment:', teacher.comment);
 
-      teacher.state = this.dataService.parseTeachersFromAPI([update])[0].state;
-      teacher.comment = update.comment === ' ' ? '' : update.comment;
+      // ✅ Parse mit updateData statt update
+      teacher.state = this.dataService.parseTeachersFromAPI([
+        updateData,
+      ])[0].state;
+      teacher.comment = updateData.comment === ' ' ? '' : updateData.comment;
 
       console.log('👉 New state:', teacher.state);
       console.log('👉 New comment:', teacher.comment);
 
       this.applyFilters();
       this.updateStats();
-
-      // ✅ WICHTIG: Force Change Detection!
       this.cdr.detectChanges();
 
       // Show toast if notifications enabled
@@ -455,7 +460,7 @@ export class HomePage implements OnInit, OnDestroy {
         this.showUpdateToast(teacher);
       }
     } else {
-      console.warn('⚠️ Teacher not found with id:', update._id);
+      console.warn('⚠️ Teacher not found with id:', updateData._id);
     }
   }
 
