@@ -138,9 +138,13 @@ exports.updatePost = async (data) => {
   let id = data.id;
   let status = data.status;
   let comment = data.comment;
-  // UAP 9.3.1: User-Informationen für Audit-Logging
   let userId = data.userId;
   let username = data.username;
+
+  console.log("📝 === updatePost START ===");
+  console.log("📝 id:", id);
+  console.log("📝 status:", status);
+  console.log("📝 comment:", comment);
 
   // DSGVO UAP9.1.2: Validiere Kommentar auf personenbezogene Daten
   if (comment && comment.trim().length > 0) {
@@ -164,7 +168,14 @@ exports.updatePost = async (data) => {
 
   try {
     let post = await Post.findById(id);
+
+    console.log("📝 Post found:", post ? "YES" : "NO");
+    console.log("📝 Post:", post);
+
     let lastAlertId = await this.getAlertId();
+
+    console.log("📝 lastAlertId:", lastAlertId);
+    console.log("📝 post.alert:", post?.alert);
 
     if (!post.alert.equals(lastAlertId))
       return {
