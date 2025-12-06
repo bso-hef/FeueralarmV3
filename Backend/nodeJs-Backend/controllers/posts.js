@@ -210,7 +210,7 @@ exports.updatePost = async (data) => {
       console.log("📝 result.nModified:", result.nModified);
       console.log("📝 result.ok:", result.ok);
 
-      if (result.n > 0) {
+      if (result.matchedCount > 0) {
         result = await Alert.updateOne({ _id: post.alert }, { updated: time });
 
         // NEU: Stats aktualisieren
