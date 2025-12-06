@@ -296,8 +296,15 @@ export class HomePage implements OnInit, OnDestroy {
 
     // Listen to updates
     const updateSub = this.socketService.update$.subscribe((update) => {
+      console.log('🔔 update$ triggered with:', update);
+      console.log('🔔 typeof update:', typeof update);
+      console.log('🔔 update truthy:', !!update);
+
       if (update) {
+        console.log('🔔 Calling handleTeacherUpdate...');
         this.handleTeacherUpdate(update);
+      } else {
+        console.log('🔔 update is falsy - NOT calling handleTeacherUpdate');
       }
     });
 
