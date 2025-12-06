@@ -35,6 +35,9 @@ pm2 logs backend
 Username: admin
 Passwort: Admin2024!Secure
 
+Username: lehrer4
+Passwort: Lehrer2024!
+
 Username: verwaltung Passwort: Verwaltung2024!
 
 12Testing
