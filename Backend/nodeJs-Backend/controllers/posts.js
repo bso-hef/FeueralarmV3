@@ -269,6 +269,10 @@ exports.updatePost = async (data) => {
       };
     }
   } catch (err) {
+    console.error("📝 === OUTER CATCH BLOCK ===");
+    console.error("📝 Error:", err);
+    console.error("📝 Error message:", err.message);
+    console.error("📝 Error stack:", err.stack);
     return {
       success: false,
       msg: err.message,
