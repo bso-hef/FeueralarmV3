@@ -1,0 +1,68 @@
+.alarm-footer {
+  border-top: 2px solid var(--ion-color-danger);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+
+  ion-toolbar {
+    --background: var(--ion-color-light);
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+  }
+}
+
+.footer-content {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.end-alarm-btn {
+  flex: 1;
+  font-weight: 600;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  min-height: 48px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.export-buttons {
+  display: flex;
+  gap: 8px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+
+    ion-button {
+      flex: 1;
+    }
+  }
+
+  ion-button {
+    font-weight: 500;
+  }
+}
+
+.alarm-footer {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

@@ -184,7 +184,7 @@ export class ExportService {
     );
     yPos += 6;
     doc.text(
-      `Abwesend: ${stats.abwesend} (${stats.abwesendPercent}%)`,
+      `Unvollständig: ${stats.abwesend} (${stats.abwesendPercent}%)`,
       14,
       yPos
     );
@@ -196,7 +196,7 @@ export class ExportService {
     );
     yPos += 6;
     doc.text(
-      `Unbekannt: ${stats.unbekannt} (${stats.unbekanntPercent}%)`,
+      `Offen: ${stats.unbekannt} (${stats.unbekanntPercent}%)`,
       14,
       yPos
     );
@@ -389,26 +389,42 @@ export class ExportService {
     unbekanntPercent: number;
   } {
     const total = teachers.length;
-    const anwesend = teachers.filter((t) => t.status === 'anwesend').length;
-    const abwesend = teachers.filter((t) => t.status === 'abwesend').length;
-    const vollstaendig = teachers.filter(
-      (t) => t.status === 'vollständig'
+
+    console.log('📊 === calculateStatistics DEBUG ===');
+    console.log('📊 Total teachers:', total);
+    console.log(
+      '📊 Teacher statuses:',
+      teachers.map((t) => t.status)
+    );
+
+    // ✅ FIX: Verwende Großbuchstaben und richtige Status-Namen
+    const anwesend = teachers.filter(
+      (t) => t.status === 'Anwesend' || t.status === 'anwesend'
     ).length;
-    const unbekannt = teachers.filter(
-      (t) => t.status === 'unbekannt' || !t.status
+
+    const unvollstaendig = teachers.filter(
+      (t) => t.status === 'Unvollständig' || t.status === 'unvollständig'
     ).length;
+
+    const offen = teachers.filter(
+      (t) => t.status === 'Offen' || t.status === 'offen' || !t.status
+    ).length;
+
+    console.log('📊 Anwesend:', anwesend);
+    console.log('📊 Unvollständig:', unvollstaendig);
+    console.log('📊 Offen:', offen);
 
     return {
       total,
       anwesend,
-      abwesend,
-      vollstaendig,
-      unbekannt,
+      abwesend: unvollstaendig, // ← "Abwesend" zeigt "Unvollständig"
+      vollstaendig: anwesend, // ← "Vollständig" zeigt "Anwesend" (alle da)
+      unbekannt: offen, // ← "Unbekannt" zeigt "Offen"
       anwesendPercent: total > 0 ? Math.round((anwesend / total) * 100) : 0,
-      abwesendPercent: total > 0 ? Math.round((abwesend / total) * 100) : 0,
-      vollstaendigPercent:
-        total > 0 ? Math.round((vollstaendig / total) * 100) : 0,
-      unbekanntPercent: total > 0 ? Math.round((unbekannt / total) * 100) : 0,
+      abwesendPercent:
+        total > 0 ? Math.round((unvollstaendig / total) * 100) : 0,
+      vollstaendigPercent: total > 0 ? Math.round((anwesend / total) * 100) : 0,
+      unbekanntPercent: total > 0 ? Math.round((offen / total) * 100) : 0,
     };
   }
 
@@ -417,10 +433,12 @@ export class ExportService {
    */
   private translateStatus(status: string): string {
     const translations: { [key: string]: string } = {
+      Anwesend: 'Anwesend',
       anwesend: 'Anwesend',
-      abwesend: 'Abwesend',
-      vollständig: 'Vollständig',
-      unbekannt: 'Unbekannt',
+      Unvollständig: 'Unvollständig',
+      unvollständig: 'Unvollständig',
+      Offen: 'Offen',
+      offen: 'Offen',
     };
 
     return translations[status] || status || 'Unbekannt';

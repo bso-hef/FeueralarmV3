@@ -138,9 +138,13 @@ exports.updatePost = async (data) => {
   let id = data.id;
   let status = data.status;
   let comment = data.comment;
-  // UAP 9.3.1: User-Informationen für Audit-Logging
   let userId = data.userId;
   let username = data.username;
+
+  console.log("📝 === updatePost START ===");
+  console.log("📝 id:", id);
+  console.log("📝 status:", status);
+  console.log("📝 comment:", comment);
 
   // DSGVO UAP9.1.2: Validiere Kommentar auf personenbezogene Daten
   if (comment && comment.trim().length > 0) {
@@ -164,14 +168,24 @@ exports.updatePost = async (data) => {
 
   try {
     let post = await Post.findById(id);
-    let lastAlertId = await this.getAlertId();
 
-    if (!post.alert.equals(lastAlertId))
+    console.log("📝 Post found:", post ? "YES" : "NO");
+    console.log("📝 Post:", post);
+
+    const Alert = require("../models/alert");
+    const postAlert = await Alert.findById(post.alert);
+    console.log("📝 postAlert:", postAlert);
+    console.log("📝 postAlert.archived:", postAlert?.archived);
+
+    if (!postAlert || postAlert.archived === true) {
+      console.log("❌ Alert is archived!");
       return {
         success: false,
         msg: "Diese Klasse ist bereits archiviert.",
         posts: [],
       };
+    }
+    console.log("✅ Alert is NOT archived - proceeding with update");
 
     // UAP 9.3.1: Alte Werte für Audit-Log speichern
     const oldStatus = post.status;
@@ -184,10 +198,19 @@ exports.updatePost = async (data) => {
     post.status = status || post.status;
     post.comment = comment || post.comment;
 
-    try {
-      let result = await Post.updateOne({ _id: post._id }, post);
+    console.log("📝 About to update post with _id:", post._id);
+    console.log("📝 New status:", status);
+    console.log("📝 post object:", post);
 
-      if (result.n > 0) {
+    try {
+      console.log("📝 === INSIDE TRY BLOCK ===");
+      let result = await Post.updateOne({ _id: post._id }, post);
+      console.log("📝 MongoDB updateOne result:", result);
+      console.log("📝 result.n:", result.n);
+      console.log("📝 result.nModified:", result.nModified);
+      console.log("📝 result.ok:", result.ok);
+
+      if (result.matchedCount > 0) {
         result = await Alert.updateOne({ _id: post.alert }, { updated: time });
 
         // NEU: Stats aktualisieren
@@ -236,6 +259,9 @@ exports.updatePost = async (data) => {
           posts: [],
         };
     } catch (err) {
+      console.error("📝 === ERROR IN TRY BLOCK ===");
+      console.error("📝 Error message:", err.message);
+      console.error("📝 Error stack:", err.stack);
       return {
         success: false,
         msg: err.message,
@@ -243,6 +269,10 @@ exports.updatePost = async (data) => {
       };
     }
   } catch (err) {
+    console.error("📝 === OUTER CATCH BLOCK ===");
+    console.error("📝 Error:", err);
+    console.error("📝 Error message:", err.message);
+    console.error("📝 Error stack:", err.stack);
     return {
       success: false,
       msg: err.message,

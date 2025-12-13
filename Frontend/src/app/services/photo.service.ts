@@ -37,6 +37,13 @@ export class PhotoService {
    */
   async takePhoto(): Promise<string | null> {
     try {
+      // ✅ WEB: Verwende File Input (Kamera nicht verfügbar)
+      if (Capacitor.getPlatform() === 'web') {
+        console.log('📸 Camera not available on web, using file input...');
+        return this.selectPhoto(); // Fallback zu File Input
+      }
+
+      // ✅ NATIVE: Verwende Capacitor Camera
       const photo = await Camera.getPhoto({
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Camera,
@@ -57,6 +64,41 @@ export class PhotoService {
    */
   async selectPhoto(): Promise<string | null> {
     try {
+      // ✅ WEB: Verwende File Input
+      if (Capacitor.getPlatform() === 'web') {
+        console.log('📸 Using web file input for photo...');
+        return new Promise((resolve) => {
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'image/*';
+
+          input.onchange = (event: any) => {
+            const file = event.target.files[0];
+            if (!file) {
+              console.log('❌ No file selected');
+              resolve(null);
+              return;
+            }
+
+            console.log('📸 File selected:', file.name, file.size);
+            const reader = new FileReader();
+            reader.onload = () => {
+              console.log('📸 File read successfully');
+              resolve(reader.result as string);
+            };
+            reader.onerror = () => {
+              console.error('❌ Error reading file');
+              resolve(null);
+            };
+            reader.readAsDataURL(file);
+          };
+
+          input.click();
+        });
+      }
+
+      // ✅ NATIVE: Verwende Capacitor Camera
+      console.log('📸 Using native camera plugin...');
       const photo = await Camera.getPhoto({
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Photos,
@@ -76,6 +118,8 @@ export class PhotoService {
    * Für Web: Input File
    */
   async selectFile(): Promise<{ data: string; filename: string } | null> {
+    console.log('📄 Opening file picker...');
+
     if (Capacitor.getPlatform() === 'web') {
       return new Promise((resolve) => {
         const input = document.createElement('input');
@@ -85,18 +129,24 @@ export class PhotoService {
         input.onchange = (event: any) => {
           const file = event.target.files[0];
           if (!file) {
+            console.log('❌ No file selected');
             resolve(null);
             return;
           }
 
+          console.log('📄 File selected:', file.name, file.size);
           const reader = new FileReader();
           reader.onload = () => {
+            console.log('📄 File read successfully');
             resolve({
               data: reader.result as string,
               filename: file.name,
             });
           };
-          reader.onerror = () => resolve(null);
+          reader.onerror = () => {
+            console.error('❌ Error reading file');
+            resolve(null);
+          };
           reader.readAsDataURL(file);
         };
 
@@ -121,6 +171,11 @@ export class PhotoService {
     base64Data: string,
     filename?: string
   ): Observable<PhotoUploadResult> {
+    console.log('📤 uploadPhoto called:', {
+      teacherId,
+      dataLength: base64Data?.length,
+    });
+
     // Entferne Data-URL-Prefix falls vorhanden
     const base64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
 
@@ -129,6 +184,11 @@ export class PhotoService {
       photo: base64,
       filename: filename || `photo_${Date.now()}.jpg`,
     };
+
+    console.log(
+      '📤 Sending request to:',
+      `${this.API_URL}/teachers/${teacherId}/photos`
+    );
 
     return this.http.post<PhotoUploadResult>(
       `${this.API_URL}/teachers/${teacherId}/photos`,
@@ -145,6 +205,12 @@ export class PhotoService {
     base64Data: string,
     filename: string
   ): Observable<PhotoUploadResult> {
+    console.log('📤 uploadFile called:', {
+      teacherId,
+      filename,
+      dataLength: base64Data?.length,
+    });
+
     // Entferne Data-URL-Prefix
     const base64 = base64Data.replace(/^data:[^;]+;base64,/, '');
 
@@ -153,6 +219,11 @@ export class PhotoService {
       file: base64,
       filename,
     };
+
+    console.log(
+      '📤 Sending request to:',
+      `${this.API_URL}/teachers/${teacherId}/files`
+    );
 
     return this.http.post<PhotoUploadResult>(
       `${this.API_URL}/teachers/${teacherId}/files`,
@@ -169,6 +240,12 @@ export class PhotoService {
     noteContent: string,
     title?: string
   ): Observable<PhotoUploadResult> {
+    console.log('📝 uploadNote called:', {
+      teacherId,
+      title,
+      contentLength: noteContent?.length,
+    });
+
     const filename = title
       ? `${this.sanitizeFilename(title)}.txt`
       : `note_${Date.now()}.txt`;
@@ -182,6 +259,11 @@ export class PhotoService {
       filename,
       mimeType: 'text/plain',
     };
+
+    console.log(
+      '📤 Sending request to:',
+      `${this.API_URL}/teachers/${teacherId}/files`
+    );
 
     return this.http.post<PhotoUploadResult>(
       `${this.API_URL}/teachers/${teacherId}/files`,

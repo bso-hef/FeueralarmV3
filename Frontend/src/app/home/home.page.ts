@@ -1,7 +1,21 @@
-import { Component, OnInit, OnDestroy, inject, Injector } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  Injector,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { RestService } from '../services/rest.service';
+import {
+  ExportService,
+  ExportAlarmData,
+  ExportTeacherData,
+} from '../services/export.service';
+import { AlarmFooterComponent } from '../components/alarm-footer/alarm-footer.component';
 import {
   IonHeader,
   IonToolbar,
@@ -42,6 +56,7 @@ import {
   cloudOffline,
   syncOutline,
   documentTextOutline,
+  camera,
 } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
@@ -51,7 +66,6 @@ import {
   TeacherState,
   TeacherStateLabel,
 } from '../interfaces/teacher.interface';
-import { RestService } from '../services/rest.service';
 import { SocketService } from '../services/socket.service';
 import { SyncService } from '../services/sync.service';
 import { DataService } from '../services/data.service';
@@ -59,6 +73,7 @@ import { FeedbackService } from '../services/feedback.service';
 import { SettingsService } from '../services/settings.service';
 import { SettingsModal } from '../modals/settings/settings.modal';
 import { InformationModal } from '../modals/information/information.modal';
+import { AttachmentModalComponent } from '../modals/attachment/attachment-modal.component';
 
 @Component({
   selector: 'app-home',
@@ -86,6 +101,7 @@ import { InformationModal } from '../modals/information/information.modal';
     IonCard,
     IonCardContent,
     IonProgressBar,
+    AlarmFooterComponent,
   ],
 })
 export class HomePage implements OnInit, OnDestroy {
@@ -99,15 +115,20 @@ export class HomePage implements OnInit, OnDestroy {
   // UI State
   isLoading = true;
   isAdmin = false;
-  canAccessDashboard = false; // ✅ NEU: Separate Variable für Dashboard-Zugriff
+  canAccessDashboard = false;
   searchTerm = '';
   selectedStatus: string = '4'; // 4 = All
   sortBy: 'teacher' | 'class' = 'teacher';
 
-  // *** NEU: Sync Status ***
+  // Sync Status
   isOnline = true;
   isSyncing = false;
   pendingActions = 0;
+
+  // Alarm State
+  hasActiveAlarm = false;
+  currentAlarmId: string | null = null;
+  isProcessingAlarm = false;
 
   // Stats
   stats = {
@@ -140,14 +161,19 @@ export class HomePage implements OnInit, OnDestroy {
     private settingsService: SettingsService,
     private modalCtrl: ModalController,
     private router: Router,
-    private syncService: SyncService
+    private syncService: SyncService,
+    private exportService: ExportService,
+    private cdr: ChangeDetectorRef
   ) {
+    // Socket Service optional injizieren
+    console.log('🏠 HomePage constructor START');
+
     // Socket Service optional injizieren
     try {
       const injector = inject(Injector);
       this.socketService = injector.get(SocketService, null) ?? undefined;
       if (this.socketService) {
-        console.log('✅ SocketService verfügbar');
+        console.log('✅ SocketService verfügbar in Constructor');
       } else {
         console.warn('⚠️ SocketService nicht verfügbar - läuft ohne Socket');
       }
@@ -174,12 +200,17 @@ export class HomePage implements OnInit, OnDestroy {
       cloudOffline,
       syncOutline,
       documentTextOutline,
+      camera,
     });
   }
 
   async ngOnInit() {
-    // ✅ GEÄNDERT: Check if user is admin or verwaltung
+    console.log('🏠 ngOnInit START');
+    console.log('🔍 socketService exists:', !!this.socketService);
+
+    // Check if user is admin or verwaltung
     const role = this.restService.getRoleValue();
+    console.log('🔍 User role:', role);
     this.isAdmin = role === 'admin';
     this.canAccessDashboard = role === 'admin' || role === 'verwaltung';
 
@@ -189,7 +220,7 @@ export class HomePage implements OnInit, OnDestroy {
       .getDefaultStatusAsNumber()
       .toString();
 
-    // *** NEU: Sync-Status überwachen ***
+    // Sync-Status überwachen
     this.subscriptions.push(
       this.syncService.getOnlineStatus().subscribe((online) => {
         this.isOnline = online;
@@ -230,6 +261,16 @@ export class HomePage implements OnInit, OnDestroy {
       this.socketService.disconnect();
     }
   }
+  async ionViewWillEnter() {
+    console.log('🔄 ionViewWillEnter - Checking for active alarm...');
+
+    await this.checkForActiveAlarm();
+
+    if (this.hasActiveAlarm && this.teachers.length === 0) {
+      console.log('🔍 Active alarm detected but no data - loading...');
+      await this.loadData();
+    }
+  }
 
   // ==========================================
   // DATA LOADING
@@ -245,15 +286,65 @@ export class HomePage implements OnInit, OnDestroy {
         this.applyFilters();
         this.updateStats();
         this.isLoading = false;
+
+        // Check for active alarm
+        this.checkForActiveAlarm().catch((err) =>
+          console.error('Error checking alarm:', err)
+        );
       }
     });
 
     // Listen to updates
     const updateSub = this.socketService.update$.subscribe((update) => {
+      console.log('🔔 update$ triggered with:', update);
+      console.log('🔔 typeof update:', typeof update);
+      console.log('🔔 update truthy:', !!update);
+
       if (update) {
+        console.log('🔔 Calling handleTeacherUpdate...');
         this.handleTeacherUpdate(update);
+      } else {
+        console.log('🔔 update is falsy - NOT calling handleTeacherUpdate');
       }
     });
+
+    const alarmStartedSub = this.socketService.alarmStarted$.subscribe(
+      (data) => {
+        if (data) {
+          console.log('🚨 Alarm gestartet Event empfangen:', data);
+          this.loadData();
+        }
+      }
+    );
+
+    const alarmUpdatedSub = this.socketService.alarmUpdated$.subscribe(
+      (data) => {
+        if (data) {
+          console.log('🔄 Alarm aktualisiert Event empfangen:', data);
+        }
+      }
+    );
+
+    const alarmEndedSub = this.socketService.alarmEnded$.subscribe((data) => {
+      if (data) {
+        console.log('🔚 Alarm beendet Event empfangen:', data);
+        this.teachers = [];
+        this.filteredTeachers = [];
+        this.hasActiveAlarm = false;
+        this.currentAlarmId = null;
+        this.updateStats();
+        this.cdr.detectChanges();
+      }
+    });
+
+    // ÄNDERE subscriptions.push Zeile:
+    this.subscriptions.push(
+      postsSub,
+      updateSub,
+      alarmStartedSub,
+      alarmUpdatedSub,
+      alarmEndedSub
+    );
 
     this.subscriptions.push(postsSub, updateSub);
   }
@@ -279,6 +370,9 @@ export class HomePage implements OnInit, OnDestroy {
         this.isLoading = false;
       }
 
+      // Check for active alarm
+      await this.checkForActiveAlarm();
+
       await this.feedbackService.hideLoading();
     } catch (error) {
       console.error('Error loading data:', error);
@@ -290,16 +384,79 @@ export class HomePage implements OnInit, OnDestroy {
       this.applyFilters();
       this.updateStats();
       this.isLoading = false;
+
+      // Check for active alarm
+      await this.checkForActiveAlarm();
     }
   }
 
+  /**
+   * Wartet darauf dass Socket-Daten über posts$ empfangen werden
+   */
+  /**
+   * Wartet darauf dass Socket-Daten über posts$ empfangen werden
+   */
+  private waitForSocketData(timeoutMs: number): Promise<boolean> {
+    console.log('⏳ waitForSocketData START - timeout:', timeoutMs, 'ms');
+
+    return new Promise((resolve) => {
+      let resolved = false;
+
+      // Timeout
+      const timeout = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          console.log('⏰ Socket timeout reached');
+          resolve(false);
+        }
+      }, timeoutMs);
+
+      // Warte auf posts$
+      const sub = this.socketService!.posts$.subscribe((data) => {
+        console.log('📥 posts$ event in waitForSocketData:', data);
+
+        if (data && data.posts && data.posts.length > 0 && !resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          sub.unsubscribe();
+          console.log(
+            '✅ Socket data received via posts$:',
+            data.posts.length,
+            'posts'
+          );
+          resolve(true);
+        }
+      });
+    });
+  }
+
   private handleTeacherUpdate(update: any): void {
-    const teacher = this.teachers.find((t) => t.id === update._id);
+    console.log('👉 handleTeacherUpdate CALLED with:', update);
+
+    // ✅ FIX: Mongoose sendet _doc Object
+    const updateData = update._doc || update;
+    console.log('👉 updateData:', updateData);
+    console.log('👉 updateData._id:', updateData._id);
+
+    const teacher = this.teachers.find((t) => t.id === updateData._id);
+    console.log('👉 Found teacher:', teacher ? 'YES' : 'NO');
+
     if (teacher) {
-      teacher.state = this.dataService.parseTeachersFromAPI([update])[0].state;
-      teacher.comment = update.comment === ' ' ? '' : update.comment;
+      console.log('👉 Old state:', teacher.state);
+      console.log('👉 Old comment:', teacher.comment);
+
+      // ✅ Parse mit updateData statt update
+      teacher.state = this.dataService.parseTeachersFromAPI([
+        updateData,
+      ])[0].state;
+      teacher.comment = updateData.comment === ' ' ? '' : updateData.comment;
+
+      console.log('👉 New state:', teacher.state);
+      console.log('👉 New comment:', teacher.comment);
+
       this.applyFilters();
       this.updateStats();
+      this.cdr.detectChanges();
 
       // Show toast if notifications enabled
       if (
@@ -309,6 +466,8 @@ export class HomePage implements OnInit, OnDestroy {
       ) {
         this.showUpdateToast(teacher);
       }
+    } else {
+      console.warn('⚠️ Teacher not found with id:', updateData._id);
     }
   }
 
@@ -319,7 +478,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   // ==========================================
-  // MOCK DATA (für Development ohne Backend)
+  // MOCK DATA
   // ==========================================
 
   private getMockTeachers(): Teacher[] {
@@ -349,7 +508,6 @@ export class HomePage implements OnInit, OnDestroy {
         classNumber: 'EL301',
         room: ['R312'],
         state: TeacherState.INCOMPLETE,
-        // DSGVO: Kommentar enthält KEINE Schülernamen - nur Anzahl
         comment: 'Nur 15 Schüler anwesend',
       },
       {
@@ -383,14 +541,12 @@ export class HomePage implements OnInit, OnDestroy {
         ? 'all'
         : (parseInt(this.selectedStatus) as TeacherState);
 
-    // Filter
     let filtered = this.dataService.filterTeachers(
       this.teachers,
       this.searchTerm,
       statusFilter
     );
 
-    // Sort
     if (this.sortBy === 'teacher') {
       filtered = this.dataService.sortTeachersByName(filtered);
     } else {
@@ -429,7 +585,6 @@ export class HomePage implements OnInit, OnDestroy {
       if (this.socketService) {
         await this.socketService.updatePost(teacher.id, status);
       } else {
-        // Ohne Socket: Nur lokale Änderung
         this.applyFilters();
         this.updateStats();
       }
@@ -446,7 +601,6 @@ export class HomePage implements OnInit, OnDestroy {
       if (this.socketService) {
         await this.socketService.updatePost(teacher.id, status);
       } else {
-        // Ohne Socket: Nur lokale Änderung
         this.applyFilters();
         this.updateStats();
       }
@@ -454,7 +608,6 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async addComment(teacher: Teacher): Promise<void> {
-    // DSGVO: Warnung anzeigen, keine Schülernamen in Kommentare
     const comment = await this.feedbackService.showPrompt(
       'Kommentar hinzufügen',
       'Bitte KEINE Schülernamen eingeben! Nur allgemeine Informationen zur Situation.',
@@ -463,7 +616,6 @@ export class HomePage implements OnInit, OnDestroy {
     );
 
     if (comment !== null && comment.trim() !== '') {
-      // DSGVO: Validiere Kommentar auf verdächtige Patterns
       const validationWarning = this.validateCommentForPrivacy(comment.trim());
 
       if (validationWarning) {
@@ -488,18 +640,9 @@ export class HomePage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * DSGVO: Validiert Kommentare auf personenbezogene Daten
-   * Warnt vor möglichen Schülernamen oder sensiblen Daten
-   */
   private validateCommentForPrivacy(comment: string): string | null {
-    // Pattern für mögliche Namen (Großbuchstabe gefolgt von Kleinbuchstaben)
     const namePattern = /\b[A-ZÄÖÜ][a-zäöüß]+ [A-ZÄÖÜ][a-zäöüß]+\b/;
-
-    // Pattern für Geburtsdaten
     const datePattern = /\b\d{1,2}\.\d{1,2}\.\d{2,4}\b/;
-
-    // Verdächtige Begriffe
     const suspiciousWords = [
       'schüler.*name',
       'student.*name',
@@ -549,8 +692,375 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   // ==========================================
-  // ALARM
+  // ALARM MANAGEMENT
   // ==========================================
+
+  private async checkForActiveAlarm(): Promise<void> {
+    console.log('🔍 === checkForActiveAlarm() START ===');
+
+    try {
+      // ✅ Hole aktuelle Alarm-ID von der API
+      console.log('🔍 Fetching current alert from API...');
+      const response = await this.restService.getCurrentAlert().toPromise();
+
+      if (response && response.alert && response.alert._id) {
+        // ✅ Aktiver Alarm gefunden
+        this.currentAlarmId = response.alert._id;
+        this.hasActiveAlarm = true;
+
+        console.log('✅ Active alarm found:', this.currentAlarmId);
+
+        // ✅ Wenn noch keine Daten geladen sind, hole Posts
+        if (this.teachers.length === 0 && this.socketService) {
+          console.log('📦 No teachers loaded yet - fetching posts...');
+          this.socketService.getPosts();
+        }
+      } else {
+        // ✅ Kein aktiver Alarm
+        this.currentAlarmId = null;
+        this.hasActiveAlarm = false;
+        console.log('🔍 No active alarm');
+      }
+    } catch (error) {
+      console.error('❌ Error checking for active alarm:', error);
+
+      // Fallback: Prüfe ob teachers.length > 0
+      if (this.teachers.length > 0) {
+        console.log('⚠️ API failed but teachers exist - assuming alarm active');
+        this.hasActiveAlarm = true;
+        const firstTeacher = this.teachers[0] as any;
+        this.currentAlarmId =
+          firstTeacher.alert || firstTeacher._id || firstTeacher.id;
+      } else {
+        this.hasActiveAlarm = false;
+        this.currentAlarmId = null;
+      }
+    }
+
+    console.log('🔍 === checkForActiveAlarm() END ===');
+    console.log('🔍 hasActiveAlarm:', this.hasActiveAlarm);
+    console.log('🔍 currentAlarmId:', this.currentAlarmId);
+  }
+
+  /**
+   * Prüft ob noch offene Klassen existieren
+   */
+  private hasOpenClasses(): boolean {
+    const result = this.teachers.some((t) => t.state === TeacherState.OPEN);
+    console.log('🔍 hasOpenClasses():', result);
+    return result;
+  }
+
+  /**
+   * Gibt die Anzahl der offenen Klassen zurück
+   */
+  private getOpenClassesCount(): number {
+    const count = this.teachers.filter(
+      (t) => t.state === TeacherState.OPEN
+    ).length;
+    console.log('🔍 getOpenClassesCount():', count);
+    return count;
+  }
+
+  /**
+   * Gibt die Namen der offenen Klassen zurück
+   */
+  private getOpenClassesNames(): string[] {
+    const names = this.teachers
+      .filter((t) => t.state === TeacherState.OPEN)
+      .map((t) => `${t.class} (${t.classNumber})`)
+      .slice(0, 5);
+    console.log('🔍 getOpenClassesNames():', names);
+    return names;
+  }
+
+  async endAndArchiveAlarm(): Promise<void> {
+    console.log('🔥 === endAndArchiveAlarm() CALLED ===');
+    console.log('🔥 currentAlarmId:', this.currentAlarmId);
+    console.log('🔥 hasActiveAlarm:', this.hasActiveAlarm);
+    console.log('🔥 teachers.length:', this.teachers.length);
+    console.log('🔥 teachers:', this.teachers);
+
+    if (!this.currentAlarmId) {
+      console.log('⚠️ Kein Alarm ID - Abbruch');
+      await this.feedbackService.showWarningToast(
+        'Kein aktiver Alarm vorhanden'
+      );
+      return;
+    }
+
+    // ✅ VALIDIERUNG: Prüfe auf offene Klassen
+    if (this.hasOpenClasses()) {
+      const openCount = this.getOpenClassesCount();
+      const openClasses = this.getOpenClassesNames();
+
+      console.log('⚠️ Es gibt noch offene Klassen:', openCount);
+
+      let message = `⚠️ Es ${
+        openCount === 1 ? 'ist' : 'sind'
+      } noch ${openCount} Klasse${openCount === 1 ? '' : 'n'} offen:\n\n`;
+      message += openClasses.join('\n');
+
+      if (openCount > 5) {
+        message += `\n... und ${openCount - 5} weitere`;
+      }
+
+      message +=
+        '\n\n❌ Bitte schließe alle Klassen ab (Anwesend oder Unvollständig), bevor du den Alarm beendest!';
+
+      console.log('🚨 Zeige Alert mit Message:', message);
+
+      // Zeige Alert mit nur OK Button
+      await this.feedbackService.showConfirm(
+        '⚠️ Alarm kann nicht beendet werden',
+        message,
+        'OK',
+        '' // Leerer String = kein Cancel-Button
+      );
+
+      console.log('🚨 Alert wurde geschlossen');
+      return;
+    }
+
+    console.log('✅ Alle Klassen geschlossen - fahre fort');
+
+    const confirmed = await this.feedbackService.showConfirm(
+      'Alarm beenden',
+      'Alle Klassen sind abgeschlossen. Möchtest du den Alarm jetzt beenden und archivieren?',
+      'Ja, beenden',
+      'Abbrechen'
+    );
+
+    if (!confirmed) {
+      console.log('❌ Benutzer hat abgebrochen');
+      return;
+    }
+
+    try {
+      this.isProcessingAlarm = true;
+      console.log('📦 Starte Archivierung...');
+
+      console.log('🔗 API Call: archiveAlert(' + this.currentAlarmId + ')');
+      console.log('🔗 Calling restService.archiveAlert()...');
+
+      // ✅ Berechne Stats vor dem Archivieren
+      const stats = {
+        total: this.teachers.length,
+        complete: this.teachers.filter((t) => t.state === TeacherState.PRESENT)
+          .length,
+        incomplete: this.teachers.filter(
+          (t) => t.state === TeacherState.INCOMPLETE
+        ).length,
+        undefined: this.teachers.filter((t) => t.state === TeacherState.OPEN)
+          .length,
+      };
+
+      console.log('📊 Stats zum Speichern:', stats);
+
+      const response = await new Promise((resolve, reject) => {
+        console.log('🔗 Inside Promise - subscribing...');
+        this.restService.archiveAlert(this.currentAlarmId!, stats).subscribe({
+          next: (res) => {
+            console.log('📥 Response received:', res);
+            resolve(res);
+          },
+          error: (err) => {
+            console.error('📥 Error received:', err);
+            reject(err);
+          },
+        });
+        console.log('🔗 Subscribe called');
+      });
+
+      console.log('✅ API Response:', response);
+
+      // ✅ WICHTIG: Setze isProcessing SOFORT auf false!
+      this.isProcessingAlarm = false;
+
+      // ✅ UI zurücksetzen
+      console.log('🔄 Setze UI zurück...');
+      this.teachers = [];
+      this.filteredTeachers = [];
+      this.hasActiveAlarm = false;
+      this.currentAlarmId = null;
+      this.updateStats();
+
+      // ✅ Force Angular Change Detection
+      this.cdr.detectChanges();
+
+      console.log('✅ UI zurückgesetzt');
+      console.log('🔥 teachers.length:', this.teachers.length);
+      console.log('🔥 hasActiveAlarm:', this.hasActiveAlarm);
+
+      // Toast NACH dem UI-Reset (falls es blockiert, ist UI schon zurückgesetzt)
+      await this.feedbackService.showSuccessToast(
+        'Alarm erfolgreich beendet und archiviert'
+      );
+    } catch (error) {
+      console.error('❌ === ERROR beim Archivieren ===');
+      console.error('❌ Error:', error);
+      this.isProcessingAlarm = false; // ← AUCH HIER!
+      await this.feedbackService.showError(
+        error,
+        'Fehler beim Beenden des Alarms'
+      );
+    } finally {
+      this.isProcessingAlarm = false; // ← Sicherheitshalber auch hier
+      console.log('🔥 === endAndArchiveAlarm() ENDE ===');
+    }
+  }
+
+  async exportCurrentAlarmPDF(): Promise<void> {
+    console.log('📄 === exportCurrentAlarmPDF() CALLED ===');
+    console.log('📄 hasActiveAlarm:', this.hasActiveAlarm);
+    console.log('📄 teachers.length:', this.teachers.length);
+    console.log('📄 currentAlarmId:', this.currentAlarmId);
+
+    if (!this.hasActiveAlarm || this.teachers.length === 0) {
+      console.log('⚠️ Kein aktiver Alarm - Abbruch');
+      await this.feedbackService.showWarningToast(
+        'Kein aktiver Alarm vorhanden'
+      );
+      return;
+    }
+
+    // ✅ VALIDIERUNG: Prüfe ob alle Klassen abgeschlossen sind
+    if (this.hasOpenClasses()) {
+      const openCount = this.getOpenClassesCount();
+      const openClasses = this.getOpenClassesNames();
+
+      let message = `⚠️ Es ${
+        openCount === 1 ? 'ist' : 'sind'
+      } noch ${openCount} Klasse${openCount === 1 ? '' : 'n'} offen:\n\n`;
+      message += openClasses.join('\n');
+
+      if (openCount > 5) {
+        message += `\n... und ${openCount - 5} weitere`;
+      }
+
+      message +=
+        '\n\n❌ Bitte schließe alle Klassen ab (Anwesend oder Unvollständig), bevor du den Export erstellst!';
+
+      await this.feedbackService.showConfirm(
+        '⚠️ Export nicht möglich',
+        message,
+        'OK',
+        ''
+      );
+      return;
+    }
+
+    try {
+      console.log('📄 Starte PDF-Export...');
+
+      const alarmData: ExportAlarmData = {
+        _id: this.currentAlarmId || 'unknown',
+        created: new Date().toISOString(),
+        updated: new Date().toISOString(),
+        archived: false,
+        classCount: this.teachers.length,
+        triggeredBy: this.restService.getEmail(),
+        description: 'Feueralarm',
+        location: 'Schule',
+      };
+
+      const teacherData: ExportTeacherData[] = this.teachers.map((t) => ({
+        name: t.names.join(', '),
+        klasse: `${t.class} (${t.classNumber})`,
+        status: this.getStatusLabel(t.state),
+        comment: t.comment || '-',
+        raum: t.room?.join(', ') || '-',
+      }));
+
+      console.log('📄 AlarmData:', alarmData);
+      console.log('📄 TeacherData:', teacherData);
+      console.log('📄 Rufe exportService.exportAlarmToPDF() auf...');
+
+      this.exportService.exportAlarmToPDF(alarmData, teacherData);
+
+      console.log('✅ PDF-Export erfolgreich');
+      await this.feedbackService.showSuccessToast('PDF erfolgreich erstellt');
+    } catch (error) {
+      console.error('❌ Error exporting PDF:', error);
+      await this.feedbackService.showError(error, 'Fehler beim PDF-Export');
+    }
+  }
+
+  async exportCurrentAlarmCSV(): Promise<void> {
+    console.log('📊 === exportCurrentAlarmCSV() CALLED ===');
+    console.log('📊 hasActiveAlarm:', this.hasActiveAlarm);
+    console.log('📊 teachers.length:', this.teachers.length);
+    console.log('📊 currentAlarmId:', this.currentAlarmId);
+
+    if (!this.hasActiveAlarm || this.teachers.length === 0) {
+      console.log('⚠️ Kein aktiver Alarm - Abbruch');
+      await this.feedbackService.showWarningToast(
+        'Kein aktiver Alarm vorhanden'
+      );
+      return;
+    }
+
+    // ✅ VALIDIERUNG: Prüfe ob alle Klassen abgeschlossen sind
+    if (this.hasOpenClasses()) {
+      const openCount = this.getOpenClassesCount();
+      const openClasses = this.getOpenClassesNames();
+
+      let message = `⚠️ Es ${
+        openCount === 1 ? 'ist' : 'sind'
+      } noch ${openCount} Klasse${openCount === 1 ? '' : 'n'} offen:\n\n`;
+      message += openClasses.join('\n');
+
+      if (openCount > 5) {
+        message += `\n... und ${openCount - 5} weitere`;
+      }
+
+      message +=
+        '\n\n❌ Bitte schließe alle Klassen ab (Anwesend oder Unvollständig), bevor du den Export erstellst!';
+
+      await this.feedbackService.showConfirm(
+        '⚠️ Export nicht möglich',
+        message,
+        'OK',
+        ''
+      );
+      return;
+    }
+
+    try {
+      console.log('📊 Starte CSV-Export...');
+
+      const alarmData: ExportAlarmData = {
+        _id: this.currentAlarmId || 'unknown',
+        created: new Date().toISOString(),
+        updated: new Date().toISOString(),
+        archived: false,
+        classCount: this.teachers.length,
+        triggeredBy: this.restService.getEmail(),
+        description: 'Feueralarm',
+        location: 'Schule',
+      };
+
+      const teacherData: ExportTeacherData[] = this.teachers.map((t) => ({
+        name: t.names.join(', '),
+        klasse: `${t.class} (${t.classNumber})`,
+        status: this.getStatusLabel(t.state),
+        comment: t.comment || '-',
+        raum: t.room?.join(', ') || '-',
+      }));
+
+      console.log('📊 AlarmData:', alarmData);
+      console.log('📊 TeacherData:', teacherData);
+      console.log('📊 Rufe exportService.exportAlarmToCSV() auf...');
+
+      this.exportService.exportAlarmToCSV(alarmData, teacherData);
+
+      console.log('✅ CSV-Export erfolgreich');
+      await this.feedbackService.showSuccessToast('CSV erfolgreich erstellt');
+    } catch (error) {
+      console.error('❌ Error exporting CSV:', error);
+      await this.feedbackService.showError(error, 'Fehler beim CSV-Export');
+    }
+  }
 
   async triggerAlarm(): Promise<void> {
     console.log('🚨 triggerAlarm() START');
@@ -566,7 +1076,6 @@ export class HomePage implements OnInit, OnDestroy {
         this.socketService.triggerAlert(this.selectedHour, day);
         console.log('✅ triggerAlert called successfully!');
 
-        // Warte kurz und lade dann Daten neu
         setTimeout(() => {
           console.log('🔄 Reloading data...');
           this.loadData();
@@ -579,13 +1088,7 @@ export class HomePage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Erstellt Mock-Lehrer-Daten für einen Test-Alarm
-   * DSGVO: Enthält nur Klassenbezeichnungen, KEINE Schülerdaten
-   */
   private getMockTeachersForAlarm(): Teacher[] {
-    const hourLabel = this.getHourLabel(this.selectedHour);
-
     return [
       {
         id: 'mock-1',
@@ -593,69 +1096,6 @@ export class HomePage implements OnInit, OnDestroy {
         class: '10A',
         classNumber: 'IT101',
         room: ['R101', 'R102'],
-        state: TeacherState.OPEN,
-        comment: '',
-      },
-      {
-        id: 'mock-2',
-        names: ['Thomas Müller'],
-        class: '11B',
-        classNumber: 'BW201',
-        room: ['R205'],
-        state: TeacherState.OPEN,
-        comment: '',
-      },
-      {
-        id: 'mock-3',
-        names: ['Julia Weber'],
-        class: '12C',
-        classNumber: 'EL301',
-        room: ['R312'],
-        state: TeacherState.OPEN,
-        comment: '',
-      },
-      {
-        id: 'mock-4',
-        names: ['Peter Schneider', 'Klaus Fischer'],
-        class: '9D',
-        classNumber: 'MET202',
-        room: ['W103'],
-        state: TeacherState.OPEN,
-        comment: '',
-      },
-      {
-        id: 'mock-5',
-        names: ['Maria Wagner'],
-        class: '13A',
-        classNumber: 'BWL401',
-        room: ['H201'],
-        state: TeacherState.OPEN,
-        comment: '',
-      },
-      {
-        id: 'mock-6',
-        names: ['Stefan Becker'],
-        class: '10B',
-        classNumber: 'IT102',
-        room: ['R103'],
-        state: TeacherState.OPEN,
-        comment: '',
-      },
-      {
-        id: 'mock-7',
-        names: ['Lisa Hoffmann'],
-        class: '11A',
-        classNumber: 'BW101',
-        room: ['R201'],
-        state: TeacherState.OPEN,
-        comment: '',
-      },
-      {
-        id: 'mock-8',
-        names: ['Michael Braun', 'Sandra Klein'],
-        class: '12A',
-        classNumber: 'EL201',
-        room: ['R310', 'R311'],
         state: TeacherState.OPEN,
         comment: '',
       },
@@ -692,13 +1132,11 @@ export class HomePage implements OnInit, OnDestroy {
     this.router.navigate(['/archive']);
   }
 
-  // ✅ Dashboard-Navigation (nur für Admin/Verwaltung)
   openDashboard(): void {
     console.log('🎯 Opening Dashboard...');
     this.router.navigate(['/dashboard']);
   }
 
-  // ✅ Audit-Logs-Navigation (nur für Admin/Verwaltung)
   openAuditLogs(): void {
     console.log('📋 Opening Audit-Logs...');
     this.router.navigate(['/audit-logs']);
@@ -713,7 +1151,6 @@ export class HomePage implements OnInit, OnDestroy {
 
     const { data } = await modal.onWillDismiss();
 
-    // Reload settings
     this.sortBy = this.settingsService.getSortBy();
     this.selectedStatus = this.settingsService
       .getDefaultStatusAsNumber()
@@ -726,6 +1163,23 @@ export class HomePage implements OnInit, OnDestroy {
       component: InformationModal,
       componentProps: {
         stats: this.stats,
+      },
+    });
+
+    await modal.present();
+  }
+
+  // ==========================================
+  // ATTACHMENTS
+  // ==========================================
+
+  async openAttachments(teacher: Teacher): Promise<void> {
+    console.log('📸 Opening attachments for:', teacher.class);
+
+    const modal = await this.modalCtrl.create({
+      component: AttachmentModalComponent,
+      componentProps: {
+        teacher: teacher,
       },
     });
 

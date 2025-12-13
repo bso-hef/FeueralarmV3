@@ -44,19 +44,49 @@ export class DataService {
     return teachers;
   }
 
-  private parseStatus(status: string | undefined): TeacherState {
-    if (!status || status === 'undefined') {
+  private parseStatus(status: string | number | undefined): TeacherState {
+    // Wenn undefined oder null
+    if (status === undefined || status === null || status === 'undefined') {
+      console.log('⚠️ Status ist undefined/null, verwende OPEN');
       return TeacherState.OPEN;
     }
 
-    switch (status.toLowerCase()) {
-      case 'complete':
-        return TeacherState.PRESENT;
-      case 'incomplete':
-        return TeacherState.INCOMPLETE;
-      default:
-        return TeacherState.OPEN;
+    // ✅ WENN STATUS EINE ZAHL IST (vom Backend)
+    if (typeof status === 'number') {
+      console.log('🔢 Status ist Zahl:', status);
+      switch (status) {
+        case 1:
+          return TeacherState.OPEN;
+        case 2:
+          return TeacherState.PRESENT;
+        case 3:
+          return TeacherState.INCOMPLETE;
+        default:
+          console.warn('⚠️ Unbekannte Status-Zahl:', status);
+          return TeacherState.OPEN;
+      }
     }
+
+    // ✅ WENN STATUS EIN STRING IST
+    if (typeof status === 'string') {
+      console.log('📝 Status ist String:', status);
+      switch (status.toLowerCase()) {
+        case 'complete':
+          return TeacherState.PRESENT;
+        case 'incomplete':
+          return TeacherState.INCOMPLETE;
+        case 'invalid': // ← NEU: Backend verwendet "invalid" für offene Klassen!
+        case 'undefined':
+        case '':
+          return TeacherState.OPEN;
+        default:
+          console.warn('⚠️ Unbekannter Status-String:', status);
+          return TeacherState.OPEN;
+      }
+    }
+
+    console.warn('⚠️ Status hat unbekannten Typ:', typeof status, status);
+    return TeacherState.OPEN;
   }
 
   private parseComment(comment: string | undefined): string {

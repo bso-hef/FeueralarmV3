@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { RestService } from './rest.service';
 
 export interface AuditLog {
   _id: string;
@@ -56,10 +57,17 @@ export interface AuditLogStats {
 export class AuditLogService {
   private readonly API_URL = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private restService: RestService) {
+    console.log('📋 AuditLogService initialized, API_URL:', this.API_URL);
+  }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token') || '';
+    const token = this.restService.getToken();
+    console.log(
+      '🔐 AuditLogService.getHeaders() - Token:',
+      token ? `${token.substring(0, 20)}...` : 'NULL/EMPTY'
+    );
+
     return new HttpHeaders({
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
@@ -89,6 +97,7 @@ export class AuditLogService {
     if (params.skip) queryParams.append('skip', params.skip.toString());
 
     const url = `${this.API_URL}/audit-logs?${queryParams.toString()}`;
+    console.log('📋 getAuditLogs - Request URL:', url);
 
     return this.http.get<AuditLogResponse>(url, {
       headers: this.getHeaders(),
@@ -103,6 +112,13 @@ export class AuditLogService {
     entityId: string,
     limit: number = 100
   ): Observable<AuditLogResponse> {
+    console.log(
+      '📋 getEntityLogs - entityType:',
+      entityType,
+      'entityId:',
+      entityId
+    );
+
     return this.http.get<AuditLogResponse>(
       `${this.API_URL}/audit-logs/entity/${entityType}/${entityId}?limit=${limit}`,
       { headers: this.getHeaders() }
@@ -113,6 +129,11 @@ export class AuditLogService {
    * Ruft Statistiken über Audit-Logs ab
    */
   getStats(): Observable<AuditLogStats> {
+    console.log(
+      '📋 getStats - Request URL:',
+      `${this.API_URL}/audit-logs/stats`
+    );
+
     return this.http.get<AuditLogStats>(`${this.API_URL}/audit-logs/stats`, {
       headers: this.getHeaders(),
     });

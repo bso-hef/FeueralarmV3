@@ -19,6 +19,8 @@ Endpoint: 18.193.97.54
 
 Restart Frontend:                                                                                                                                           sudo chown -R $USER:$USER /var/www/Deployment/Repository/Frontend
 cd /var/www/Deployment/Repository/Frontend
+sudo chown -R $USER:$USER www/
+sudo chmod -R 755 www/
 npx ng build --configuration=production
 sudo rsync -av --delete www/ /var/www/Deployment/Webserver/
 sudo nginx -t && sudo systemctl reload nginx
@@ -33,6 +35,9 @@ pm2 logs backend
 Username: admin
 Passwort: Admin2024!Secure
 
+Username: lehrer4
+Passwort: Lehrer2024!
+
 Username: verwaltung Passwort: Verwaltung2024!
 
-...
+123Testing

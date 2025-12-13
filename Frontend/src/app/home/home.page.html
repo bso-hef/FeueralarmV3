@@ -198,10 +198,18 @@
           </div>
         </div>
 
-        <!-- Comment Button -->
-        <button class="icon-button" (click)="addComment(teacher)">
-          <ion-icon name="chatbox-outline"></ion-icon>
-        </button>
+        <!-- Action Icons -->
+        <div class="header-actions">
+          <!-- Comment Button -->
+          <button class="icon-button" (click)="addComment(teacher)">
+            <ion-icon name="chatbox-outline"></ion-icon>
+          </button>
+
+          <!-- ✅ NEU: Attachment Button -->
+          <button class="icon-button" (click)="openAttachments(teacher)">
+            <ion-icon name="camera"></ion-icon>
+          </button>
+        </div>
       </div>
 
       <!-- Comment Display -->
@@ -237,3 +245,11 @@
     </div>
   </div>
 </ion-content>
+<!-- Alarm Footer -->
+<app-alarm-footer
+  [hasActiveAlarm]="hasActiveAlarm"
+  [isProcessing]="isProcessingAlarm"
+  (endAlarm)="endAndArchiveAlarm()"
+  (exportPDF)="exportCurrentAlarmPDF()"
+  (exportCSV)="exportCurrentAlarmCSV()"
+></app-alarm-footer>

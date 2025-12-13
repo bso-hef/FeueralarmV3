@@ -1,0 +1,41 @@
+<ion-footer *ngIf="hasActiveAlarm" class="alarm-footer">
+  <ion-toolbar>
+    <div class="footer-content">
+      <!-- Alarm beenden Button (links) -->
+      <ion-button
+        expand="block"
+        color="danger"
+        (click)="onEndAlarm()"
+        [disabled]="isProcessing"
+        class="end-alarm-btn"
+      >
+        <ion-icon slot="start" name="checkmark-done-outline"></ion-icon>
+        <span *ngIf="!isProcessing">Alarm beenden & archivieren</span>
+        <ion-spinner *ngIf="isProcessing" name="crescent"></ion-spinner>
+      </ion-button>
+
+      <!-- Export Buttons (rechts) -->
+      <div class="export-buttons">
+        <ion-button
+          fill="outline"
+          color="primary"
+          (click)="onExportPDF()"
+          [disabled]="isProcessing"
+        >
+          <ion-icon slot="start" name="document-text-outline"></ion-icon>
+          PDF
+        </ion-button>
+
+        <ion-button
+          fill="outline"
+          color="success"
+          (click)="onExportCSV()"
+          [disabled]="isProcessing"
+        >
+          <ion-icon slot="start" name="grid-outline"></ion-icon>
+          CSV
+        </ion-button>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-footer>

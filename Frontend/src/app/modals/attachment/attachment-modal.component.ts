@@ -28,6 +28,7 @@ import {
   text,
   cloudUpload,
   trash,
+  eyeOutline,
 } from 'ionicons/icons';
 
 import { Teacher, Attachment } from '../../interfaces/teacher.interface';
@@ -64,10 +65,6 @@ export class AttachmentModalComponent implements OnInit {
   isLoading = false;
   isUploading = false;
 
-  // Für Notizen
-  noteText = '';
-  noteTitle = '';
-
   constructor(
     private modalCtrl: ModalController,
     private actionSheetCtrl: ActionSheetController,
@@ -82,6 +79,7 @@ export class AttachmentModalComponent implements OnInit {
       text,
       cloudUpload,
       trash,
+      eyeOutline,
     });
   }
 
@@ -174,6 +172,19 @@ export class AttachmentModalComponent implements OnInit {
         return;
       }
 
+      // ✅ NEU: Bestätigung vor Upload
+      const confirmed = await this.feedbackService.showConfirm(
+        'Foto hochladen',
+        'Möchtest du dieses Foto wirklich hochladen?',
+        'Hochladen',
+        'Abbrechen'
+      );
+
+      if (!confirmed) {
+        await this.feedbackService.showWarningToast('Upload abgebrochen');
+        return;
+      }
+
       await this.uploadPhoto(photoData);
     } catch (error) {
       await this.feedbackService.hideLoading();
@@ -183,19 +194,40 @@ export class AttachmentModalComponent implements OnInit {
 
   async selectPhoto() {
     try {
+      console.log('📸 1. Opening gallery...');
       await this.feedbackService.showLoading('Galerie wird geöffnet...');
 
       const photoData = await this.photoService.selectPhoto();
+      console.log('📸 2. Photo selected, data length:', photoData?.length || 0);
 
       await this.feedbackService.hideLoading();
 
       if (!photoData) {
+        console.log('❌ 3. No photo data');
         await this.feedbackService.showWarningToast('Kein Foto ausgewählt');
         return;
       }
 
+      console.log('📸 4. Showing confirmation dialog...');
+      const confirmed = await this.feedbackService.showConfirm(
+        'Foto hochladen',
+        'Möchtest du dieses Foto wirklich hochladen?',
+        'Hochladen',
+        'Abbrechen'
+      );
+      console.log('📸 5. Confirmation result:', confirmed);
+
+      if (!confirmed) {
+        console.log('❌ 6. Upload cancelled');
+        await this.feedbackService.showWarningToast('Upload abgebrochen');
+        return;
+      }
+
+      console.log('📸 7. Starting upload...');
       await this.uploadPhoto(photoData);
+      console.log('✅ 8. Upload completed');
     } catch (error) {
+      console.error('❌ Error in selectPhoto:', error);
       await this.feedbackService.hideLoading();
       await this.feedbackService.showError(error, 'Fehler beim Auswählen');
     }
@@ -203,15 +235,42 @@ export class AttachmentModalComponent implements OnInit {
 
   async selectFile() {
     try {
+      console.log('📄 1. Opening file picker...');
       const fileData = await this.photoService.selectFile();
+      console.log(
+        '📄 2. File data received:',
+        fileData
+          ? `${fileData.filename} (${fileData.data.length} chars)`
+          : 'null'
+      );
 
       if (!fileData) {
+        console.log('❌ 3. No file data');
         await this.feedbackService.showWarningToast('Keine Datei ausgewählt');
         return;
       }
 
+      console.log('📄 4. Showing confirmation dialog...');
+      // ✅ NEU: Bestätigung vor Upload
+      const confirmed = await this.feedbackService.showConfirm(
+        'Datei hochladen',
+        `Möchtest du "${fileData.filename}" wirklich hochladen?`,
+        'Hochladen',
+        'Abbrechen'
+      );
+      console.log('📄 5. Confirmation result:', confirmed);
+
+      if (!confirmed) {
+        console.log('❌ 6. Upload cancelled');
+        await this.feedbackService.showWarningToast('Upload abgebrochen');
+        return;
+      }
+
+      console.log('📄 7. Starting upload...');
       await this.uploadFile(fileData.data, fileData.filename);
+      console.log('✅ 8. Upload completed');
     } catch (error) {
+      console.error('❌ Error in selectFile:', error);
       await this.feedbackService.showError(error, 'Fehler beim Hochladen');
     }
   }
@@ -268,26 +327,35 @@ export class AttachmentModalComponent implements OnInit {
 
   async uploadPhoto(base64Data: string) {
     try {
+      console.log('📤 uploadPhoto called with teacher.id:', this.teacher.id);
+      console.log('📤 Base64 data length:', base64Data.length);
+
       await this.feedbackService.showLoading('Foto wird hochgeladen...');
 
       this.isUploading = true;
 
+      console.log('📤 Calling photoService.uploadPhoto...');
       const response = await this.photoService
         .uploadPhoto(this.teacher.id, base64Data)
         .toPromise();
+
+      console.log('📤 Upload response:', response);
 
       await this.feedbackService.hideLoading();
       this.isUploading = false;
 
       if (response && response.success) {
+        console.log('✅ Upload successful!');
         await this.feedbackService.showSuccessToast(
           'Foto erfolgreich hochgeladen!'
         );
         await this.loadAttachments();
       } else {
+        console.error('❌ Upload failed:', response);
         throw new Error(response?.error || 'Upload fehlgeschlagen');
       }
     } catch (error) {
+      console.error('❌ Error in uploadPhoto:', error);
       await this.feedbackService.hideLoading();
       this.isUploading = false;
       await this.feedbackService.showError(error, 'Upload fehlgeschlagen');
@@ -296,27 +364,60 @@ export class AttachmentModalComponent implements OnInit {
 
   async uploadFile(base64Data: string, filename: string) {
     try {
-      await this.feedbackService.showLoading('Datei wird hochgeladen...');
+      console.log('📤 uploadFile called:', {
+        filename,
+        teacherId: this.teacher.id,
+        dataLength: base64Data.length,
+      });
+      console.log('📤 Checking services...');
+      console.log('📤 feedbackService:', !!this.feedbackService);
+      console.log('📤 photoService:', !!this.photoService);
+      console.log('📤 teacher:', this.teacher);
+
+      // ⚠️ TEMPORÄR DEAKTIVIERT - showLoading hängt
+      // console.log('📤 Showing loading...');
+      // await this.feedbackService.showLoading('Datei wird hochgeladen...');
+      // console.log('📤 Loading shown');
 
       this.isUploading = true;
 
-      const response = await this.photoService
-        .uploadFile(this.teacher.id, base64Data, filename)
-        .toPromise();
+      console.log('📤 Calling photoService.uploadFile...');
+      console.log(
+        '📤 URL will be:',
+        `https://18.193.97.54/api/teachers/${this.teacher.id}/files`
+      );
 
-      await this.feedbackService.hideLoading();
+      let response;
+      try {
+        response = await this.photoService
+          .uploadFile(this.teacher.id, base64Data, filename)
+          .toPromise();
+        console.log('📤 Upload response received:', response);
+      } catch (httpError: any) {
+        console.error('❌ HTTP Error during upload:', httpError);
+        console.error('❌ Error status:', httpError.status);
+        console.error('❌ Error message:', httpError.message);
+        console.error('❌ Error body:', httpError.error);
+        throw httpError;
+      }
+
+      // await this.feedbackService.hideLoading();
       this.isUploading = false;
 
       if (response && response.success) {
+        console.log('✅ File upload successful!');
         await this.feedbackService.showSuccessToast(
           'Datei erfolgreich hochgeladen!'
         );
         await this.loadAttachments();
       } else {
+        console.error('❌ File upload failed:', response);
         throw new Error(response?.error || 'Upload fehlgeschlagen');
       }
-    } catch (error) {
-      await this.feedbackService.hideLoading();
+    } catch (error: any) {
+      console.error('❌ Error in uploadFile:', error);
+      console.error('❌ Error stack:', error.stack);
+      // await this.feedbackService.hideLoading();
       this.isUploading = false;
       await this.feedbackService.showError(error, 'Upload fehlgeschlagen');
     }
@@ -372,6 +473,33 @@ export class AttachmentModalComponent implements OnInit {
       attachment.mimeType?.startsWith('image/') ||
       false
     );
+  }
+
+  openAttachment(attachment: Attachment): void {
+    // Öffne in neuem Tab/Browser
+    window.open(attachment.url, '_blank', 'noopener,noreferrer');
+  }
+
+  formatFileSize(bytes: number): string {
+    if (!bytes) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  formatDate(dateString: string): string {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (error) {
+      return dateString;
+    }
   }
 
   close() {
