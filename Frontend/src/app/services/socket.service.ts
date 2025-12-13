@@ -118,8 +118,11 @@ export class SocketService {
     socketAny.on('emitUpdate', (data: any) => {
       console.log('🔄 Update received:', data);
       this.lastChangeSocketId = data.msg || '';
-      if (data.posts && data.posts[0]) {
-        this.updateSubject.next(data.posts[0]);
+
+      // ✅ FIX: Backend sendet Mongoose Document direkt, nicht in posts Array
+      if (data) {
+        console.log('✅ Calling updateSubject.next with:', data);
+        this.updateSubject.next(data);
       }
     });
 
