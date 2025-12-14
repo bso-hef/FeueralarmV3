@@ -112,3 +112,28 @@
     </div>
   </div>
 </ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <div style="display: flex; justify-content: space-around; padding: 8px">
+      <ion-button
+        (click)="exportAllAlarmsCSV()"
+        *ngIf="alarms.length > 0"
+        expand="block"
+        style="flex: 1; margin: 0 4px"
+      >
+        <ion-icon name="download-outline" slot="start"></ion-icon>
+        Alle als CSV
+      </ion-button>
+
+      <ion-button
+        (click)="refreshAlarms()"
+        color="medium"
+        expand="block"
+        style="flex: 1; margin: 0 4px"
+      >
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Aktualisieren
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>
