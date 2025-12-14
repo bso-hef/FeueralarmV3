@@ -18,6 +18,7 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSpinner,
+  IonFooter,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -65,6 +66,7 @@ import {
     IonRefresher,
     IonRefresherContent,
     IonSpinner,
+    IonFooter,
     SharedHeaderComponent,
   ],
 })
