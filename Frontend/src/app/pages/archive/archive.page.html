@@ -1,13 +1,13 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
-        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title>Alarm Archiv</ion-title>
+<app-shared-header
+  title="Alarm Archiv"
+  [showBackButton]="true"
+></app-shared-header>
+
+<ion-header>
+  <!-- Stats Bar (unter dem Shared Header) -->
+  <ion-toolbar *ngIf="!isLoading">
     <ion-buttons slot="end">
-      <!-- NEU: Export All Button -->
+      <!-- Export All Button -->
       <ion-button (click)="exportAllAlarmsCSV()" *ngIf="alarms.length > 0">
         <ion-icon name="download-outline" slot="icon-only"></ion-icon>
       </ion-button>
@@ -15,10 +15,7 @@
         <ion-icon name="refresh" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-  </ion-toolbar>
 
-  <!-- Stats Bar -->
-  <ion-toolbar *ngIf="!isLoading">
     <div class="stats-bar">
       <div class="stat-item">
         <ion-icon name="calendar-outline"></ion-icon>
@@ -35,112 +32,114 @@
     </div>
   </ion-toolbar>
 </ion-header>
+  <ion-content [fullscreen]="true">
+    <!-- Pull to Refresh -->
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
 
-<ion-content [fullscreen]="true">
-  <!-- Pull to Refresh -->
-  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
+    <!-- Filter Segment -->
+    <div class="filter-section">
+      <ion-segment [(ngModel)]="filterStatus" (ionChange)="onFilterChange()">
+        <ion-segment-button value="all">
+          <ion-label>Alle ({{ alarms.length }})</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="active">
+          <ion-label>Aktiv ({{ activeAlarmsCount }})</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="archived">
+          <ion-label>Archiviert ({{ archivedAlarmsCount }})</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
 
-  <!-- Filter Segment -->
-  <div class="filter-section">
-    <ion-segment [(ngModel)]="filterStatus" (ionChange)="onFilterChange()">
-      <ion-segment-button value="all">
-        <ion-label>Alle ({{ alarms.length }})</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="active">
-        <ion-label>Aktiv ({{ activeAlarmsCount }})</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="archived">
-        <ion-label>Archiviert ({{ archivedAlarmsCount }})</ion-label>
-      </ion-segment-button>
-    </ion-segment>
-  </div>
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Lade Alarme...</p>
+    </div>
 
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="isLoading">
-    <ion-spinner name="crescent"></ion-spinner>
-    <p>Lade Alarme...</p>
-  </div>
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && filteredAlarms.length === 0">
+      <ion-icon name="archive-outline"></ion-icon>
+      <h3>Keine Alarme gefunden</h3>
+      <p *ngIf="filterStatus === 'all'">
+        Es wurden noch keine Alarme ausgelöst.
+      </p>
+      <p *ngIf="filterStatus === 'active'">Keine aktiven Alarme vorhanden.</p>
+      <p *ngIf="filterStatus === 'archived'">
+        Keine archivierten Alarme vorhanden.
+      </p>
+    </div>
 
-  <!-- Empty State -->
-  <div class="empty-state" *ngIf="!isLoading && filteredAlarms.length === 0">
-    <ion-icon name="archive-outline"></ion-icon>
-    <h3>Keine Alarme gefunden</h3>
-    <p *ngIf="filterStatus === 'all'">Es wurden noch keine Alarme ausgelöst.</p>
-    <p *ngIf="filterStatus === 'active'">Keine aktiven Alarme vorhanden.</p>
-    <p *ngIf="filterStatus === 'archived'">
-      Keine archivierten Alarme vorhanden.
-    </p>
-  </div>
-
-  <!-- Alarm List -->
-  <div class="alarm-list" *ngIf="!isLoading && filteredAlarms.length > 0">
-    <div class="alarm-card" *ngFor="let alarm of filteredAlarms">
-      <!-- Header -->
-      <div class="alarm-header" (click)="viewAlarmDetails(alarm)">
-        <div class="alarm-info">
-          <h3>Alarm {{ formatAlarmDate(alarm.created) }}</h3>
-          <p class="alarm-time">{{ getTimeSince(alarm.created) }}</p>
-        </div>
-        <ion-badge [color]="alarm.archived ? 'medium' : 'primary'">
-          {{ alarm.archived ? 'Archiviert' : 'Aktiv' }}
-        </ion-badge>
-      </div>
-
-      <!-- Stats -->
-      <div
-        class="alarm-stats"
-        *ngIf="alarm.stats"
-        (click)="viewAlarmDetails(alarm)"
-      >
-        <div class="stat-chip">
-          <ion-icon name="people-outline"></ion-icon>
-          <span>{{ alarm.stats.total }} Klassen</span>
-        </div>
-        <div class="stat-chip success">
-          <ion-icon name="checkmark-circle"></ion-icon>
-          <span>{{ alarm.stats.complete }} Vollständig</span>
-        </div>
-        <div class="stat-chip warning">
-          <ion-icon name="close-circle"></ion-icon>
-          <span>{{ alarm.stats.incomplete }} Unvollständig</span>
-        </div>
-        <div class="stat-chip" *ngIf="alarm.stats.undefined > 0">
-          <ion-icon name="time-outline"></ion-icon>
-          <span>{{ alarm.stats.undefined }} Offen</span>
-        </div>
-      </div>
-
-      <!-- Footer mit Export-Buttons -->
-      <div class="alarm-footer">
-        <div class="alarm-meta" (click)="viewAlarmDetails(alarm)">
-          <ion-icon name="calendar-outline"></ion-icon>
-          <span>{{ alarm.classCount }} Klassen</span>
+    <!-- Alarm List -->
+    <div class="alarm-list" *ngIf="!isLoading && filteredAlarms.length > 0">
+      <div class="alarm-card" *ngFor="let alarm of filteredAlarms">
+        <!-- Header -->
+        <div class="alarm-header" (click)="viewAlarmDetails(alarm)">
+          <div class="alarm-info">
+            <h3>Alarm {{ formatAlarmDate(alarm.created) }}</h3>
+            <p class="alarm-time">{{ getTimeSince(alarm.created) }}</p>
+          </div>
+          <ion-badge [color]="alarm.archived ? 'medium' : 'primary'">
+            {{ alarm.archived ? 'Archiviert' : 'Aktiv' }}
+          </ion-badge>
         </div>
 
-        <!-- NEU: Export Buttons -->
-        <div class="export-buttons">
-          <ion-button
-            fill="clear"
-            size="small"
-            (click)="exportAlarmPDF(alarm); $event.stopPropagation()"
-            title="Als PDF exportieren"
-          >
-            <ion-icon name="document-text-outline" slot="start"></ion-icon>
-            PDF
-          </ion-button>
-          <ion-button
-            fill="clear"
-            size="small"
-            (click)="exportAlarmCSV(alarm); $event.stopPropagation()"
-            title="Als CSV exportieren"
-          >
-            <ion-icon name="download-outline" slot="start"></ion-icon>
-            CSV
-          </ion-button>
+        <!-- Stats -->
+        <div
+          class="alarm-stats"
+          *ngIf="alarm.stats"
+          (click)="viewAlarmDetails(alarm)"
+        >
+          <div class="stat-chip">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>{{ alarm.stats.total }} Klassen</span>
+          </div>
+          <div class="stat-chip success">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            <span>{{ alarm.stats.complete }} Vollständig</span>
+          </div>
+          <div class="stat-chip warning">
+            <ion-icon name="close-circle"></ion-icon>
+            <span>{{ alarm.stats.incomplete }} Unvollständig</span>
+          </div>
+          <div class="stat-chip" *ngIf="alarm.stats.undefined > 0">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>{{ alarm.stats.undefined }} Offen</span>
+          </div>
+        </div>
+
+        <!-- Footer mit Export-Buttons -->
+        <div class="alarm-footer">
+          <div class="alarm-meta" (click)="viewAlarmDetails(alarm)">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span>{{ alarm.classCount }} Klassen</span>
+          </div>
+
+          <!-- NEU: Export Buttons -->
+          <div class="export-buttons">
+            <ion-button
+              fill="clear"
+              size="small"
+              (click)="exportAlarmPDF(alarm); $event.stopPropagation()"
+              title="Als PDF exportieren"
+            >
+              <ion-icon name="document-text-outline" slot="start"></ion-icon>
+              PDF
+            </ion-button>
+            <ion-button
+              fill="clear"
+              size="small"
+              (click)="exportAlarmCSV(alarm); $event.stopPropagation()"
+              title="Als CSV exportieren"
+            >
+              <ion-icon name="download-outline" slot="start"></ion-icon>
+              CSV
+            </ion-button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </ion-content>
 </ion-content>

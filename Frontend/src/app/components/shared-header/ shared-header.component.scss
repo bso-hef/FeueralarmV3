@@ -1,0 +1,280 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+@import "@ionic/angular/css/palettes/dark.system.css";
+
+/* 
+ * Modern Global Styles für Feueralarm App
+ * ========================================
+ */
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  transition: background-color var(--transition-base),
+    color var(--transition-base);
+}
+
+/* Ion Alert Customization */
+ion-alert {
+  .alert-wrapper {
+    background: var(--bg-elevated);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .alert-title {
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+  }
+
+  .alert-message {
+    color: var(--text-secondary);
+  }
+
+  .alert-input {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    padding: var(--space-3);
+
+    &:focus {
+      border-color: var(--border-focus);
+    }
+  }
+
+  .alert-button {
+    color: var(--text-primary);
+    font-weight: var(--font-medium);
+
+    &.alert-button-role-cancel {
+      color: var(--text-secondary);
+    }
+  }
+
+  .alert-radio-label {
+    color: var(--text-primary);
+  }
+
+  .alert-radio-icon {
+    border-color: var(--border-primary);
+  }
+
+  [aria-checked="true"] .alert-radio-inner {
+    background-color: var(--brand-primary);
+  }
+}
+
+/* Ion Toast Customization */
+ion-toast {
+  &.custom-toast {
+    --background: var(--bg-elevated);
+    --color: var(--text-primary);
+    --border-radius: var(--radius-lg);
+    --box-shadow: var(--shadow-lg);
+    --min-width: 280px;
+    --max-width: 500px;
+  }
+}
+
+/* Ion Modal Customization */
+ion-modal {
+  &.custom-modal {
+    --background: var(--bg-primary);
+    --border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    --box-shadow: var(--shadow-xl);
+    --max-height: 90%;
+  }
+}
+
+/* Ion Searchbar */
+ion-searchbar {
+  --background: var(--bg-secondary);
+  --border-radius: var(--radius-lg);
+  --color: var(--text-primary);
+  --placeholder-color: var(--text-tertiary);
+  --icon-color: var(--text-tertiary);
+  --clear-button-color: var(--text-tertiary);
+
+  &.searchbar-has-focus {
+    --background: var(--bg-primary);
+  }
+}
+
+/* Ion Segment */
+ion-segment {
+  --background: transparent;
+
+  ion-segment-button {
+    --color: var(--text-secondary);
+    --color-checked: var(--text-primary);
+    --indicator-color: var(--brand-primary);
+    text-transform: none;
+    font-weight: var(--font-medium);
+    min-height: 42px;
+  }
+}
+
+/* Ion Select */
+ion-select {
+  --placeholder-color: var(--text-tertiary);
+  color: var(--text-primary);
+}
+
+/* Ion Checkbox */
+ion-checkbox {
+  --border-color: var(--border-primary);
+  --background-checked: var(--brand-primary);
+  --border-color-checked: var(--brand-primary);
+  --checkmark-color: white;
+}
+
+/* Ion Item */
+ion-item {
+  --background: var(--bg-primary);
+  --color: var(--text-primary);
+  --border-color: var(--border-secondary);
+  --highlight-background: var(--bg-hover);
+}
+
+/* Ion Card */
+ion-card {
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg);
+
+  ion-card-header {
+    color: var(--text-primary);
+  }
+
+  ion-card-content {
+    color: var(--text-secondary);
+  }
+}
+
+/* Ion Loading */
+ion-loading {
+  --background: var(--bg-elevated);
+  --spinner-color: var(--brand-primary);
+
+  .loading-wrapper {
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+  }
+}
+
+/* Custom Utility Classes */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-base);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Safe Area Handling */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Loading State */
+.loading-skeleton {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
