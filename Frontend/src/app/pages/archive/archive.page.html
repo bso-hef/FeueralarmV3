@@ -1,33 +1,3 @@
-<!-- 1️⃣ Stats Bar ZUERST -->
-<ion-header>
-  <ion-toolbar *ngIf="!isLoading">
-    <ion-buttons slot="end">
-      <!-- Export All Button -->
-      <ion-button (click)="exportAllAlarmsCSV()" *ngIf="alarms.length > 0">
-        <ion-icon name="download-outline" slot="icon-only"></ion-icon>
-      </ion-button>
-      <ion-button (click)="refreshAlarms()">
-        <ion-icon name="refresh" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-
-    <div class="stats-bar">
-      <div class="stat-item">
-        <ion-icon name="calendar-outline"></ion-icon>
-        <span>Gesamt: {{ alarms.length }}</span>
-      </div>
-      <div class="stat-item">
-        <ion-icon name="eye-outline"></ion-icon>
-        <span>Aktiv: {{ activeAlarmsCount }}</span>
-      </div>
-      <div class="stat-item">
-        <ion-icon name="archive-outline"></ion-icon>
-        <span>Archiviert: {{ archivedAlarmsCount }}</span>
-      </div>
-    </div>
-  </ion-toolbar>
-</ion-header>
-
 <!-- 2️⃣ Shared Header DANACH -->
 <app-shared-header
   title="Alarm Archiv"
