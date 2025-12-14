@@ -1,8 +1,4 @@
-<app-shared-header
-  title="Alarm Archiv"
-  [showBackButton]="true"
-></app-shared-header>
-
+<!-- 1️⃣ Stats Bar ZUERST -->
 <ion-header>
   <ion-toolbar *ngIf="!isLoading">
     <ion-buttons slot="end">
@@ -31,6 +27,12 @@
     </div>
   </ion-toolbar>
 </ion-header>
+
+<!-- 2️⃣ Shared Header DANACH -->
+<app-shared-header
+  title="Alarm Archiv"
+  [showBackButton]="true"
+></app-shared-header>
 
 <ion-content [fullscreen]="true">
   <!-- Pull to Refresh -->
