@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { SharedHeaderComponent } from '../../components/shared-header/ shared-header.component';
+import { SharedHeaderComponent } from '../../components/shared-header/shared-header.component';
 import {
   IonHeader,
   IonToolbar,
