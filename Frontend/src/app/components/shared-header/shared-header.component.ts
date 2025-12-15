@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
+import { addIcons } from 'ionicons';
+import { homeOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-shared-header',
@@ -24,6 +26,9 @@ export class SharedHeaderComponent {
     private location: Location,
     private modalCtrl: ModalController
   ) {
+    addIcons({
+      'home-outline': homeOutline,
+    });
     // Online/Offline Listener
     window.addEventListener('online', () => (this.isOnline = true));
     window.addEventListener('offline', () => (this.isOnline = false));
