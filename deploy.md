@@ -17,6 +17,11 @@ chmod +x deploy.sh
 
 Endpoint: 18.193.97.54
 
+```sh
+chmod +x frontend.sh
+./frontend.sh
+```
+
 Restart Frontend:                                                                                                                                           sudo chown -R $USER:$USER /var/www/Deployment/Repository/Frontend
 cd /var/www/Deployment/Repository/Frontend
 sudo chown -R $USER:$USER www/
@@ -26,6 +31,11 @@ sudo rsync -av --delete www/ /var/www/Deployment/Webserver/
 sudo nginx -t && sudo systemctl reload nginx
 ionic build --prod
 npm run start
+
+```sh
+chmod +x backend.sh
+./backend.sh
+```
 
 Backend:
 mv Openapi.yaml openapi.yaml

@@ -53,26 +53,5 @@ ssh "$REMOTE" "set -e; \
   if systemctl is-active --quiet nginx; then sudo systemctl reload nginx; \
   elif systemctl is-active --quiet apache2; then sudo systemctl reload apache2; \
   else echo 'Hinweis: Kein nginx/apache2 aktiv'; fi"
-
-
-echo 'Start Frontend'
-ssh "$REMOTE" "
-  sudo chown -R $USER:$USER /var/www/Deployment/Repository/Frontend
-  cd /var/www/Deployment/Repository/Frontend
-  sudo chown -R $USER:$USER www/
-  sudo chmod -R 755 www/
-  npx ng build --configuration=production
-  sudo rsync -av --delete www/ /var/www/Deployment/Webserver/
-  sudo nginx -t && sudo systemctl reload nginx
-  ionic build --prod
-  npm run start
-"
-
-echo 'Start Backend'
-ssh "$REMOTE" "
-  mv Openapi.yaml openapi.yaml
-  pm2 restart backend
-  pm2 logs backend
-"
-
+  
 echo '==> Deploy fertig.'
