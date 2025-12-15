@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 
@@ -19,7 +19,11 @@ export class SharedHeaderComponent {
   isAdmin: boolean = false;
   canAccessDashboard: boolean = false;
 
-  constructor(private router: Router, private location: Location) {
+  constructor(
+    private router: Router,
+    private location: Location,
+    private modalCtrl: ModalController
+  ) {
     // Online/Offline Listener
     window.addEventListener('online', () => (this.isOnline = true));
     window.addEventListener('offline', () => (this.isOnline = false));
@@ -50,11 +54,37 @@ export class SharedHeaderComponent {
     this.router.navigate(['/archive']);
   }
 
-  openSettings() {
-    this.router.navigate(['/settings']);
+  async openSettings() {
+    try {
+      // Dynamically import SettingsModal
+      const { SettingsModal } = await import(
+        '../../modals/settings/settings.modal'
+      );
+
+      const modal = await this.modalCtrl.create({
+        component: SettingsModal,
+      });
+
+      await modal.present();
+    } catch (error) {
+      console.error('❌ Error opening Settings Modal:', error);
+    }
   }
 
-  openInformation() {
-    this.router.navigate(['/information']);
+  async openInformation() {
+    try {
+      // Dynamically import InformationModal
+      const { InformationModal } = await import(
+        '../../modals/information/information.modal'
+      );
+
+      const modal = await this.modalCtrl.create({
+        component: InformationModal,
+      });
+
+      await modal.present();
+    } catch (error) {
+      console.error('❌ Error opening Information Modal:', error);
+    }
   }
 }
