@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
+import { SharedHeaderComponent } from '../../components/shared-header/shared-header.component';
+
 import {
   AuditLogService,
   AuditLog,
@@ -13,7 +15,7 @@ import {
   templateUrl: './audit-logs.page.html',
   styleUrls: ['./audit-logs.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],
+  imports: [IonicModule, CommonModule, FormsModule, SharedHeaderComponent],
 })
 export class AuditLogsPage implements OnInit {
   logs: AuditLog[] = [];

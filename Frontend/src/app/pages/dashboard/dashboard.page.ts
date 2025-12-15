@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { SharedHeaderComponent } from '../../components/shared-header/shared-header.component';
+
 import {
   IonHeader,
   IonToolbar,
@@ -106,6 +108,7 @@ interface DashboardStats {
     IonGrid,
     IonRow,
     IonCol,
+    SharedHeaderComponent,
   ],
   // ✅ Kein providers Array mehr nötig - alle Services haben providedIn: 'root'
 })
