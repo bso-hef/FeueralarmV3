@@ -3,19 +3,6 @@
   [showBackButton]="true"
 ></app-shared-header>
 
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Audit-Logs</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="loadLogs()">
-        <ion-icon slot="icon-only" name="refresh"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-
   <!-- Statistiken -->
   <ion-toolbar *ngIf="stats" color="light">
     <ion-grid>

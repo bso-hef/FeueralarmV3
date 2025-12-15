@@ -3,17 +3,6 @@
   [showBackButton]="true"
 ></app-shared-header>
 
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
-        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title>Benutzerverwaltung</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
   <!-- Refresher -->
   <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
