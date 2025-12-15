@@ -38,6 +38,10 @@ export class SharedHeaderComponent {
     this.location.back();
   }
 
+  openHome() {
+    this.router.navigate(['/home']);
+  }
+
   openDashboard() {
     this.router.navigate(['/dashboard']);
   }
