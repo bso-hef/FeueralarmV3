@@ -112,7 +112,6 @@ export class InformationModal implements OnInit {
   async logout(): Promise<void> {
     console.log('🚨 logout() called - isLoggingOut:', this.isLoggingOut);
 
-    // Prüfe globalen Flag im sessionStorage
     const globalLogoutFlag = sessionStorage.getItem('logout-in-progress');
     if (globalLogoutFlag === 'true') {
       console.log('🚨 Global logout in progress, skipping...');
@@ -124,7 +123,6 @@ export class InformationModal implements OnInit {
       return;
     }
 
-    // Setze beide Flags
     this.isLoggingOut = true;
     sessionStorage.setItem('logout-in-progress', 'true');
 
@@ -133,6 +131,7 @@ export class InformationModal implements OnInit {
     const alert = await this.alertCtrl.create({
       header: 'Abmelden',
       message: 'Möchtest du dich wirklich abmelden?',
+      backdropDismiss: false,
       buttons: [
         {
           text: 'Abbrechen',
@@ -146,10 +145,16 @@ export class InformationModal implements OnInit {
         {
           text: 'Abmelden',
           role: 'confirm',
-          handler: async () => {
-            console.log('🚨 Abmelden clicked');
-            await this.performLogout();
-            return true;
+          handler: () => {
+            console.log('🚨 Abmelden clicked - dismissing alert immediately');
+
+            // Schließe Alert sofort
+            alert.dismiss().then(() => {
+              console.log('🚨 Alert closed, starting logout...');
+              this.performLogout();
+            });
+
+            return false; // Verhindert automatisches Schließen
           },
         },
       ],
@@ -157,19 +162,6 @@ export class InformationModal implements OnInit {
 
     console.log('🚨 Presenting alert...');
     await alert.present();
-
-    // Cleanup wenn Alert geschlossen wird (egal wie)
-    alert.onDidDismiss().then(() => {
-      console.log('🚨 Alert dismissed');
-      if (this.isLoggingOut) {
-        // Wenn noch im Logout-Prozess, Flag NICHT entfernen
-        console.log('🚨 Still logging out, keeping flag');
-      } else {
-        // Wenn abgebrochen wurde, Flag entfernen
-        console.log('🚨 Logout cancelled, removing flag');
-        sessionStorage.removeItem('logout-in-progress');
-      }
-    });
   }
 
   private async performLogout(): Promise<void> {
@@ -185,13 +177,11 @@ export class InformationModal implements OnInit {
       await this.restService.logout();
 
       console.log('🔓 Clearing storage (keeping logout flag)...');
-      // Speichere Flag temporär
       const logoutFlag = sessionStorage.getItem('logout-in-progress');
 
       localStorage.clear();
       sessionStorage.clear();
 
-      // Setze Flag zurück
       if (logoutFlag) {
         sessionStorage.setItem('logout-in-progress', logoutFlag);
       }
@@ -213,17 +203,17 @@ export class InformationModal implements OnInit {
       console.log('🔓 Closing modal...');
       await this.modalCtrl.dismiss();
 
-      console.log('🔓 Showing toast...');
-      await this.feedbackService.showSuccessToast('Erfolgreich abgemeldet');
-
       console.log('🔓 Navigating to login...');
       await this.router.navigate(['/login'], { replaceUrl: true });
 
-      console.log('🔓 Clearing logout flag after delay...');
+      console.log('🔓 Showing toast...');
+      await this.feedbackService.showSuccessToast('Erfolgreich abgemeldet');
+
+      console.log('🔓 Clearing logout flag...');
       setTimeout(() => {
         sessionStorage.removeItem('logout-in-progress');
         console.log('🔓 Logout flag cleared');
-      }, 1000);
+      }, 500);
 
       console.log('🔓 performLogout() END');
     } catch (error) {
