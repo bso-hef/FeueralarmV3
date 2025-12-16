@@ -190,14 +190,10 @@ export class AuditLogsPage implements OnInit {
   }
 
   /**
-   * Aktualisiert die Liste
+   * Aktualisiert die Liste (Pull-to-Refresh)
    */
   refresh(event: any) {
-    this.loadLogs();
-    this.loadStats();
-    setTimeout(() => {
-      event.target.complete();
-    }, 500);
+    window.location.reload();
   }
 
   /**
