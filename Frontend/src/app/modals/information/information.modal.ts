@@ -107,7 +107,14 @@ export class InformationModal implements OnInit {
     return role;
   }
 
+  private isLoggingOut = false;
+
   async logout(): Promise<void> {
+    if (this.isLoggingOut) {
+      console.log('🔓 Logout already in progress, skipping alert...');
+      return;
+    }
+
     const alert = await this.alertCtrl.create({
       header: 'Abmelden',
       message: 'Möchtest du dich wirklich abmelden?',
@@ -128,7 +135,6 @@ export class InformationModal implements OnInit {
 
     await alert.present();
   }
-  private isLoggingOut = false;
 
   private async performLogout(): Promise<void> {
     console.log('🔓 performLogout() START');
