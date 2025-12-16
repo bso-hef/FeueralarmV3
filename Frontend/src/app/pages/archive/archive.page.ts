@@ -211,14 +211,10 @@ export class ArchivePage implements OnInit {
   }
 
   async refreshAlarms() {
-    await this.feedbackService.showLoading('Aktualisiere...');
+    window.location.reload();
 
     // Cache löschen
     this.alarmService.clearCache();
-
-    await this.loadAlarms();
-    await this.feedbackService.hideLoading();
-    await this.feedbackService.showSuccessToast('Alarme aktualisiert!');
   }
 
   // ==========================================
