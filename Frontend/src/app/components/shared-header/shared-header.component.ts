@@ -4,7 +4,18 @@ import { IonicModule, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { homeOutline } from 'ionicons/icons';
+import {
+  homeOutline,
+  statsChartOutline,
+  documentTextOutline,
+  peopleOutline,
+  archiveOutline,
+  settingsOutline,
+  informationCircleOutline,
+  arrowBack,
+  wifi,
+  cloudOffline,
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-shared-header',
@@ -28,6 +39,15 @@ export class SharedHeaderComponent {
   ) {
     addIcons({
       'home-outline': homeOutline,
+      'stats-chart-outline': statsChartOutline,
+      'document-text-outline': documentTextOutline,
+      'people-outline': peopleOutline,
+      'archive-outline': archiveOutline,
+      'settings-outline': settingsOutline,
+      'information-circle-outline': informationCircleOutline,
+      'arrow-back': arrowBack,
+      wifi: wifi,
+      'cloud-offline': cloudOffline,
     });
     // Online/Offline Listener
     window.addEventListener('online', () => (this.isOnline = true));
