@@ -139,6 +139,22 @@ export class InformationModal implements OnInit {
       // Clear auth
       await this.restService.logout();
 
+      // 3. ✅ NEU: Clear ALL cache/storage
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Clear IndexedDB
+      if ('indexedDB' in window) {
+        try {
+          const databases = await indexedDB.databases();
+          databases.forEach((db) => {
+            if (db.name) indexedDB.deleteDatabase(db.name);
+          });
+        } catch (e) {
+          console.log('IndexedDB clear failed:', e);
+        }
+      }
+
       await this.feedbackService.hideLoading();
       await this.feedbackService.showSuccessToast('Erfolgreich abgemeldet');
 
