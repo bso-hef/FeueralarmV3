@@ -133,7 +133,7 @@ export class InformationModal implements OnInit {
     console.log('🔓 performLogout() START');
     try {
       console.log('🔓 Showing loading...');
-      await this.feedbackService.showLoading('Abmelden...');
+      this.feedbackService.showLoading('Abmelden...');
 
       console.log('🔓 Disconnecting socket...');
       this.socketService.disconnect();
