@@ -185,8 +185,16 @@ export class InformationModal implements OnInit {
       console.log('🔓 Showing toast...');
       await this.feedbackService.showSuccessToast('Erfolgreich abgemeldet');
 
+      console.log('🔓 Setting global logout flag...');
+      sessionStorage.setItem('logout-in-progress', 'true'); // 👈 FLAG SETZEN
+
       console.log('🔓 Navigating to login...');
       await this.router.navigate(['/login']);
+
+      console.log('🔓 Clearing logout flag...');
+      setTimeout(() => {
+        sessionStorage.removeItem('logout-in-progress'); // 👈 FLAG NACH 1s ENTFERNEN
+      }, 1000);
 
       console.log('🔓 performLogout() END');
     } catch (error) {
