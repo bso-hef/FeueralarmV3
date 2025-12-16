@@ -209,11 +209,9 @@ export class InformationModal implements OnInit {
       console.log('🔓 Showing toast...');
       await this.feedbackService.showSuccessToast('Erfolgreich abgemeldet');
 
-      console.log('🔓 Clearing logout flag...');
-      setTimeout(() => {
-        sessionStorage.removeItem('logout-in-progress');
-        console.log('🔓 Logout flag cleared');
-      }, 500);
+      console.log('🔓 Clearing logout flag NOW...');
+      sessionStorage.removeItem('logout-in-progress');
+      console.log('🔓 Logout flag cleared');
 
       console.log('🔓 performLogout() END');
     } catch (error) {
@@ -225,7 +223,6 @@ export class InformationModal implements OnInit {
       this.isLoggingOut = false;
     }
   }
-
   close(): void {
     this.modalCtrl.dismiss();
   }
