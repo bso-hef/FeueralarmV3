@@ -211,6 +211,7 @@ export class ArchivePage implements OnInit {
   }
 
   async refreshAlarms() {
+    console.log('🔄 refreshAlarms() called!');
     window.location.reload();
 
     // Cache löschen
