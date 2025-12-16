@@ -110,10 +110,14 @@ export class InformationModal implements OnInit {
   private isLoggingOut = false;
 
   async logout(): Promise<void> {
+    console.log('🚨 logout() called - isLoggingOut:', this.isLoggingOut);
+
     if (this.isLoggingOut) {
       console.log('🔓 Logout already in progress, skipping alert...');
       return;
     }
+
+    console.log('🚨 Creating alert...');
 
     const alert = await this.alertCtrl.create({
       header: 'Abmelden',
@@ -122,17 +126,29 @@ export class InformationModal implements OnInit {
         {
           text: 'Abbrechen',
           role: 'cancel',
+          handler: () => {
+            console.log('🚨 Abbrechen clicked');
+            return true;
+          },
         },
         {
           text: 'Abmelden',
           role: 'confirm',
           handler: async () => {
+            console.log('🚨 Abmelden clicked');
+            if (this.isLoggingOut) {
+              console.log('🔓 Already logging out, skipping...');
+              return false;
+            }
+            this.isLoggingOut = true;
             await this.performLogout();
+            return true;
           },
         },
       ],
     });
 
+    console.log('🚨 Presenting alert...');
     await alert.present();
   }
 
