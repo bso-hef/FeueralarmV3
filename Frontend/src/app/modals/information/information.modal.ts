@@ -110,13 +110,23 @@ export class InformationModal implements OnInit {
   private isLoggingOut = false;
 
   async logout(): Promise<void> {
-    console.trace('🚨🚨🚨 LOGOUT CALLED - Stack trace:');
     console.log('🚨 logout() called - isLoggingOut:', this.isLoggingOut);
+
+    // Prüfe globalen Flag im sessionStorage
+    const globalLogoutFlag = sessionStorage.getItem('logout-in-progress');
+    if (globalLogoutFlag === 'true') {
+      console.log('🚨 Global logout in progress, skipping...');
+      return;
+    }
 
     if (this.isLoggingOut) {
       console.log('🔓 Logout already in progress, skipping alert...');
       return;
     }
+
+    // Setze beide Flags
+    this.isLoggingOut = true;
+    sessionStorage.setItem('logout-in-progress', 'true');
 
     console.log('🚨 Creating alert...');
 
@@ -127,19 +137,19 @@ export class InformationModal implements OnInit {
         {
           text: 'Abbrechen',
           role: 'cancel',
+          handler: () => {
+            console.log('🚨 Abbrechen clicked');
+            this.isLoggingOut = false;
+            sessionStorage.removeItem('logout-in-progress');
+          },
         },
         {
           text: 'Abmelden',
           role: 'confirm',
           handler: async () => {
             console.log('🚨 Abmelden clicked');
-            if (this.isLoggingOut) {
-              console.log('🔓 Already logging out, skipping...');
-              return false;
-            }
-            this.isLoggingOut = true;
             await this.performLogout();
-            return true; // <-- HIER fehlte das return!
+            return true;
           },
         },
       ],
@@ -147,6 +157,19 @@ export class InformationModal implements OnInit {
 
     console.log('🚨 Presenting alert...');
     await alert.present();
+
+    // Cleanup wenn Alert geschlossen wird (egal wie)
+    alert.onDidDismiss().then(() => {
+      console.log('🚨 Alert dismissed');
+      if (this.isLoggingOut) {
+        // Wenn noch im Logout-Prozess, Flag NICHT entfernen
+        console.log('🚨 Still logging out, keeping flag');
+      } else {
+        // Wenn abgebrochen wurde, Flag entfernen
+        console.log('🚨 Logout cancelled, removing flag');
+        sessionStorage.removeItem('logout-in-progress');
+      }
+    });
   }
 
   private async performLogout(): Promise<void> {
@@ -161,9 +184,17 @@ export class InformationModal implements OnInit {
       console.log('🔓 Calling logout...');
       await this.restService.logout();
 
-      console.log('🔓 Clearing storage...');
+      console.log('🔓 Clearing storage (keeping logout flag)...');
+      // Speichere Flag temporär
+      const logoutFlag = sessionStorage.getItem('logout-in-progress');
+
       localStorage.clear();
       sessionStorage.clear();
+
+      // Setze Flag zurück
+      if (logoutFlag) {
+        sessionStorage.setItem('logout-in-progress', logoutFlag);
+      }
 
       if ('indexedDB' in window) {
         try {
@@ -185,15 +216,13 @@ export class InformationModal implements OnInit {
       console.log('🔓 Showing toast...');
       await this.feedbackService.showSuccessToast('Erfolgreich abgemeldet');
 
-      console.log('🔓 Setting global logout flag...');
-      sessionStorage.setItem('logout-in-progress', 'true'); // 👈 FLAG SETZEN
-
       console.log('🔓 Navigating to login...');
-      await this.router.navigate(['/login']);
+      await this.router.navigate(['/login'], { replaceUrl: true });
 
-      console.log('🔓 Clearing logout flag...');
+      console.log('🔓 Clearing logout flag after delay...');
       setTimeout(() => {
-        sessionStorage.removeItem('logout-in-progress'); // 👈 FLAG NACH 1s ENTFERNEN
+        sessionStorage.removeItem('logout-in-progress');
+        console.log('🔓 Logout flag cleared');
       }, 1000);
 
       console.log('🔓 performLogout() END');
@@ -201,6 +230,7 @@ export class InformationModal implements OnInit {
       console.error('🔓 performLogout() ERROR:', error);
       await this.feedbackService.hideLoading();
       await this.feedbackService.showError(error, 'Fehler beim Abmelden');
+      sessionStorage.removeItem('logout-in-progress');
     } finally {
       this.isLoggingOut = false;
     }
