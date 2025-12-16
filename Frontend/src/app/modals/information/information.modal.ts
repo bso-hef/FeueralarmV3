@@ -159,14 +159,14 @@ export class InformationModal implements OnInit {
       console.log('🔓 Hiding loading...');
       await this.feedbackService.hideLoading();
 
-      console.log('🔓 Showing toast...');
-      await this.feedbackService.showSuccessToast('Erfolgreich abgemeldet');
-
       console.log('🔓 Closing modal...');
       await this.modalCtrl.dismiss();
 
+      console.log('🔓 Showing toast...');
+      await this.feedbackService.showSuccessToast('Erfolgreich abgemeldet');
+
       console.log('🔓 Navigating to login...');
-      this.router.navigate(['/login']);
+      await this.router.navigate(['/login']);
 
       console.log('🔓 performLogout() END');
     } catch (error) {
