@@ -191,13 +191,6 @@ exports.archiveAlert = async (req, res) => {
         alertId: alert._id,
       });
     }
-    // ✅ NEU: Logge Alarm Archivierung
-    const auditService = require("../service/audit.service");
-    await auditService.logAlertArchived({
-      userId: req.userData.userId,
-      username: req.userData.email || req.userData.username,
-      alertId: alertId,
-    });
 
     res.status(200).json({
       success: true,
