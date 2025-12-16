@@ -130,20 +130,21 @@ export class InformationModal implements OnInit {
   }
 
   private async performLogout(): Promise<void> {
+    console.log('🔓 performLogout() START');
     try {
+      console.log('🔓 Showing loading...');
       await this.feedbackService.showLoading('Abmelden...');
 
-      // Disconnect socket
+      console.log('🔓 Disconnecting socket...');
       this.socketService.disconnect();
 
-      // Clear auth
+      console.log('🔓 Calling logout...');
       await this.restService.logout();
 
-      // 3. ✅ NEU: Clear ALL cache/storage
+      console.log('🔓 Clearing storage...');
       localStorage.clear();
       sessionStorage.clear();
 
-      // Clear IndexedDB
       if ('indexedDB' in window) {
         try {
           const databases = await indexedDB.databases();
@@ -155,15 +156,21 @@ export class InformationModal implements OnInit {
         }
       }
 
+      console.log('🔓 Hiding loading...');
       await this.feedbackService.hideLoading();
+
+      console.log('🔓 Showing toast...');
       await this.feedbackService.showSuccessToast('Erfolgreich abgemeldet');
 
-      // Close modal
-      this.modalCtrl.dismiss();
+      console.log('🔓 Closing modal...');
+      await this.modalCtrl.dismiss();
 
-      // Navigate to login
+      console.log('🔓 Navigating to login...');
       this.router.navigate(['/login']);
+
+      console.log('🔓 performLogout() END');
     } catch (error) {
+      console.error('🔓 performLogout() ERROR:', error);
       await this.feedbackService.hideLoading();
       await this.feedbackService.showError(error, 'Fehler beim Abmelden');
     }
