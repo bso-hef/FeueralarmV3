@@ -110,6 +110,7 @@ export class InformationModal implements OnInit {
   private isLoggingOut = false;
 
   async logout(): Promise<void> {
+    console.trace('🚨🚨🚨 LOGOUT CALLED - Stack trace:');
     console.log('🚨 logout() called - isLoggingOut:', this.isLoggingOut);
 
     if (this.isLoggingOut) {
@@ -126,10 +127,6 @@ export class InformationModal implements OnInit {
         {
           text: 'Abbrechen',
           role: 'cancel',
-          handler: () => {
-            console.log('🚨 Abbrechen clicked');
-            return true;
-          },
         },
         {
           text: 'Abmelden',
@@ -142,7 +139,7 @@ export class InformationModal implements OnInit {
             }
             this.isLoggingOut = true;
             await this.performLogout();
-            return true;
+            return true; // <-- HIER fehlte das return!
           },
         },
       ],
