@@ -128,6 +128,7 @@ export class InformationModal implements OnInit {
 
     await alert.present();
   }
+  private isLoggingOut = false;
 
   private async performLogout(): Promise<void> {
     console.log('🔓 performLogout() START');
@@ -173,6 +174,8 @@ export class InformationModal implements OnInit {
       console.error('🔓 performLogout() ERROR:', error);
       await this.feedbackService.hideLoading();
       await this.feedbackService.showError(error, 'Fehler beim Abmelden');
+    } finally {
+      this.isLoggingOut = false;
     }
   }
 
