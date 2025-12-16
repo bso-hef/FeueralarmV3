@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { SharedHeaderComponent } from '../../components/shared-header/shared-header.component';
+import { addIcons } from 'ionicons';
+import { school } from 'ionicons/icons';
 
 import {
   AuditLogService,
@@ -59,7 +61,12 @@ export class AuditLogsPage implements OnInit {
     { value: '30d', label: 'Letzte 30 Tage' },
   ];
 
-  constructor(private auditLogService: AuditLogService) {}
+  constructor(private auditLogService: AuditLogService) {
+    // ✅ Registriere school Icon
+    addIcons({
+      school: school,
+    });
+  }
 
   ngOnInit() {
     this.loadLogs();
