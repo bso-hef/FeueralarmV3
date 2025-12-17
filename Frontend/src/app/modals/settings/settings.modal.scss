@@ -69,6 +69,24 @@ ion-content {
     margin-bottom: var(--space-2);
   }
 }
+.logout-section {
+  padding: 16px;
+  margin-top: 24px;
+
+  .logout-button {
+    --background: var(--ion-color-danger);
+    --background-hover: var(--ion-color-danger-shade);
+    --background-activated: var(--ion-color-danger-tint);
+    --color: white;
+
+    font-weight: 600;
+    margin-top: 8px;
+
+    ion-icon {
+      margin-right: 8px;
+    }
+  }
+}
 
 ion-footer {
   ion-toolbar {
