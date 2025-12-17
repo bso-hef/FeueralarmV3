@@ -258,27 +258,18 @@ export class PhotoService {
       contentLength: noteContent?.length,
     });
 
-    const filename = title
-      ? `${this.sanitizeFilename(title)}.txt`
-      : `note_${Date.now()}.txt`;
-
-    // Konvertiere Text zu Base64
-    const base64 = btoa(unescape(encodeURIComponent(noteContent)));
-
     const payload = {
-      teacherId,
-      file: base64,
-      filename,
-      mimeType: 'text/plain',
+      content: noteContent, // ← KORRIGIERT: content statt file
+      title: title || 'Notiz', // ← NEU
     };
 
     console.log(
       '📤 Sending request to:',
-      `${this.API_URL}/teachers/${teacherId}/files`
+      `${this.API_URL}/teachers/${teacherId}/notes` // ← KORRIGIERT: /notes statt /files
     );
 
     return this.http.post<PhotoUploadResult>(
-      `${this.API_URL}/teachers/${teacherId}/files`,
+      `${this.API_URL}/teachers/${teacherId}/notes`, // ← KORRIGIERT
       payload,
       { headers: this.getHeaders() }
     );
