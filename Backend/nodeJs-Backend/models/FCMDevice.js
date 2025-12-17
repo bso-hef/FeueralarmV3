@@ -119,15 +119,24 @@ fcmDeviceSchema.statics.registerToken = async function (userId, fcmToken, device
       device.deviceInfo = { ...device.deviceInfo, ...deviceInfo };
       device.isActive = true;
       device.lastUsed = new Date();
+      // ERZWINGE Notification-Einstellungen auf true
+      device.notificationPreferences.alarms = true;
+      device.notificationPreferences.statusChanges = true;
+      device.notificationPreferences.reminders = true;
       await device.save();
       console.log(`✅ FCM token updated for user ${userId}`);
     } else {
-      // Create new device
+      // Create new device - ERZWINGE alarms: true
       device = await this.create({
         userId,
         fcmToken,
         deviceInfo,
         isActive: true,
+        notificationPreferences: {
+          alarms: true,
+          statusChanges: true,
+          reminders: true,
+        },
       });
       console.log(`✅ New FCM token registered for user ${userId}`);
     }
@@ -169,20 +178,23 @@ fcmDeviceSchema.statics.getActiveTokensForUsers = async function (userIds) {
 
 /**
  * Get active tokens with notification preferences
+ * GEÄNDERT: Gibt IMMER alle aktiven Tokens zurück, ignoriert Preferences
  * @param {ObjectId[]} userIds - Array of user IDs
  * @param {string} notificationType - Type of notification (alarms, statusChanges, reminders)
  * @returns {Promise<string[]>} Array of FCM tokens
  */
 fcmDeviceSchema.statics.getTokensWithPreference = async function (userIds, notificationType) {
+  // IGNORIERE Preferences - gib ALLE aktiven Tokens zurück
   const query = {
     userId: { $in: userIds },
     isActive: true,
   };
 
-  // Add notification preference filter
-  query[`notificationPreferences.${notificationType}`] = true;
+  // KEINE Preference-Filterung mehr!
+  // Alle bekommen IMMER Benachrichtigungen
 
   const devices = await this.find(query).select("fcmToken");
+  console.log(`📱 Found ${devices.length} active devices (ignoring preferences - all get notifications)`);
   return devices.map((device) => device.fcmToken);
 };
 
