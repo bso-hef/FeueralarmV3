@@ -22,6 +22,9 @@ router.post("/create-admin", UserController.createAdminUser);
 // PROTECTED ROUTES (mit Auth + Admin)
 // ==========================================
 
+// Benutzer erstellen (Admin only)
+router.post("/", checkAuth, checkPermission, UserController.createUserByAdmin);
+
 // Alle Benutzer abrufen (Admin only)
 router.get("/", checkAuth, checkPermission, UserController.getAllUsers);
 
