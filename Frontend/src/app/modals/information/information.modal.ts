@@ -113,6 +113,9 @@ export class InformationModal implements OnInit {
     console.log('🚨 logout() called - isLoggingOut:', this.isLoggingOut);
 
     const globalLogoutFlag = sessionStorage.getItem('logout-in-progress');
+    console.log('🚨 Global flag value:', globalLogoutFlag);
+    console.log('🚨 All sessionStorage keys:', Object.keys(sessionStorage));
+
     if (globalLogoutFlag === 'true') {
       console.log('🚨 Global logout in progress, skipping...');
       return;
@@ -125,6 +128,7 @@ export class InformationModal implements OnInit {
 
     this.isLoggingOut = true;
     sessionStorage.setItem('logout-in-progress', 'true');
+    console.log('🚨 Set logout flag to true');
 
     console.log('🚨 Creating alert...');
 
@@ -140,6 +144,7 @@ export class InformationModal implements OnInit {
             console.log('🚨 Abbrechen clicked');
             this.isLoggingOut = false;
             sessionStorage.removeItem('logout-in-progress');
+            console.log('🚨 Removed logout flag after cancel');
           },
         },
         {
@@ -148,13 +153,12 @@ export class InformationModal implements OnInit {
           handler: () => {
             console.log('🚨 Abmelden clicked - dismissing alert immediately');
 
-            // Schließe Alert sofort
             alert.dismiss().then(() => {
               console.log('🚨 Alert closed, starting logout...');
               this.performLogout();
             });
 
-            return false; // Verhindert automatisches Schließen
+            return false;
           },
         },
       ],
@@ -211,7 +215,14 @@ export class InformationModal implements OnInit {
 
       console.log('🔓 Clearing logout flag NOW...');
       sessionStorage.removeItem('logout-in-progress');
-      console.log('🔓 Logout flag cleared');
+      console.log(
+        '🔓 Logout flag cleared - verify:',
+        sessionStorage.getItem('logout-in-progress')
+      );
+      console.log(
+        '🔓 All sessionStorage after clear:',
+        Object.keys(sessionStorage)
+      );
 
       console.log('🔓 performLogout() END');
     } catch (error) {
