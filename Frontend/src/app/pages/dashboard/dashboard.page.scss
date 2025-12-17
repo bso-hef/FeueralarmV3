@@ -601,52 +601,63 @@
   }
 }
 
-// Responsive Design
-@media (min-width: 768px) {
-  .api-docs-widget {
-    .api-actions {
-      flex-direction: row;
-
-      ion-button {
-        flex: 1;
-      }
-    }
-  }
-}
-
 // ==========================================
-// LIGHT MODE OVERRIDES
+// LIGHT MODE - COMPLETE OVERRIDES
 // ==========================================
 
 body.light-theme {
+  // Content Background
+  ion-content {
+    --background: #f8f9fa;
+  }
+
+  // Dashboard Header
   .dashboard-header {
     h2 {
-      color: #000000 !important;
+      color: #1a1a1a !important;
     }
 
     .last-update {
-      color: #000000 !important;
+      color: #495057 !important;
+
+      ion-icon {
+        color: #6c757d !important;
+      }
     }
   }
 
+  // Stat Cards
   .stat-card {
+    background: #ffffff !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid #e9ecef;
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+    }
+
     ion-card-content {
       h3 {
-        color: #000000 !important;
+        color: #212529 !important;
       }
 
       p {
-        color: #666666 !important;
+        color: #495057 !important;
       }
     }
   }
 
+  // Progress Card
   .progress-card {
+    background: #ffffff !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid #e9ecef;
+
     ion-card-header {
-      border-bottom: 1px solid #e0e0e0;
+      border-bottom: 1px solid #dee2e6;
 
       ion-card-title {
-        color: #000000 !important;
+        color: #212529 !important;
       }
     }
 
@@ -654,132 +665,209 @@ body.light-theme {
       .progress-info {
         span {
           &:first-child {
-            color: #000000 !important;
+            color: #212529 !important;
           }
 
           &:last-child {
-            color: #666666 !important;
+            color: #6c757d !important;
+          }
+        }
+      }
+
+      .progress-details {
+        .detail-item {
+          color: #495057 !important;
+
+          &.success {
+            color: #198754 !important;
+
+            ion-icon {
+              color: #198754 !important;
+            }
+          }
+
+          &.warning {
+            color: #dc3545 !important;
+
+            ion-icon {
+              color: #dc3545 !important;
+            }
+          }
+
+          &.medium {
+            color: #6c757d !important;
+
+            ion-icon {
+              color: #6c757d !important;
+            }
           }
         }
       }
     }
   }
 
+  // Empty State
   .empty-state {
     h3 {
-      color: #000000 !important;
+      color: #212529 !important;
     }
 
     p {
-      color: #666666 !important;
+      color: #6c757d !important;
+    }
+
+    ion-icon {
+      color: #198754 !important;
     }
   }
 
+  // Alarms Section
   .alarms-section {
     .section-title {
-      color: #000000 !important;
+      color: #212529 !important;
+
+      ion-icon {
+        color: #fd7e14 !important;
+      }
     }
   }
 
+  // Alarm Cards
   .alarm-card {
-    background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: #ffffff !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid #e9ecef;
+    border-left: 4px solid #fd7e14;
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+      border-left-color: #f76707;
+    }
 
     .alarm-header {
       .alarm-info {
         h4 {
-          color: #000000 !important;
+          color: #212529 !important;
         }
 
         .alarm-time {
-          color: #666666 !important;
+          color: #6c757d !important;
+
+          ion-icon {
+            color: #6c757d !important;
+          }
         }
       }
     }
 
     .alarm-stats {
       .stat-chip {
-        background: #f5f5f5;
-        color: #000000 !important;
+        background: #f8f9fa !important;
+        color: #495057 !important;
 
         ion-icon {
-          color: #666666 !important;
+          color: #6c757d !important;
         }
 
         &.success {
-          background: rgba(16, 185, 129, 0.1);
-          color: #10b981 !important;
+          background: #d1e7dd !important;
+          color: #0f5132 !important;
 
           ion-icon {
-            color: #10b981 !important;
+            color: #0f5132 !important;
           }
         }
 
         &.warning {
-          background: rgba(239, 68, 68, 0.1);
-          color: #ef4444 !important;
+          background: #f8d7da !important;
+          color: #842029 !important;
 
           ion-icon {
-            color: #ef4444 !important;
+            color: #842029 !important;
           }
         }
 
         &.medium {
-          background: rgba(156, 163, 175, 0.1);
-          color: #666666 !important;
+          background: #e9ecef !important;
+          color: #6c757d !important;
 
           ion-icon {
-            color: #666666 !important;
+            color: #6c757d !important;
           }
         }
       }
     }
   }
 
+  // API Docs Widget
   .api-docs-widget {
-    background: #ffffff;
+    background: #ffffff !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid #e9ecef;
 
     ion-card-header {
       ion-card-title {
-        color: var(--ion-color-primary) !important;
+        color: #0d6efd !important;
+
+        ion-icon {
+          color: #0d6efd !important;
+        }
       }
     }
 
     .api-description {
-      color: #666666 !important;
+      color: #6c757d !important;
     }
 
     .api-info {
-      background: #f5f5f5;
+      background: #f8f9fa !important;
+      border: 1px solid #e9ecef;
 
       .info-item {
+        color: #495057 !important;
+
+        ion-icon {
+          color: #0d6efd !important;
+        }
+
         span {
-          color: #000000 !important;
+          color: #212529 !important;
         }
       }
     }
 
     .api-endpoints {
-      border-top: 1px solid #e0e0e0;
+      border-top: 1px solid #dee2e6;
 
       .endpoints-title {
-        color: #000000 !important;
+        color: #212529 !important;
       }
 
       .endpoints-list {
         li {
-          border-bottom: 1px solid #e0e0e0;
+          border-bottom: 1px solid #e9ecef;
 
           code {
-            background: #f5f5f5;
-            color: #000000 !important;
+            background: #f8f9fa !important;
+            color: #212529 !important;
+            border: 1px solid #dee2e6;
           }
         }
       }
     }
+
+    .api-preview {
+      border: 1px solid #dee2e6;
+      background: #f8f9fa !important;
+    }
   }
 
+  // Loading State
   .loading-state {
-    color: #666666 !important;
+    color: #6c757d !important;
+
+    p {
+      color: #6c757d !important;
+    }
   }
 }
