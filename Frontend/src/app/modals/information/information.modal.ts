@@ -180,15 +180,9 @@ export class InformationModal implements OnInit {
       console.log('🔓 Calling logout...');
       await this.restService.logout();
 
-      console.log('🔓 Clearing storage (keeping logout flag)...');
-      const logoutFlag = sessionStorage.getItem('logout-in-progress');
-
+      console.log('🔓 Clearing storage...');
       localStorage.clear();
-      sessionStorage.clear();
-
-      if (logoutFlag) {
-        sessionStorage.setItem('logout-in-progress', logoutFlag);
-      }
+      sessionStorage.clear(); // 👈 Flag wird hier automatisch gelöscht!
 
       if ('indexedDB' in window) {
         try {
@@ -213,17 +207,6 @@ export class InformationModal implements OnInit {
       console.log('🔓 Showing toast...');
       await this.feedbackService.showSuccessToast('Erfolgreich abgemeldet');
 
-      console.log('🔓 Clearing logout flag NOW...');
-      sessionStorage.removeItem('logout-in-progress');
-      console.log(
-        '🔓 Logout flag cleared - verify:',
-        sessionStorage.getItem('logout-in-progress')
-      );
-      console.log(
-        '🔓 All sessionStorage after clear:',
-        Object.keys(sessionStorage)
-      );
-
       console.log('🔓 performLogout() END');
     } catch (error) {
       console.error('🔓 performLogout() ERROR:', error);
@@ -234,6 +217,7 @@ export class InformationModal implements OnInit {
       this.isLoggingOut = false;
     }
   }
+
   close(): void {
     this.modalCtrl.dismiss();
   }
