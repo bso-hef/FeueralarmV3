@@ -278,3 +278,39 @@ ion-loading {
     transform: translateX(100%);
   }
 }
+
+body.light-theme {
+  ion-searchbar {
+    --background: #f5f5f5 !important;
+    --color: #000000 !important;
+    --placeholder-color: #000000 !important;
+    --placeholder-opacity: 1 !important;
+    --icon-color: #333333 !important;
+
+    .searchbar-input-container {
+      background: #f5f5f5 !important;
+      border: 2px solid #999999 !important;
+      border-radius: var(--radius-md);
+    }
+
+    input.searchbar-input {
+      color: #000000 !important;
+
+      &::placeholder {
+        color: #000000 !important;
+        opacity: 1 !important;
+      }
+    }
+
+    .searchbar-search-icon,
+    .searchbar-clear-button {
+      color: #000000 !important;
+    }
+  }
+
+  // Footer im Light Mode
+  ion-footer {
+    --background: #ffffff;
+    border-top: 1px solid #e0e0e0;
+  }
+}
