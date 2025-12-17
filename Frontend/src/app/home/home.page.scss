@@ -405,9 +405,13 @@ ion-content {
     ion-searchbar {
       --background: #f5f5f5; // Hellgrau für Light Mode
       --color: #000000;
-      --placeholder-color: #666666;
+      --placeholder-color: #000000;
       --icon-color: #666666;
       border: 2px solid #cccccc;
+
+      input {
+        color: #000000 !important;
+      }
     }
   }
 }
