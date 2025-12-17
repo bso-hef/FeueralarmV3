@@ -66,7 +66,7 @@ export class SettingsModal implements OnInit {
   sortBy: 'teacher' | 'class' = 'teacher';
   defaultStatus: string = 'all';
   showNotifications = true;
-  theme: 'light' | 'dark' | 'auto' = 'dark';
+  theme: 'light' | 'dark' | 'auto' = 'auto';
   selectedArchive = '';
   archives: Archive[] = [];
 
