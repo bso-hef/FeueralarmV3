@@ -69,24 +69,35 @@ router.post("/:id/files", checkAuth, async (req, res) => {
     const { id } = req.params;
     const { file, filename, mimeType } = req.body;
 
+    console.log("📝 === FILE UPLOAD START ===");
+    console.log("📝 Teacher ID:", id);
+    console.log("📝 Filename:", filename);
+    console.log("📝 MimeType:", mimeType);
+    console.log("📝 File data length:", file?.length);
+    console.log("📝 Request body keys:", Object.keys(req.body));
+
     if (!file || !filename) {
+      console.log("❌ Missing file or filename!");
       return res.status(400).json({
         success: false,
         error: "Datei oder Filename fehlt",
       });
     }
 
-    // Base64 zu Buffer konvertieren
+    console.log("📝 Converting base64 to buffer...");
     const fileBuffer = Buffer.from(file, "base64");
+    console.log("📝 Buffer size:", fileBuffer.length, "bytes");
 
-    // Upload zu S3
+    console.log("📝 Uploading to S3...");
     const uploadResult = await s3Service.uploadDocument(fileBuffer, filename);
+    console.log("📝 S3 upload result:", uploadResult);
 
-    // Bestimme Type basierend auf Dateiendung
     const ext = filename.split(".").pop()?.toLowerCase();
-    const type = ["jpg", "jpeg", "png", "gif", "webp"].includes(ext) ? "photo" : ext === "txt" ? "note" : "document";
+    console.log("📝 File extension:", ext);
 
-    // Speichere Attachment in MongoDB
+    const type = ["jpg", "jpeg", "png", "gif", "webp"].includes(ext) ? "photo" : ext === "txt" ? "note" : "document";
+    console.log("📝 Detected type:", type);
+
     const attachment = {
       id: require("uuid").v4(),
       type,
@@ -99,12 +110,12 @@ router.post("/:id/files", checkAuth, async (req, res) => {
       uploadedBy: req.userData.userId,
     };
 
-    // Update Post/Teacher mit neuem Attachment
+    console.log("📝 Saving to MongoDB...");
     await Post.findByIdAndUpdate(id, {
       $push: { attachments: attachment },
     });
 
-    console.log("✅ Datei hochgeladen:", uploadResult.url);
+    console.log("✅ File uploaded successfully!");
 
     res.json({
       success: true,
@@ -114,6 +125,7 @@ router.post("/:id/files", checkAuth, async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Fehler beim Datei-Upload:", error);
+    console.error("❌ Error stack:", error.stack);
     res.status(500).json({
       success: false,
       error: error.message || "Fehler beim Hochladen",
