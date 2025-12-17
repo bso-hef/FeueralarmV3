@@ -68,7 +68,7 @@ export class UserManagementService {
    */
   createUser(userData: CreateUserData): Observable<any> {
     return this.http
-      .post(`${this.API_URL}/users/signup`, userData, {
+      .post(`${this.API_URL}/users`, userData, {
         headers: this.getHeaders(),
       })
       .pipe(catchError(this.handleError));
