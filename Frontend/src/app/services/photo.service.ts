@@ -118,48 +118,57 @@ export class PhotoService {
    * Für Web: Input File
    */
   async selectFile(): Promise<{ data: string; filename: string } | null> {
-    console.log('📄 Opening file picker...');
-
-    alert('File Picker wird jetzt geöffnet!');
+    console.log('📄 PhotoService: selectFile() START');
 
     if (Capacitor.getPlatform() === 'web') {
       return new Promise((resolve) => {
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = 'image/*,.pdf,.doc,.docx,.txt';
+        input.accept = '*/*';
+        input.style.display = 'none'; // 👈 Verstecke Input
 
-        input.onchange = (event: any) => {
-          alert('Datei wurde ausgewählt!');
-          const file = event.target.files[0];
-          if (!file) {
-            console.log('❌ No file selected');
-            resolve(null);
-            return;
-          }
+        document.body.appendChild(input); // 👈 Füge zu DOM hinzu
 
-          console.log('📄 File selected:', file.name, file.size);
-          const reader = new FileReader();
-          reader.onload = () => {
-            console.log('📄 File read successfully');
-            resolve({
-              data: reader.result as string,
-              filename: file.name,
-            });
-          };
-          reader.onerror = () => {
-            console.error('❌ Error reading file');
-            resolve(null);
-          };
-          reader.readAsDataURL(file);
-        };
+        input.addEventListener(
+          'change',
+          (event: any) => {
+            // 👈 addEventListener statt onchange
+            console.log('📄 change event triggered!');
+            const file = event.target.files?.[0];
+
+            if (!file) {
+              console.log('❌ No file selected');
+              document.body.removeChild(input); // 👈 Cleanup
+              resolve(null);
+              return;
+            }
+
+            console.log('📄 File selected:', file.name, file.size);
+
+            const reader = new FileReader();
+            reader.onload = () => {
+              console.log('📄 File read successfully');
+              document.body.removeChild(input); // 👈 Cleanup
+              resolve({
+                data: reader.result as string,
+                filename: file.name,
+              });
+            };
+            reader.onerror = () => {
+              console.error('❌ Error reading file');
+              document.body.removeChild(input); // 👈 Cleanup
+              resolve(null);
+            };
+            reader.readAsDataURL(file);
+          },
+          { once: true }
+        ); // 👈 Nur einmal ausführen
 
         input.click();
       });
-    } else {
-      // TODO: Native File Picker für iOS/Android
-      console.warn('⚠️ File Picker noch nicht für native Apps implementiert');
-      return null;
     }
+
+    return null;
   }
 
   // ==========================================
