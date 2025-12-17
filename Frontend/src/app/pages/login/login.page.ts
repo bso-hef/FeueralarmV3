@@ -171,7 +171,7 @@ export class LoginPage implements OnInit {
    */
   async showLoginErrorAlert(errorMessage?: string) {
     const alert = await this.alertController.create({
-      header: '❌ Anmeldung fehlgeschlagen',
+      header: 'Anmeldung fehlgeschlagen',
       message:
         errorMessage === 'Verbindungsfehler'
           ? 'Keine Verbindung zum Server. Bitte überprüfe deine Internetverbindung.'

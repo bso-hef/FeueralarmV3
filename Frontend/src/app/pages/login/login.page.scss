@@ -391,6 +391,8 @@ body.dark-theme {
   .alert-button-group {
     padding: 0 16px 16px 16px;
     background: var(--bg-elevated);
+    display: flex;
+    justify-content: center;
 
     button {
       border-radius: 10px;
@@ -430,7 +432,7 @@ body.dark-theme {
     }
 
     .alert-head {
-      background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+      background: linear-gradient(135deg, #000000 0%, #000000 100%);
     }
 
     .alert-message {
