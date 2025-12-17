@@ -1,6 +1,7 @@
 const PostController = require("../controllers/posts");
 const jwt = require("jsonwebtoken");
 const { Mutex } = require("async-mutex");
+const { notifyAlarmTriggered } = require("../service/alarmNotifications"); // NEU: Push-Benachrichtigungen
 
 // Mutex für Thread-Safety bei WebUntis-Anfragen
 const untisLock = new Mutex();
@@ -56,7 +57,7 @@ module.exports = (io) => {
           console.log("✅ Alert processed successfully");
           console.log(`📤 Sending ${res.teachers.length} posts to all clients`);
 
-          // ✅ NEU: Sende "alarmStarted" Event an ALLE Clients
+          // ✅ Sende "alarmStarted" Event an ALLE Clients
           io.emit("alarmStarted", {
             success: true,
             message: "Neuer Alarm wurde ausgelöst",
@@ -72,6 +73,25 @@ module.exports = (io) => {
           });
 
           console.log("📡 Broadcast 'alarmStarted' sent to all clients");
+
+          // ==========================================
+          // NEU: PUSH-BENACHRICHTIGUNGEN SENDEN
+          // ==========================================
+          try {
+            const Alert = require("../models/alert");
+            const activeAlert = await Alert.findOne({ archived: { $ne: true } }).sort({ created: -1 });
+
+            if (activeAlert) {
+              console.log("📱 Sending push notifications for alarm:", activeAlert._id);
+              // Push-Benachrichtigung an alle registrierten Geräte senden
+              await notifyAlarmTriggered(activeAlert);
+              console.log("✅ Push notifications sent to all devices");
+            }
+          } catch (pushError) {
+            console.error("⚠️ Push notification failed (non-critical):", pushError.message);
+            // Fehler nicht weitergeben - Push-Benachrichtigungen sind optional
+          }
+          // ==========================================
         } else {
           console.error("❌ Alert processing failed:", res.message);
           socket.emit("error", { message: res.message });
@@ -251,6 +271,7 @@ module.exports = (io) => {
         socket.emit("error", { message: "Internal server error" });
       }
     });
+
     // ==========================================
     // ALARM BEENDEN EVENT (Optional - für später)
     // ==========================================
