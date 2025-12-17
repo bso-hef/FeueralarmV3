@@ -122,20 +122,6 @@ export class AttachmentModalComponent implements OnInit {
       header: 'Anhang hinzufügen',
       buttons: [
         {
-          text: 'Foto aufnehmen',
-          icon: 'camera',
-          handler: () => {
-            this.takePhoto();
-          },
-        },
-        {
-          text: 'Foto aus Galerie',
-          icon: 'image',
-          handler: () => {
-            this.selectPhoto();
-          },
-        },
-        {
           text: 'Datei hochladen',
           icon: 'document',
           handler: () => {

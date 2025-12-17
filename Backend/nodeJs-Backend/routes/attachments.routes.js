@@ -134,6 +134,67 @@ router.post("/:id/files", checkAuth, async (req, res) => {
 });
 
 /**
+ * POST /api/teachers/:id/notes
+ * Erstelle eine Notiz für einen Teacher
+ */
+router.post("/:id/notes", checkAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content, title } = req.body;
+
+    console.log("📝 === NOTE UPLOAD START ===");
+    console.log("📝 Teacher ID:", id);
+    console.log("📝 Title:", title);
+    console.log("📝 Content length:", content?.length);
+
+    if (!content || content.trim() === "") {
+      console.log("❌ Missing content!");
+      return res.status(400).json({
+        success: false,
+        error: "Notiz-Inhalt fehlt",
+      });
+    }
+
+    console.log("📝 Uploading note to S3...");
+    const uploadResult = await s3Service.uploadNote(content, title);
+    console.log("📝 S3 upload result:", uploadResult);
+
+    const attachment = {
+      id: require("uuid").v4(),
+      type: "note",
+      url: uploadResult.url,
+      key: uploadResult.key,
+      filename: uploadResult.filename || `${title || "note"}.txt`,
+      mimeType: "text/plain",
+      size: Buffer.from(content, "utf-8").length,
+      uploadedAt: new Date().toISOString(),
+      uploadedBy: req.userData.userId,
+    };
+
+    console.log("📝 Saving to MongoDB...");
+    await Post.findByIdAndUpdate(id, {
+      $push: { attachments: attachment },
+    });
+
+    console.log("✅ Note uploaded successfully!");
+
+    res.json({
+      success: true,
+      url: uploadResult.url,
+      filename: attachment.filename,
+      attachment,
+    });
+  } catch (error) {
+    console.error("❌ Fehler beim Notiz-Upload:", error);
+    console.error("❌ Error stack:", error.stack);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Fehler beim Hochladen",
+    });
+  }
+});
+
+/**
  * GET /api/teachers/:id/attachments
  * Lade alle Attachments für einen Teacher
  */
