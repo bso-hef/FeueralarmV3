@@ -308,6 +308,39 @@ body.light-theme {
     }
   }
 
+  // Light Mode Dashboard Fix
+  body.light-theme {
+    app-dashboard {
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        color: #000000 !important;
+      }
+
+      p,
+      span,
+      ion-label {
+        color: #333333 !important;
+      }
+
+      ion-card-title {
+        color: #000000 !important;
+      }
+
+      .last-update,
+      .alarm-time,
+      .api-description {
+        color: #666666 !important;
+      }
+
+      ion-card {
+        background: #ffffff !important;
+      }
+    }
+  }
+
   // Footer im Light Mode
   ion-footer {
     --background: #ffffff;
