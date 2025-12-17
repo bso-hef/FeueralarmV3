@@ -66,11 +66,11 @@ exports.userLogin = (req, res, next) => {
           role: fetchedUser.role,
         },
         process.env.JWT_KEY,
-        { expiresIn: "1h" }
+        { expiresIn: "7d" }
       );
       res.status(200).json({
         token: token,
-        expiresIn: 3600,
+        expiresIn: 604800,
         userId: fetchedUser._id,
         username: fetchedUser.username,
       });
