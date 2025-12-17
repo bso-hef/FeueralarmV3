@@ -1,9 +1,9 @@
 .alarm-footer {
-  border-top: 2px solid var(--ion-color-danger);
+  border-top: 1px solid var(--ion-border-color);
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
 
   ion-toolbar {
-    --background: var(--ion-color-light);
+    --background: var(--ion-background-color);
     --padding-start: 16px;
     --padding-end: 16px;
     --padding-top: 12px;
