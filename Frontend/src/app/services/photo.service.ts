@@ -120,6 +120,8 @@ export class PhotoService {
   async selectFile(): Promise<{ data: string; filename: string } | null> {
     console.log('📄 Opening file picker...');
 
+    alert('File Picker wird jetzt geöffnet!');
+
     if (Capacitor.getPlatform() === 'web') {
       return new Promise((resolve) => {
         const input = document.createElement('input');
@@ -127,6 +129,7 @@ export class PhotoService {
         input.accept = 'image/*,.pdf,.doc,.docx,.txt';
 
         input.onchange = (event: any) => {
+          alert('Datei wurde ausgewählt!');
           const file = event.target.files[0];
           if (!file) {
             console.log('❌ No file selected');
