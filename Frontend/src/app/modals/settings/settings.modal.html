@@ -68,34 +68,29 @@
     <!-- Theme -->
     <div class="setting-section">
       <h3>Erscheinungsbild</h3>
-      <ion-list>
+      <ion-list class="theme-list">
         <ion-radio-group [(ngModel)]="theme" (ionChange)="onThemeChange()">
           <ion-item>
-            <ion-radio value="light" slot="start"></ion-radio>
-            <ion-label>
-              <ion-icon name="sunny"></ion-icon>
-              Hell
-            </ion-label>
+            <ion-icon name="sunny" slot="start"></ion-icon>
+            <ion-label>Hell</ion-label>
+            <ion-radio value="light" slot="end"></ion-radio>
           </ion-item>
           <ion-item>
-            <ion-radio value="dark" slot="start"></ion-radio>
-            <ion-label>
-              <ion-icon name="moon"></ion-icon>
-              Dunkel
-            </ion-label>
+            <ion-icon name="moon" slot="start"></ion-icon>
+            <ion-label>Dunkel</ion-label>
+            <ion-radio value="dark" slot="end"></ion-radio>
           </ion-item>
           <ion-item>
-            <ion-radio value="auto" slot="start"></ion-radio>
-            <ion-label>
-              <ion-icon name="contrast"></ion-icon>
-              Automatisch
-            </ion-label>
+            <ion-icon name="contrast" slot="start"></ion-icon>
+            <ion-label>Automatisch</ion-label>
+            <ion-radio value="auto" slot="end"></ion-radio>
           </ion-item>
         </ion-radio-group>
       </ion-list>
     </div>
   </div>
-  <!-- Am Ende der Seite, vor </ion-content> -->
+
+  <!-- Logout Button -->
   <div class="logout-section">
     <ion-button
       expand="block"

@@ -124,6 +124,7 @@ export class SettingsModal implements OnInit {
 
   onThemeChange(): void {
     this.themeService.setTheme(this.theme);
+    console.log('🎨 Theme changed to:', this.theme);
   }
 
   onArchiveChange(): void {
