@@ -188,7 +188,7 @@ export class AttachmentModalComponent implements OnInit {
   }
 
   async createNote() {
-    console.log('📝 createNote() called!'); // ← NEU
+    console.log('📝 createNote() called!');
 
     const noteContent = await this.feedbackService.showPrompt(
       'Notiz erstellen',
@@ -197,28 +197,34 @@ export class AttachmentModalComponent implements OnInit {
       ''
     );
 
-    console.log('📝 Note content:', noteContent); // ← NEU
+    console.log('📝 Note content:', noteContent);
 
     if (!noteContent || noteContent.trim() === '') {
       console.log('📝 No content, returning');
       return;
     }
 
+    console.log('📝 Showing title prompt...'); // ← NEU
     const noteTitle = await this.feedbackService.showPrompt(
       'Notiz-Titel',
       'Titel (optional)',
       'text',
       ''
     );
+    console.log('📝 Note title:', noteTitle); // ← NEU
 
     try {
+      console.log('📝 Starting upload...'); // ← NEU
       await this.feedbackService.showLoading('Notiz wird hochgeladen...');
 
       this.isUploading = true;
 
+      console.log('📝 Calling photoService.uploadNote...'); // ← NEU
       const response = await this.photoService
         .uploadNote(this.teacher.id, noteContent.trim(), noteTitle || undefined)
         .toPromise();
+
+      console.log('📝 Response:', response); // ← NEU
 
       await this.feedbackService.hideLoading();
       this.isUploading = false;
@@ -232,12 +238,12 @@ export class AttachmentModalComponent implements OnInit {
         throw new Error(response?.error || 'Upload fehlgeschlagen');
       }
     } catch (error) {
+      console.error('📝 Error:', error); // ← NEU
       await this.feedbackService.hideLoading();
       this.isUploading = false;
       await this.feedbackService.showError(error, 'Fehler beim Speichern');
     }
   }
-
   // ==========================================
   // UPLOAD HELPERS
   // ==========================================
