@@ -106,6 +106,7 @@ ion-content {
       --border-radius: var(--radius-md);
       --box-shadow: none;
       padding: 0;
+      border: 2px solid var(--border-secondary);
     }
   }
 }
