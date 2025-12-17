@@ -236,6 +236,7 @@ ion-content {
     }
   }
 }
+
 .test-login-button {
   margin-top: var(--space-2);
   padding: var(--space-3);
@@ -259,6 +260,7 @@ ion-content {
     cursor: not-allowed;
   }
 }
+
 // Status Badge
 .status-badge-container {
   text-align: center;
@@ -347,5 +349,97 @@ body.dark-theme {
   .offline-warning {
     background: rgba(255, 152, 0, 0.15);
     border-color: #ff9800;
+  }
+}
+
+// ============================================
+// LOGIN ERROR ALERT STYLING
+// ============================================
+
+::ng-deep .login-error-alert {
+  --backdrop-opacity: 0.6;
+
+  .alert-wrapper {
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    max-width: 340px;
+  }
+
+  .alert-head {
+    padding: 24px 24px 12px 24px;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+      margin: 0;
+      text-align: center;
+    }
+  }
+
+  .alert-message {
+    padding: 20px 24px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    text-align: center;
+    background: var(--bg-elevated);
+  }
+
+  .alert-button-group {
+    padding: 0 16px 16px 16px;
+    background: var(--bg-elevated);
+
+    button {
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 14px;
+      margin: 0;
+      width: 100%;
+      transition: all 0.2s ease;
+
+      &.alert-button-confirm {
+        background: linear-gradient(
+          135deg,
+          var(--brand-primary),
+          var(--brand-primary-light)
+        );
+        color: white;
+
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(170, 0, 0, 0.3);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+}
+
+// Dark Theme für Alert
+body.dark-theme {
+  ::ng-deep .login-error-alert {
+    .alert-wrapper {
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .alert-head {
+      background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    }
+
+    .alert-message {
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+    }
+
+    .alert-button-group {
+      background: var(--bg-elevated);
+    }
   }
 }
