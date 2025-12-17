@@ -215,7 +215,7 @@ export class AttachmentModalComponent implements OnInit {
 
     try {
       console.log('📝 Starting upload...'); // ← NEU
-      await this.feedbackService.showLoading('Notiz wird hochgeladen...');
+      this.feedbackService.showLoading('Notiz wird hochgeladen...');
 
       this.isUploading = true;
 
@@ -226,20 +226,18 @@ export class AttachmentModalComponent implements OnInit {
 
       console.log('📝 Response:', response); // ← NEU
 
-      await this.feedbackService.hideLoading();
+      this.feedbackService.hideLoading();
       this.isUploading = false;
 
       if (response && response.success) {
-        await this.feedbackService.showSuccessToast(
-          'Notiz erfolgreich gespeichert!'
-        );
+        this.feedbackService.showSuccessToast('Notiz erfolgreich gespeichert!');
         await this.loadAttachments();
       } else {
         throw new Error(response?.error || 'Upload fehlgeschlagen');
       }
     } catch (error) {
       console.error('📝 Error:', error); // ← NEU
-      await this.feedbackService.hideLoading();
+      this.feedbackService.hideLoading();
       this.isUploading = false;
       await this.feedbackService.showError(error, 'Fehler beim Speichern');
     }
