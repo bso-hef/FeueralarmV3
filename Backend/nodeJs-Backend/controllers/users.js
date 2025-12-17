@@ -142,6 +142,11 @@ exports.createUserByAdmin = async (req, res, next) => {
   try {
     const { username, password, role } = req.body;
 
+    // DEBUG LOGS
+    console.log("📥 Received request body:", req.body);
+    console.log("📥 Extracted role:", role);
+    console.log("📥 Role type:", typeof role);
+
     // Validierung
     if (!username || !password) {
       return res.status(400).json({
