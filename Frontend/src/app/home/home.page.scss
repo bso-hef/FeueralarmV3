@@ -399,9 +399,8 @@ ion-content {
     background-color: rgba(var(--ion-color-primary-rgb), 0.2);
   }
 }
-
-// Light Mode Overrides - MUSS NACH .filter-section kommen!
-body.light {
+// Light Mode Overrides - Korrekte Klasse!
+body.light-theme {
   .filter-section {
     .search-bar {
       ion-searchbar {
@@ -410,16 +409,6 @@ body.light {
         --placeholder-color: #000000 !important;
         --icon-color: #333333 !important;
         border: 2px solid #999999 !important;
-
-        ::ng-deep {
-          .searchbar-input {
-            color: #000000 !important;
-          }
-
-          .searchbar-search-icon {
-            color: #333333 !important;
-          }
-        }
       }
     }
   }
