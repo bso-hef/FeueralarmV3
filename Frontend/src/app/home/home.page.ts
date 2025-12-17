@@ -56,7 +56,7 @@ import {
   cloudOffline,
   syncOutline,
   documentTextOutline,
-  camera,
+  documentText,
 } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
@@ -200,7 +200,7 @@ export class HomePage implements OnInit, OnDestroy {
       cloudOffline,
       syncOutline,
       documentTextOutline,
-      camera,
+      documentText,
     });
   }
 
