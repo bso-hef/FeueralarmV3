@@ -188,6 +188,8 @@ export class AttachmentModalComponent implements OnInit {
   }
 
   async createNote() {
+    console.log('📝 createNote() called!'); // ← NEU
+
     const noteContent = await this.feedbackService.showPrompt(
       'Notiz erstellen',
       'Notiz eingeben...',
@@ -195,7 +197,10 @@ export class AttachmentModalComponent implements OnInit {
       ''
     );
 
+    console.log('📝 Note content:', noteContent); // ← NEU
+
     if (!noteContent || noteContent.trim() === '') {
+      console.log('📝 No content, returning');
       return;
     }
 
