@@ -1074,15 +1074,26 @@ export class HomePage implements OnInit, OnDestroy {
         this.socketService.triggerAlert(this.selectedHour, day);
         console.log('✅ triggerAlert called successfully!');
 
+        // NEU: Zeige Erfolgs-Toast
+        await this.feedbackService.showSuccessToast(
+          '🚨 Alarm wurde ausgelöst!'
+        );
+
         setTimeout(() => {
           console.log('🔄 Reloading data...');
           this.loadData();
         }, 2000);
       } else {
         console.log('❌ No socketService available!');
+        await this.feedbackService.showErrorToast(
+          'Fehler: Socket nicht verfügbar'
+        );
       }
     } catch (error) {
       console.error('❌ Error in triggerAlarm:', error);
+      await this.feedbackService.showErrorToast(
+        'Fehler beim Auslösen des Alarms'
+      );
     }
   }
 
