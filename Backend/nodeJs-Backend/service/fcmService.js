@@ -156,7 +156,7 @@ class FCMService {
   async sendAlarmNotification(fcmTokens, alarm) {
     const notification = {
       title: "🔥 FEUERALARM!",
-      body: `${alarm.location || "Unbekannter Standort"} - ${alarm.alarmType || "Alarm ausgelöst"}`,
+      body: `"Alarm ausgelöst"`,
     };
 
     const data = {

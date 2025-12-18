@@ -192,6 +192,16 @@ exports.archiveAlert = async (req, res) => {
       });
     }
 
+    // NEU: Push-Benachrichtigung beim Alarm-Ende senden
+    try {
+      const { notifyAlarmEnded } = require("../service/alarmNotifications");
+      console.log("📱 Sending push notification for alarm end...");
+      await notifyAlarmEnded(alert);
+      console.log("✅ Push notification sent for alarm end");
+    } catch (pushError) {
+      console.error("⚠️ Push notification failed (non-critical):", pushError.message);
+    }
+
     res.status(200).json({
       success: true,
       message: "Alarm archiviert",
