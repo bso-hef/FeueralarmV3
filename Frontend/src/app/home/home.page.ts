@@ -345,8 +345,6 @@ export class HomePage implements OnInit, OnDestroy {
       alarmUpdatedSub,
       alarmEndedSub
     );
-
-    this.subscriptions.push(postsSub, updateSub);
   }
 
   private async loadData(): Promise<void> {
