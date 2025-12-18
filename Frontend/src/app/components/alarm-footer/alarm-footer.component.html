@@ -1,4 +1,4 @@
-<ion-footer *ngIf="hasActiveAlarm" class="alarm-footer">
+<ion-footer *ngIf="userRole === 'admin' && hasActiveAlarm" class="alarm-footer">
   <ion-toolbar>
     <div class="footer-content">
       <!-- Alarm beenden Button (links) -->

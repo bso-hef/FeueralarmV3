@@ -31,14 +31,6 @@ router.post("/register", checkAuth, async (req, res) => {
     // Register token in database
     const device = await FCMDevice.registerToken(userId, fcmToken, deviceInfo);
 
-    // Send test notification to verify token
-    try {
-      await fcmService.sendTestNotification(fcmToken);
-    } catch (error) {
-      console.warn("⚠️ Failed to send test notification:", error.message);
-      // Don't fail registration if test notification fails
-    }
-
     res.status(200).json({
       success: true,
       message: "FCM Token erfolgreich registriert",
