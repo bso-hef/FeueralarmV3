@@ -1074,10 +1074,8 @@ export class HomePage implements OnInit, OnDestroy {
         this.socketService.triggerAlert(this.selectedHour, day);
         console.log('✅ triggerAlert called successfully!');
 
-        // NEU: Zeige Erfolgs-Toast
-        await this.feedbackService.showSuccessToast(
-          '🚨 Alarm wurde ausgelöst!'
-        );
+        // NEU: Einfacher JavaScript Alert
+        alert('🚨 Alarm wurde ausgelöst!');
 
         setTimeout(() => {
           console.log('🔄 Reloading data...');
