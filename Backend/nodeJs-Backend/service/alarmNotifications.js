@@ -1,8 +1,8 @@
 /**
- * Alarm Service Extension for FCM Integration
- * Add this to your existing alarmService.js or create as separate file
+ * Alarm Notifications Service
+ * Push-Benachrichtigungen bei Alarm-Trigger und Alarm-Ende
  *
- * UAP 5.2.2: Push-Benachrichtigungen bei Alarm/Statusänderungen
+ * UAP 5.2.2: Push-Benachrichtigungen
  */
 
 const FCMDevice = require("../models/FCMDevice");
@@ -10,29 +10,40 @@ const fcmService = require("./fcmService");
 
 /**
  * Send push notifications when alarm is triggered
+ * Sendet an ALLE registrierten Geräte
  * @param {object} alarm - Alarm document
- * @param {object[]} recipients - Users to notify (optional, defaults to all active users)
  */
-async function notifyAlarmTriggered(alarm, recipients = null) {
+async function notifyAlarmTriggered(alarm) {
   try {
-    let userIds;
+    console.log("📱 notifyAlarmTriggered called for alarm:", alarm._id);
 
-    if (recipients && recipients.length > 0) {
-      // Notify specific users
-      userIds = recipients.map((user) => user._id);
-    } else {
-      // Notify all users with active devices
-      // You might want to filter by role or permissions here
-      const User = require("../models/user");
-      const allUsers = await User.find({ isActive: true }).select("_id");
-      userIds = allUsers.map((user) => user._id);
+    // DEBUG: Zeige Collection und DB Info
+    const mongoose = require("mongoose");
+    console.log("🔍 Connected to DB:", mongoose.connection.name);
+    console.log("🔍 Connection state:", mongoose.connection.readyState);
+    console.log("🔍 DB host:", mongoose.connection.host);
+
+    // Hole ALLE aktiven FCM Tokens (ohne User-Filter)
+    console.log("🔍 Querying FCMDevice.find({ isActive: true })...");
+    const allDevices = await FCMDevice.find({ isActive: true });
+
+    console.log(`🔍 Raw query result: ${allDevices.length} devices found`);
+    if (allDevices.length > 0) {
+      console.log("🔍 First device sample:", JSON.stringify(allDevices[0].toObject(), null, 2));
     }
 
-    // Get FCM tokens for users with alarm notifications enabled
-    const fcmTokens = await FCMDevice.getTokensWithPreference(userIds, "alarms");
+    const fcmTokens = allDevices.map((device) => device.fcmToken);
+    console.log(`📱 Found ${fcmTokens.length} active devices to notify`);
+    console.log(
+      `📱 FCM Tokens:`,
+      fcmTokens.map((t) => t.substring(0, 20) + "...")
+    );
 
     if (fcmTokens.length === 0) {
-      console.warn("⚠️ No devices with alarm notifications enabled");
+      console.warn("⚠️ No active devices found for notifications");
+      // DEBUG: Versuche ALLE Devices zu finden
+      const anyDevices = await FCMDevice.find({});
+      console.log(`🔍 Total devices in DB (any query): ${anyDevices.length}`);
       return;
     }
 
@@ -46,58 +57,52 @@ async function notifyAlarmTriggered(alarm, recipients = null) {
     return result;
   } catch (error) {
     console.error("❌ Error sending alarm notification:", error);
+    console.error("❌ Stack trace:", error.stack);
     // Don't throw - notification failures shouldn't block alarm creation
   }
 }
 
 /**
- * Send push notifications when alarm status changes
+ * Send push notifications when alarm is ended/archived
+ * Sendet an ALLE registrierten Geräte
  * @param {object} alarm - Alarm document
- * @param {string} oldStatus - Previous status
- * @param {string} newStatus - New status
- * @param {object[]} recipients - Users to notify (optional)
  */
-async function notifyAlarmStatusChange(alarm, oldStatus, newStatus, recipients = null) {
+async function notifyAlarmEnded(alarm) {
   try {
-    let userIds;
+    console.log("📱 notifyAlarmEnded called for alarm:", alarm._id);
 
-    if (recipients && recipients.length > 0) {
-      userIds = recipients.map((user) => user._id);
-    } else {
-      // Notify all users
-      const User = require("../models/user");
-      const allUsers = await User.find({ isActive: true }).select("_id");
-      userIds = allUsers.map((user) => user._id);
-    }
+    // Hole ALLE aktiven FCM Tokens
+    const allDevices = await FCMDevice.find({ isActive: true }).select("fcmToken");
+    const fcmTokens = allDevices.map((device) => device.fcmToken);
 
-    // Get FCM tokens for users with status change notifications enabled
-    const fcmTokens = await FCMDevice.getTokensWithPreference(userIds, "statusChanges");
+    console.log(`📱 Found ${fcmTokens.length} active devices to notify`);
 
     if (fcmTokens.length === 0) {
-      console.warn("⚠️ No devices with status change notifications enabled");
+      console.warn("⚠️ No active devices found for notifications");
       return;
     }
 
+    console.log(`📤 Sending alarm ended notification to ${fcmTokens.length} devices`);
+
+    // Verwende Status-Change Notification mit "Alarm beendet" Message
     const statusData = {
       alarmId: alarm._id,
-      oldStatus,
-      newStatus,
-      message: `Alarm-Status geändert: ${oldStatus} → ${newStatus}`,
+      oldStatus: "active",
+      newStatus: "ended",
+      message: "Alarm wurde beendet",
     };
-
-    console.log(`📤 Sending status change notification to ${fcmTokens.length} devices`);
 
     const result = await fcmService.sendStatusChangeNotification(fcmTokens, statusData);
 
-    console.log(`✅ Status change notification sent: ${result.successCount} success, ${result.failureCount} failed`);
+    console.log(`✅ Alarm ended notification sent: ${result.successCount} success, ${result.failureCount} failed`);
 
     return result;
   } catch (error) {
-    console.error("❌ Error sending status change notification:", error);
+    console.error("❌ Error sending alarm ended notification:", error);
   }
 }
 
 module.exports = {
   notifyAlarmTriggered,
-  notifyAlarmStatusChange,
+  notifyAlarmEnded,
 };
