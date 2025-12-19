@@ -107,49 +107,114 @@ export class InformationModal implements OnInit {
     return role;
   }
 
+  private isLoggingOut = false;
+
   async logout(): Promise<void> {
+    console.log('🚨 logout() called - isLoggingOut:', this.isLoggingOut);
+
+    const globalLogoutFlag = sessionStorage.getItem('logout-in-progress');
+    console.log('🚨 Global flag value:', globalLogoutFlag);
+    console.log('🚨 All sessionStorage keys:', Object.keys(sessionStorage));
+
+    if (globalLogoutFlag === 'true') {
+      console.log('🚨 Global logout in progress, skipping...');
+      return;
+    }
+
+    if (this.isLoggingOut) {
+      console.log('🔓 Logout already in progress, skipping alert...');
+      return;
+    }
+
+    this.isLoggingOut = true;
+    sessionStorage.setItem('logout-in-progress', 'true');
+    console.log('🚨 Set logout flag to true');
+
+    console.log('🚨 Creating alert...');
+
     const alert = await this.alertCtrl.create({
       header: 'Abmelden',
       message: 'Möchtest du dich wirklich abmelden?',
+      backdropDismiss: false,
       buttons: [
         {
           text: 'Abbrechen',
           role: 'cancel',
+          handler: () => {
+            console.log('🚨 Abbrechen clicked');
+            this.isLoggingOut = false;
+            sessionStorage.removeItem('logout-in-progress');
+            console.log('🚨 Removed logout flag after cancel');
+          },
         },
         {
           text: 'Abmelden',
           role: 'confirm',
-          handler: async () => {
-            await this.performLogout();
+          handler: () => {
+            console.log('🚨 Abmelden clicked - dismissing alert immediately');
+
+            alert.dismiss().then(() => {
+              console.log('🚨 Alert closed, starting logout...');
+              this.performLogout();
+            });
+
+            return false;
           },
         },
       ],
     });
 
+    console.log('🚨 Presenting alert...');
     await alert.present();
   }
 
   private async performLogout(): Promise<void> {
+    console.log('🔓 performLogout() START');
     try {
-      await this.feedbackService.showLoading('Abmelden...');
+      console.log('🔓 Showing loading...');
+      this.feedbackService.showLoading('Abmelden...');
 
-      // Disconnect socket
+      console.log('🔓 Disconnecting socket...');
       this.socketService.disconnect();
 
-      // Clear auth
+      console.log('🔓 Calling logout...');
       await this.restService.logout();
 
+      console.log('🔓 Clearing storage...');
+      localStorage.clear();
+      sessionStorage.clear(); // 👈 Flag wird hier automatisch gelöscht!
+
+      if ('indexedDB' in window) {
+        try {
+          const databases = await indexedDB.databases();
+          databases.forEach((db) => {
+            if (db.name) indexedDB.deleteDatabase(db.name);
+          });
+        } catch (e) {
+          console.log('IndexedDB clear failed:', e);
+        }
+      }
+
+      console.log('🔓 Hiding loading...');
       await this.feedbackService.hideLoading();
+
+      console.log('🔓 Closing modal...');
+      await this.modalCtrl.dismiss();
+
+      console.log('🔓 Navigating to login...');
+      await this.router.navigate(['/login'], { replaceUrl: true });
+
+      console.log('🔓 Showing toast...');
       await this.feedbackService.showSuccessToast('Erfolgreich abgemeldet');
 
-      // Close modal
-      this.modalCtrl.dismiss();
-
-      // Navigate to login
-      this.router.navigate(['/login']);
+      console.log('🔓 performLogout() END');
     } catch (error) {
+      console.error('🔓 performLogout() ERROR:', error);
       await this.feedbackService.hideLoading();
       await this.feedbackService.showError(error, 'Fehler beim Abmelden');
+      sessionStorage.removeItem('logout-in-progress');
+    } finally {
+      this.isLoggingOut = false;
     }
   }
 

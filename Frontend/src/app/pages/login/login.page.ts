@@ -9,6 +9,7 @@ import {
   IonCheckbox,
   IonSpinner,
   IonBadge,
+  AlertController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -67,7 +68,8 @@ export class LoginPage implements OnInit {
     private restService: RestService,
     private feedbackService: FeedbackService,
     private themeService: ThemeService,
-    private router: Router
+    private router: Router,
+    private alertController: AlertController
   ) {
     addIcons({
       flame,
@@ -152,20 +154,39 @@ export class LoginPage implements OnInit {
           }
         );
       } else {
-        // Login fehlgeschlagen
+        // Login fehlgeschlagen - ALERT statt Toast
         console.log('❌ Login fehlgeschlagen:', result?.error);
         this.isLoading = false;
-        await this.feedbackService.showErrorToast(
-          result?.error || 'Anmeldung fehlgeschlagen'
-        );
+        await this.showLoginErrorAlert(result?.error);
       }
     } catch (error: any) {
       console.error('❌ Login error:', error);
       this.isLoading = false;
-      await this.feedbackService.showErrorToast(
-        'Verbindungsfehler. Bitte versuche es erneut.'
-      );
+      await this.showLoginErrorAlert('Verbindungsfehler');
     }
+  }
+
+  /**
+   * Zeigt ein Alert-Pop-up bei falschem Benutzernamen oder Passwort
+   */
+  async showLoginErrorAlert(errorMessage?: string) {
+    const alert = await this.alertController.create({
+      header: 'Anmeldung fehlgeschlagen',
+      message:
+        errorMessage === 'Verbindungsfehler'
+          ? 'Keine Verbindung zum Server. Bitte überprüfe deine Internetverbindung.'
+          : 'Falscher Benutzername oder falsches Passwort. Bitte versuche es erneut.',
+      buttons: [
+        {
+          text: 'OK',
+          role: 'cancel',
+          cssClass: 'alert-button-confirm',
+        },
+      ],
+      cssClass: 'login-error-alert',
+    });
+
+    await alert.present();
   }
 
   async testLogin() {

@@ -1,13 +1,7 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
-        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title>Benutzerverwaltung</ion-title>
-  </ion-toolbar>
-</ion-header>
+<app-shared-header
+  title="Benutzerverwaltung"
+  [showBackButton]="true"
+></app-shared-header>
 
 <ion-content>
   <!-- Refresher -->
@@ -26,7 +20,7 @@
     ></ion-searchbar>
   </div>
 
-  <!-- TEST BUTTON -->
+  <!-- TEST BUTTON
   <div style="padding: 20px; text-align: center">
     <button
       (click)="testMethod()"
@@ -42,7 +36,7 @@
     >
       🧪 TEST BUTTON
     </button>
-  </div>
+  </div> -->
 
   <!-- Loading State -->
   <div class="loading-state" *ngIf="isLoading">

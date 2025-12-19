@@ -9,12 +9,13 @@ const YAML = require("yamljs");
 
 const userRoutes = require("./routes/users");
 const alertRoutes = require("./routes/alerts");
-const postRoutes = require("./routes/posts"); // UAP 9.3.1: Posts mit Audit-Logging
-const auditLogRoutes = require("./routes/audit-logs"); // UAP 9.3.2: Audit-Logs Ansicht
+const postRoutes = require("./routes/posts");
+const auditLogRoutes = require("./routes/audit-logs");
 const attachmentRoutes = require("./routes/attachments.routes");
-const exportRoutes = require("./routes/export"); // UAP 6.3: Export-API
+const exportRoutes = require("./routes/export");
+const fcmRoutes = require("./routes/fcmRoutes"); // NEU
+const fcmService = require("./service/fcmService"); // NEU
 
-// UAP 7.2.1: OpenAPI Spezifikation laden
 const swaggerDocument = YAML.load(path.join(__dirname, "openapi.yaml"));
 
 const app = express();
@@ -23,13 +24,20 @@ mongoose
   .connect(process.env.MONGO_ATLAS_CONNECTION_STRING)
   .then(() => {
     console.log("Connected to database!");
+
+    // NEU: Initialize Firebase Cloud Messaging
+    try {
+      fcmService.initialize();
+    } catch (error) {
+      console.error("⚠️ FCM initialization failed - continuing without push notifications:", error.message);
+    }
   })
   .catch(() => {
     console.log("Connection failed!");
   });
 
-app.use(bodyParser.json({ limit: "10mb" })); // ← ERWEITERT: Größeres Limit für Fotos
-app.use(bodyParser.urlencoded({ extended: false, limit: "10mb" })); // ← ERWEITERT
+app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.urlencoded({ extended: false, limit: "10mb" }));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -37,7 +45,6 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Credentials", "true");
 
-  // Handle preflight requests
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
@@ -47,12 +54,12 @@ app.use((req, res, next) => {
 
 app.use("/api/users/", userRoutes);
 app.use("/api/alerts/", alertRoutes);
-app.use("/api/posts/", postRoutes); // ← UAP 9.3.1: Posts mit Audit-Logging
-app.use("/api/audit-logs/", auditLogRoutes); // ← UAP 9.3.2: Audit-Logs Ansicht
-app.use("/api/teachers/", attachmentRoutes); // ← NEU: Attachment Routes
-app.use("/api/export/", exportRoutes); // ← UAP 6.3: Export-API mit Auth
+app.use("/api/posts/", postRoutes);
+app.use("/api/audit-logs/", auditLogRoutes);
+app.use("/api/teachers/", attachmentRoutes);
+app.use("/api/export/", exportRoutes);
+app.use("/api/fcm/", fcmRoutes); // NEU
 
-// UAP 7.2.1: API-Dokumentation mit Swagger UI
 app.use(
   "/api-docs",
   swaggerUi.serve,

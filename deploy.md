@@ -17,6 +17,11 @@ chmod +x deploy.sh
 
 Endpoint: 18.193.97.54
 
+```sh
+chmod +x frontend.sh
+./frontend.sh
+```
+
 Restart Frontend:                                                                                                                                           sudo chown -R $USER:$USER /var/www/Deployment/Repository/Frontend
 cd /var/www/Deployment/Repository/Frontend
 sudo chown -R $USER:$USER www/
@@ -27,6 +32,11 @@ sudo nginx -t && sudo systemctl reload nginx
 ionic build --prod
 npm run start
 
+```sh
+chmod +x backend.sh
+./backend.sh
+```
+
 Backend:
 mv Openapi.yaml openapi.yaml
 pm2 restart backend
@@ -35,9 +45,11 @@ pm2 logs backend
 Username: admin
 Passwort: Admin2024!Secure
 
+18.193.97.54
+
 Username: lehrer4
 Passwort: Lehrer2024!
 
 Username: verwaltung Passwort: Verwaltung2024!
 
-123Testing
+123Testingddsadsadassadsadasdasd

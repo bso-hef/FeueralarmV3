@@ -2,6 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
+import { SharedHeaderComponent } from '../../components/shared-header/shared-header.component';
+import { addIcons } from 'ionicons';
+import { school } from 'ionicons/icons';
+
 import {
   AuditLogService,
   AuditLog,
@@ -13,7 +17,7 @@ import {
   templateUrl: './audit-logs.page.html',
   styleUrls: ['./audit-logs.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],
+  imports: [IonicModule, CommonModule, FormsModule, SharedHeaderComponent],
 })
 export class AuditLogsPage implements OnInit {
   logs: AuditLog[] = [];
@@ -57,7 +61,12 @@ export class AuditLogsPage implements OnInit {
     { value: '30d', label: 'Letzte 30 Tage' },
   ];
 
-  constructor(private auditLogService: AuditLogService) {}
+  constructor(private auditLogService: AuditLogService) {
+    // ✅ Registriere school Icon
+    addIcons({
+      school: school,
+    });
+  }
 
   ngOnInit() {
     this.loadLogs();
@@ -188,14 +197,10 @@ export class AuditLogsPage implements OnInit {
   }
 
   /**
-   * Aktualisiert die Liste
+   * Aktualisiert die Liste (Pull-to-Refresh)
    */
   refresh(event: any) {
-    this.loadLogs();
-    this.loadStats();
-    setTimeout(() => {
-      event.target.complete();
-    }, 500);
+    window.location.reload();
   }
 
   /**

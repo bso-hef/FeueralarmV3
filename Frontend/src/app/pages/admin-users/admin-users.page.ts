@@ -42,6 +42,7 @@ import { FeedbackService } from '../../services/feedback.service';
 import { RestService } from '../../services/rest.service';
 import { CreateUserModal } from '..//../modals/create-user/create-user.modal';
 import { EditUserModal } from '../../modals/edit-user/edit-user.modal';
+import { SharedHeaderComponent } from '../../components/shared-header/shared-header.component';
 
 @Component({
   selector: 'app-admin-users',
@@ -68,6 +69,7 @@ import { EditUserModal } from '../../modals/edit-user/edit-user.modal';
     IonRefresher,
     IonRefresherContent,
     IonSpinner,
+    SharedHeaderComponent,
   ],
 })
 export class AdminUsersPage implements OnInit {

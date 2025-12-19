@@ -53,5 +53,5 @@ ssh "$REMOTE" "set -e; \
   if systemctl is-active --quiet nginx; then sudo systemctl reload nginx; \
   elif systemctl is-active --quiet apache2; then sudo systemctl reload apache2; \
   else echo 'Hinweis: Kein nginx/apache2 aktiv'; fi"
-
+  
 echo '==> Deploy fertig.'

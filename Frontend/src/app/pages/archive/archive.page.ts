@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { SharedHeaderComponent } from '../../components/shared-header/shared-header.component';
 import {
   IonHeader,
   IonToolbar,
@@ -17,6 +18,7 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSpinner,
+  IonFooter,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -64,6 +66,8 @@ import {
     IonRefresher,
     IonRefresherContent,
     IonSpinner,
+    IonFooter,
+    SharedHeaderComponent,
   ],
 })
 export class ArchivePage implements OnInit {
@@ -207,14 +211,11 @@ export class ArchivePage implements OnInit {
   }
 
   async refreshAlarms() {
-    await this.feedbackService.showLoading('Aktualisiere...');
+    console.log('🔄 refreshAlarms() called!');
+    window.location.reload();
 
     // Cache löschen
     this.alarmService.clearCache();
-
-    await this.loadAlarms();
-    await this.feedbackService.hideLoading();
-    await this.feedbackService.showSuccessToast('Alarme aktualisiert!');
   }
 
   // ==========================================

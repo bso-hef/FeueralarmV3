@@ -106,6 +106,7 @@ ion-content {
       --border-radius: var(--radius-md);
       --box-shadow: none;
       padding: 0;
+      border: 2px solid var(--border-secondary);
     }
   }
 }
@@ -370,7 +371,6 @@ ion-content {
     transform: translateY(0);
   }
 }
-/* Füge das zu home.page.scss hinzu: */
 
 .header-actions {
   display: flex;
@@ -398,4 +398,24 @@ ion-content {
   &:active {
     background-color: rgba(var(--ion-color-primary-rgb), 0.2);
   }
+}
+// Light Mode Overrides - Korrekte Klasse!
+body.light-theme {
+  .filter-section {
+    .search-bar {
+      ion-searchbar {
+        --background: #f5f5f5 !important;
+        --color: #000000 !important;
+        --placeholder-color: #000000 !important;
+        --icon-color: #000000 !important;
+        border: 2px solid #999999 !important;
+      }
+    }
+  }
+}
+
+// Footer
+ion-footer {
+  --background: var(--ion-background-color);
+  border-top: 1px solid var(--ion-border-color);
 }

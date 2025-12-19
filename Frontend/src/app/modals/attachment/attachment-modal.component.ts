@@ -122,20 +122,6 @@ export class AttachmentModalComponent implements OnInit {
       header: 'Anhang hinzufügen',
       buttons: [
         {
-          text: 'Foto aufnehmen',
-          icon: 'camera',
-          handler: () => {
-            this.takePhoto();
-          },
-        },
-        {
-          text: 'Foto aus Galerie',
-          icon: 'image',
-          handler: () => {
-            this.selectPhoto();
-          },
-        },
-        {
           text: 'Datei hochladen',
           icon: 'document',
           handler: () => {
@@ -157,80 +143,6 @@ export class AttachmentModalComponent implements OnInit {
     });
 
     await actionSheet.present();
-  }
-
-  async takePhoto() {
-    try {
-      await this.feedbackService.showLoading('Kamera wird geöffnet...');
-
-      const photoData = await this.photoService.takePhoto();
-
-      await this.feedbackService.hideLoading();
-
-      if (!photoData) {
-        await this.feedbackService.showWarningToast('Kein Foto aufgenommen');
-        return;
-      }
-
-      // ✅ NEU: Bestätigung vor Upload
-      const confirmed = await this.feedbackService.showConfirm(
-        'Foto hochladen',
-        'Möchtest du dieses Foto wirklich hochladen?',
-        'Hochladen',
-        'Abbrechen'
-      );
-
-      if (!confirmed) {
-        await this.feedbackService.showWarningToast('Upload abgebrochen');
-        return;
-      }
-
-      await this.uploadPhoto(photoData);
-    } catch (error) {
-      await this.feedbackService.hideLoading();
-      await this.feedbackService.showError(error, 'Fehler beim Aufnehmen');
-    }
-  }
-
-  async selectPhoto() {
-    try {
-      console.log('📸 1. Opening gallery...');
-      await this.feedbackService.showLoading('Galerie wird geöffnet...');
-
-      const photoData = await this.photoService.selectPhoto();
-      console.log('📸 2. Photo selected, data length:', photoData?.length || 0);
-
-      await this.feedbackService.hideLoading();
-
-      if (!photoData) {
-        console.log('❌ 3. No photo data');
-        await this.feedbackService.showWarningToast('Kein Foto ausgewählt');
-        return;
-      }
-
-      console.log('📸 4. Showing confirmation dialog...');
-      const confirmed = await this.feedbackService.showConfirm(
-        'Foto hochladen',
-        'Möchtest du dieses Foto wirklich hochladen?',
-        'Hochladen',
-        'Abbrechen'
-      );
-      console.log('📸 5. Confirmation result:', confirmed);
-
-      if (!confirmed) {
-        console.log('❌ 6. Upload cancelled');
-        await this.feedbackService.showWarningToast('Upload abgebrochen');
-        return;
-      }
-
-      console.log('📸 7. Starting upload...');
-      await this.uploadPhoto(photoData);
-      console.log('✅ 8. Upload completed');
-    } catch (error) {
-      console.error('❌ Error in selectPhoto:', error);
-      await this.feedbackService.hideLoading();
-      await this.feedbackService.showError(error, 'Fehler beim Auswählen');
-    }
   }
 
   async selectFile() {
@@ -276,6 +188,8 @@ export class AttachmentModalComponent implements OnInit {
   }
 
   async createNote() {
+    console.log('📝 createNote() called!');
+
     const noteContent = await this.feedbackService.showPrompt(
       'Notiz erstellen',
       'Notiz eingeben...',
@@ -283,84 +197,54 @@ export class AttachmentModalComponent implements OnInit {
       ''
     );
 
+    console.log('📝 Note content:', noteContent);
+
     if (!noteContent || noteContent.trim() === '') {
+      console.log('📝 No content, returning');
       return;
     }
 
+    console.log('📝 Showing title prompt...'); // ← NEU
     const noteTitle = await this.feedbackService.showPrompt(
       'Notiz-Titel',
       'Titel (optional)',
       'text',
       ''
     );
+    console.log('📝 Note title:', noteTitle); // ← NEU
 
     try {
-      await this.feedbackService.showLoading('Notiz wird hochgeladen...');
+      console.log('📝 Starting upload...'); // ← NEU
+      this.feedbackService.showLoading('Notiz wird hochgeladen...');
 
       this.isUploading = true;
 
+      console.log('📝 Calling photoService.uploadNote...'); // ← NEU
       const response = await this.photoService
         .uploadNote(this.teacher.id, noteContent.trim(), noteTitle || undefined)
         .toPromise();
 
-      await this.feedbackService.hideLoading();
+      console.log('📝 Response:', response); // ← NEU
+
+      this.feedbackService.hideLoading();
       this.isUploading = false;
 
       if (response && response.success) {
-        await this.feedbackService.showSuccessToast(
-          'Notiz erfolgreich gespeichert!'
-        );
+        this.feedbackService.showSuccessToast('Notiz erfolgreich gespeichert!');
         await this.loadAttachments();
       } else {
         throw new Error(response?.error || 'Upload fehlgeschlagen');
       }
     } catch (error) {
-      await this.feedbackService.hideLoading();
+      console.error('📝 Error:', error); // ← NEU
+      this.feedbackService.hideLoading();
       this.isUploading = false;
       await this.feedbackService.showError(error, 'Fehler beim Speichern');
     }
   }
-
   // ==========================================
   // UPLOAD HELPERS
   // ==========================================
-
-  async uploadPhoto(base64Data: string) {
-    try {
-      console.log('📤 uploadPhoto called with teacher.id:', this.teacher.id);
-      console.log('📤 Base64 data length:', base64Data.length);
-
-      await this.feedbackService.showLoading('Foto wird hochgeladen...');
-
-      this.isUploading = true;
-
-      console.log('📤 Calling photoService.uploadPhoto...');
-      const response = await this.photoService
-        .uploadPhoto(this.teacher.id, base64Data)
-        .toPromise();
-
-      console.log('📤 Upload response:', response);
-
-      await this.feedbackService.hideLoading();
-      this.isUploading = false;
-
-      if (response && response.success) {
-        console.log('✅ Upload successful!');
-        await this.feedbackService.showSuccessToast(
-          'Foto erfolgreich hochgeladen!'
-        );
-        await this.loadAttachments();
-      } else {
-        console.error('❌ Upload failed:', response);
-        throw new Error(response?.error || 'Upload fehlgeschlagen');
-      }
-    } catch (error) {
-      console.error('❌ Error in uploadPhoto:', error);
-      await this.feedbackService.hideLoading();
-      this.isUploading = false;
-      await this.feedbackService.showError(error, 'Upload fehlgeschlagen');
-    }
-  }
 
   async uploadFile(base64Data: string, filename: string) {
     try {

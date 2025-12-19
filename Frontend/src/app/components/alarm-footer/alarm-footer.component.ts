@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonFooter,
@@ -28,7 +28,7 @@ import {
     IonSpinner,
   ],
 })
-export class AlarmFooterComponent {
+export class AlarmFooterComponent implements OnInit {
   @Input() hasActiveAlarm = false;
   @Input() isProcessing = false;
 
@@ -36,12 +36,20 @@ export class AlarmFooterComponent {
   @Output() exportPDF = new EventEmitter<void>();
   @Output() exportCSV = new EventEmitter<void>();
 
+  userRole: string | null = null;
+
   constructor() {
     addIcons({
       checkmarkDoneOutline,
       documentTextOutline,
       gridOutline,
     });
+  }
+
+  ngOnInit(): void {
+    // Hole User-Rolle direkt aus localStorage
+    this.userRole = localStorage.getItem('role');
+    console.log('🔐 User Role:', this.userRole);
   }
 
   onEndAlarm(): void {

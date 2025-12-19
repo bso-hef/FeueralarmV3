@@ -404,6 +404,14 @@ exports.alert = async (data) => {
 
       console.log(`✅ Alert created with ${posts.length} classes`);
 
+      // ✅ NEU: Logge Alarm Creation
+      await auditService.logAlertCreated({
+        userId: data.userId,
+        username: data.email,
+        alertId: alert._id,
+        classCount: posts.length,
+      });
+
       try {
         for (let post of posts) post.alert = alert._id;
         result = await Post.create(posts);

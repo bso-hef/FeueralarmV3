@@ -2,13 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { SharedHeaderComponent } from '../../components/shared-header/shared-header.component';
 
 @Component({
   selector: 'app-privacy',
   templateUrl: './privacy.page.html',
   styleUrls: ['./privacy.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule, SharedHeaderComponent],
 })
 export class PrivacyPage implements OnInit {
   lastUpdated = '16.11.2025';

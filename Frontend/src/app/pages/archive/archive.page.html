@@ -1,40 +1,8 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
-        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title>Alarm Archiv</ion-title>
-    <ion-buttons slot="end">
-      <!-- NEU: Export All Button -->
-      <ion-button (click)="exportAllAlarmsCSV()" *ngIf="alarms.length > 0">
-        <ion-icon name="download-outline" slot="icon-only"></ion-icon>
-      </ion-button>
-      <ion-button (click)="refreshAlarms()">
-        <ion-icon name="refresh" slot="icon-only"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-
-  <!-- Stats Bar -->
-  <ion-toolbar *ngIf="!isLoading">
-    <div class="stats-bar">
-      <div class="stat-item">
-        <ion-icon name="calendar-outline"></ion-icon>
-        <span>Gesamt: {{ alarms.length }}</span>
-      </div>
-      <div class="stat-item">
-        <ion-icon name="eye-outline"></ion-icon>
-        <span>Aktiv: {{ activeAlarmsCount }}</span>
-      </div>
-      <div class="stat-item">
-        <ion-icon name="archive-outline"></ion-icon>
-        <span>Archiviert: {{ archivedAlarmsCount }}</span>
-      </div>
-    </div>
-  </ion-toolbar>
-</ion-header>
+<!-- 2️⃣ Shared Header DANACH -->
+<app-shared-header
+  title="Alarm Archiv"
+  [showBackButton]="true"
+></app-shared-header>
 
 <ion-content [fullscreen]="true">
   <!-- Pull to Refresh -->
@@ -119,7 +87,7 @@
           <span>{{ alarm.classCount }} Klassen</span>
         </div>
 
-        <!-- NEU: Export Buttons -->
+        <!-- Export Buttons -->
         <div class="export-buttons">
           <ion-button
             fill="clear"
@@ -144,3 +112,28 @@
     </div>
   </div>
 </ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <div style="display: flex; justify-content: space-around; padding: 8px">
+      <ion-button
+        (click)="exportAllAlarmsCSV()"
+        *ngIf="alarms.length > 0"
+        expand="block"
+        style="flex: 1; margin: 0 4px"
+      >
+        <ion-icon name="download-outline" slot="start"></ion-icon>
+        Alle als CSV
+      </ion-button>
+
+      <ion-button
+        (click)="refreshAlarms()"
+        color="medium"
+        expand="block"
+        style="flex: 1; margin: 0 4px"
+      >
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Aktualisieren
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>

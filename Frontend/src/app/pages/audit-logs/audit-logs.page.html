@@ -1,43 +1,36 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Audit-Logs</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="loadLogs()">
-        <ion-icon slot="icon-only" name="refresh"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-
-  <!-- Statistiken -->
-  <ion-toolbar *ngIf="stats" color="light">
-    <ion-grid>
-      <ion-row>
-        <ion-col size="3" class="stat-col">
-          <div class="stat-value">{{ stats.total }}</div>
-          <div class="stat-label">Gesamt</div>
-        </ion-col>
-        <ion-col size="3" class="stat-col">
-          <div class="stat-value">{{ stats.last24h }}</div>
-          <div class="stat-label">24h</div>
-        </ion-col>
-        <ion-col size="6" class="stat-col">
-          <div
-            class="stat-value"
-            *ngIf="stats.topUsers && stats.topUsers.length > 0"
-          >
-            {{ stats.topUsers[0]._id }}
-          </div>
-          <div class="stat-label">Top User</div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </ion-toolbar>
-</ion-header>
+<app-shared-header
+  title="Audit Logs"
+  [showBackButton]="true"
+></app-shared-header>
 
 <ion-content>
+  <ion-header>
+    <!-- Statistiken -->
+    <ion-toolbar *ngIf="stats" color="light">
+      <ion-grid>
+        <ion-row>
+          <ion-col size="3" class="stat-col">
+            <div class="stat-value">{{ stats.total }}</div>
+            <div class="stat-label">Gesamt</div>
+          </ion-col>
+          <ion-col size="3" class="stat-col">
+            <div class="stat-value">{{ stats.last24h }}</div>
+            <div class="stat-label">24h</div>
+          </ion-col>
+          <ion-col size="6" class="stat-col">
+            <div
+              class="stat-value"
+              *ngIf="stats.topUsers && stats.topUsers.length > 0"
+            >
+              {{ stats.topUsers[0]._id }}
+            </div>
+            <div class="stat-label">Top User</div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-toolbar>
+  </ion-header>
+
   <!-- Filter -->
   <ion-card>
     <ion-card-content>

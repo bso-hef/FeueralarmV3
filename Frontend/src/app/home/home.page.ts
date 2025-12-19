@@ -56,7 +56,7 @@ import {
   cloudOffline,
   syncOutline,
   documentTextOutline,
-  camera,
+  documentText,
 } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
@@ -200,7 +200,7 @@ export class HomePage implements OnInit, OnDestroy {
       cloudOffline,
       syncOutline,
       documentTextOutline,
-      camera,
+      documentText,
     });
   }
 
@@ -345,8 +345,6 @@ export class HomePage implements OnInit, OnDestroy {
       alarmUpdatedSub,
       alarmEndedSub
     );
-
-    this.subscriptions.push(postsSub, updateSub);
   }
 
   private async loadData(): Promise<void> {
@@ -1076,15 +1074,24 @@ export class HomePage implements OnInit, OnDestroy {
         this.socketService.triggerAlert(this.selectedHour, day);
         console.log('✅ triggerAlert called successfully!');
 
+        // NEU: Einfacher JavaScript Alert
+        alert('🚨 Alarm wurde ausgelöst!');
+
         setTimeout(() => {
           console.log('🔄 Reloading data...');
           this.loadData();
         }, 2000);
       } else {
         console.log('❌ No socketService available!');
+        await this.feedbackService.showErrorToast(
+          'Fehler: Socket nicht verfügbar'
+        );
       }
     } catch (error) {
       console.error('❌ Error in triggerAlarm:', error);
+      await this.feedbackService.showErrorToast(
+        'Fehler beim Auslösen des Alarms'
+      );
     }
   }
 

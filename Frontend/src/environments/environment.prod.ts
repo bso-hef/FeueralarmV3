@@ -4,5 +4,5 @@ export const environment = {
   socketUrl: 'https://18.193.97.54',
   appVersion: '3.0.0',
   appName: 'Feueralarm BSO',
-  enableTestLogin: true,
+  enableTestLogin: false,
 };

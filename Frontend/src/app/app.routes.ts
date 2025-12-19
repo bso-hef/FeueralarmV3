@@ -48,4 +48,18 @@ export const routes: Routes = [
       import('./pages/audit-logs/audit-logs.page').then((m) => m.AuditLogsPage),
     canActivate: [authGuard], // UAP 9.3.2: Audit-Logs Ansicht
   },
+  {
+    path: 'settings',
+    loadComponent: () =>
+      import('./pages/settings/settings.page').then((m) => m.SettingsPage),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'information',
+    loadComponent: () =>
+      import('./pages/information/information.page').then(
+        (m) => m.InformationPage
+      ),
+    canActivate: [authGuard],
+  },
 ];

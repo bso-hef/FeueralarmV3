@@ -66,11 +66,11 @@ exports.userLogin = (req, res, next) => {
           role: fetchedUser.role,
         },
         process.env.JWT_KEY,
-        { expiresIn: "1h" }
+        { expiresIn: "14d" }
       );
       res.status(200).json({
         token: token,
-        expiresIn: 3600,
+        expiresIn: 1209600,
         userId: fetchedUser._id,
         username: fetchedUser.username,
       });
@@ -141,6 +141,11 @@ exports.getUser = async (req, res, next) => {
 exports.createUserByAdmin = async (req, res, next) => {
   try {
     const { username, password, role } = req.body;
+
+    // DEBUG LOGS
+    console.log("📥 Received request body:", req.body);
+    console.log("📥 Extracted role:", role);
+    console.log("📥 Role type:", typeof role);
 
     // Validierung
     if (!username || !password) {
